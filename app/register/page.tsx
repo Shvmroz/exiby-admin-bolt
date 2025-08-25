@@ -414,7 +414,7 @@ export default function RegisterPage() {
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-gray-700">
           <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
             <strong>Demo:</strong> Try registering with any email except "admin@exiby.com" to see the success flow.
-            Use "admin@exiby.com" to see server error handling.
+            Use "admin@exiby.com\" to see server error handling.
           </p>
         </div>
       </div>
