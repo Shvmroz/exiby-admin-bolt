@@ -4,8 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/contexts/AppContext';
 import { Eye, EyeOff, Mail, Lock, Calendar } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const registered = searchParams.get('registered');
+  
   const [email, setEmail] = useState('admin@exiby.com');
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
@@ -48,6 +53,15 @@ export default function LoginPage() {
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome to ExiBy</h2>
             <p className="mt-2 text-gray-600 dark:text-gray-400">Sign in to your account</p>
           </div>
+
+          {/* Registration Success Message */}
+          {registered && (
+            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                Registration successful! You can now sign in with your credentials.
+              </p>
+            </div>
+          )}
 
           {/* Demo Credentials */}
           <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -165,9 +179,12 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6 text-center">
-              <button type="button" className="font-medium text-[#0077ED] hover:text-[#0066CC] transition-colors">
-                Sign up now
-              </button>
+              <Link
+                href="/register"
+                className="font-medium text-[#0077ED] hover:text-[#0066CC] transition-colors"
+              >
+                Create a new account
+              </Link>
             </div>
           </div>
         </div>
