@@ -1,39 +1,39 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, Calendar } from 'lucide-react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useAppContext } from '@/contexts/AppContext';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Mail, Lock, Calendar } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useAppContext } from "@/contexts/AppContext";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
-  const registered = searchParams.get('registered');
-  
-  const [email, setEmail] = useState('admin@exiby.com');
-  const [password, setPassword] = useState('admin123');
+  const registered = searchParams.get("registered");
+
+  const [email, setEmail] = useState("admin@exiby.com");
+  const [password, setPassword] = useState("admin123");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+
   const { login } = useAppContext();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    
+    setError("");
+
     try {
       const success = await login(email, password);
       if (success) {
-        router.push('/dashboard');
+        router.push("/dashboard");
       } else {
-        setError('Invalid email or password');
+        setError("Invalid email or password");
       }
     } catch (err) {
-      setError('An error occurred during login');
+      setError("An error occurred during login");
     } finally {
       setIsLoading(false);
     }
@@ -46,39 +46,46 @@ export default function LoginPage() {
         <div className="lg:col-span-6 flex items-center justify-center p-8 lg:p-16">
           <div className="max-w-lg text-center lg:text-left">
             <div className="flex justify-center lg:justify-start mb-8">
-              <div className="w-20 h-20 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-3xl flex items-center justify-center shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
+              <div className="w-20 h-20 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-3xl flex items-center justify-center shadow-2xl">
                 <Calendar className="w-10 h-10 text-white" />
               </div>
             </div>
-            
+
             <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-[#0077ED] via-[#4A9AFF] to-[#0077ED] bg-clip-text text-transparent">
                 ExiBy
               </span>
             </h1>
-            
+
             <h2 className="text-3xl lg:text-4xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                 Event Management
               </span>
             </h2>
-            
+
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-              Streamline your events, connect with organizations, and manage attendees all in one powerful platform.
+              Streamline your events, connect with organizations, and manage
+              attendees all in one powerful platform.
             </p>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-center lg:justify-start space-x-3">
                 <div className="w-2 h-2 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full"></div>
-                <span className="text-gray-600 dark:text-gray-400">Seamless Event Creation</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Seamless Event Creation
+                </span>
               </div>
               <div className="flex items-center justify-center lg:justify-start space-x-3">
                 <div className="w-2 h-2 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full"></div>
-                <span className="text-gray-600 dark:text-gray-400">Organization Management</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Organization Management
+                </span>
               </div>
               <div className="flex items-center justify-center lg:justify-start space-x-3">
                 <div className="w-2 h-2 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full"></div>
-                <span className="text-gray-600 dark:text-gray-400">Real-time Analytics</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Real-time Analytics
+                </span>
               </div>
             </div>
           </div>
@@ -90,35 +97,40 @@ export default function LoginPage() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
               {/* Header */}
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
-                <p className="mt-2 text-gray-600 dark:text-gray-400">Sign in to your account</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  Welcome Back
+                </h2>
+                <p className="mt-2 text-gray-600 dark:text-gray-400">
+                  Sign in to your account
+                </p>
               </div>
 
               {/* Registration Success Message */}
               {registered && (
                 <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                   <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                    Registration successful! You can now sign in with your credentials.
+                    Registration successful! You can now sign in with your
+                    credentials.
                   </p>
                 </div>
               )}
 
-              {/* Demo Credentials */}
-              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium mb-2">Demo Credentials:</p>
-                <p className="text-sm text-blue-700 dark:text-blue-300">Email: admin@exiby.com</p>
-                <p className="text-sm text-blue-700 dark:text-blue-300">Password: admin123</p>
-              </div>
+          
 
               {error && (
                 <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                  <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                  <p className="text-sm text-red-800 dark:text-red-200">
+                    {error}
+                  </p>
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Email address
                   </label>
                   <div className="relative">
@@ -140,7 +152,10 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Password
                   </label>
                   <div className="relative">
@@ -150,7 +165,7 @@ export default function LoginPage() {
                     <input
                       id="password"
                       name="password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       required
                       value={password}
@@ -183,7 +198,7 @@ export default function LoginPage() {
                       Signing in...
                     </div>
                   ) : (
-                    'Sign in'
+                    "Sign in"
                   )}
                 </button>
               </form>
@@ -194,7 +209,9 @@ export default function LoginPage() {
                     <div className="w-full border-t border-gray-300 dark:border-gray-600" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Don't have an account?</span>
+                    <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                      Don't have an account?
+                    </span>
                   </div>
                 </div>
 

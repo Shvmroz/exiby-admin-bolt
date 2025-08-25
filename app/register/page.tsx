@@ -171,7 +171,7 @@ export default function RegisterPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg ">
                 <Calendar className="w-8 h-8 text-white" />
               </div>
             </div>
@@ -410,13 +410,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Demo Info */}
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-            <strong>Demo:</strong> Try registering with any email except "admin@exiby.com" to see the success flow.
-            Use "admin@exiby.com\" to see server error handling.
-          </p>
-        </div>
+     
       </div>
     </div>
   );
