@@ -3,16 +3,14 @@
 import React, { useState } from 'react';
 import {
   User,
-  Bell,
-  Shield,
   Palette,
-  Globe,
   Mail,
   Phone,
   Building,
   Save,
   Eye,
   EyeOff,
+  Lock,
 } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
 
@@ -46,28 +44,22 @@ const SettingsSection: React.FC<{
 
 const SettingsPage: React.FC = () => {
   const { user, darkMode, toggleDarkMode } = useAppContext();
-  const [showPassword, setShowPassword] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const [profile, setProfile] = useState({
     name: user?.name || '',
     email: user?.email || '',
     phone: '+1 (555) 123-4567',
     company: 'ExiBy Events',
     role: 'Event Manager',
-    bio: 'Passionate about creating memorable events and connecting people.',
   });
 
-  const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    pushNotifications: true,
-    eventReminders: true,
-    weeklyReports: false,
-    marketingEmails: false,
-  });
-
-  const [security, setSecurity] = useState({
-    twoFactorAuth: false,
-    loginAlerts: true,
-    dataExport: false,
+  const [passwords, setPasswords] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   });
 
   return (
@@ -172,19 +164,6 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Bio
-                </label>
-                <textarea
-                  value={profile.bio}
-                  onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                  rows={3}
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent resize-none"
-                  placeholder="Tell us about yourself..."
-                />
-              </div>
-
               <button className="flex items-center space-x-2 px-6 py-3 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors">
                 <Save className="w-4 h-4" />
                 <span>Save Changes</span>
@@ -192,103 +171,86 @@ const SettingsPage: React.FC = () => {
             </div>
           </SettingsSection>
 
-          {/* Notification Settings */}
+          {/* Change Password */}
           <SettingsSection
-            title="Notifications"
-            description="Configure how you receive notifications and updates"
-            icon={<Bell className="w-5 h-5" />}
-          >
-            <div className="space-y-4">
-              {[
-                { key: 'emailNotifications', label: 'Email Notifications', desc: 'Receive notifications via email' },
-                { key: 'pushNotifications', label: 'Push Notifications', desc: 'Get push notifications in your browser' },
-                { key: 'eventReminders', label: 'Event Reminders', desc: 'Reminders about upcoming events' },
-                { key: 'weeklyReports', label: 'Weekly Reports', desc: 'Weekly summary of your events' },
-                { key: 'marketingEmails', label: 'Marketing Emails', desc: 'Promotional content and updates' },
-              ].map((item) => (
-                <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {item.label}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {item.desc}
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={notifications[item.key as keyof typeof notifications]}
-                      onChange={(e) => setNotifications({
-                        ...notifications,
-                        [item.key]: e.target.checked
-                      })}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#0077ED]/20 dark:peer-focus:ring-[#0077ED]/20 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#0077ED]"></div>
-                  </label>
-                </div>
-              ))}
-            </div>
-          </SettingsSection>
-
-          {/* Security Settings */}
-          <SettingsSection
-            title="Security & Privacy"
-            description="Manage your account security and privacy settings"
-            icon={<Shield className="w-5 h-5" />}
+            title="Change Password"
+            description="Update your account password for better security"
+            icon={<Lock className="w-5 h-5" />}
           >
             <div className="space-y-6">
-              <div className="space-y-4">
-                {[
-                  { key: 'twoFactorAuth', label: 'Two-Factor Authentication', desc: 'Add an extra layer of security' },
-                  { key: 'loginAlerts', label: 'Login Alerts', desc: 'Get notified of new login attempts' },
-                  { key: 'dataExport', label: 'Data Export', desc: 'Allow data export requests' },
-                ].map((item) => (
-                  <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">
-                        {item.label}
-                      </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {item.desc}
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={security[item.key as keyof typeof security]}
-                        onChange={(e) => setSecurity({
-                          ...security,
-                          [item.key]: e.target.checked
-                        })}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#0077ED]/20 dark:peer-focus:ring-[#0077ED]/20 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#0077ED]"></div>
-                    </label>
-                  </div>
-                ))}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type={showOldPassword ? 'text' : 'password'}
+                    value={passwords.oldPassword}
+                    onChange={(e) => setPasswords({ ...passwords, oldPassword: e.target.value })}
+                    placeholder="Enter current password"
+                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showOldPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Change Password
+                  New Password
                 </label>
                 <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={passwords.newPassword}
+                    onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
                     placeholder="Enter new password"
-                    className="w-full pr-12 pl-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowNewPassword(!showNewPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={passwords.confirmPassword}
+                    onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                    placeholder="Confirm new password"
+                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button className="flex items-center space-x-2 px-6 py-3 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors">
+                <Save className="w-4 h-4" />
+                <span>Update Password</span>
+              </button>
             </div>
           </SettingsSection>
         </div>
@@ -344,21 +306,6 @@ const SettingsPage: React.FC = () => {
                 <span className="opacity-80">Member Since</span>
                 <span className="font-medium">Jan 2024</span>
               </div>
-            </div>
-          </div>
-
-          {/* Danger Zone */}
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6">
-            <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-4">
-              Danger Zone
-            </h3>
-            <div className="space-y-3">
-              <button className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
-                Delete Account
-              </button>
-              <p className="text-sm text-red-600 dark:text-red-400">
-                This action cannot be undone. All your data will be permanently deleted.
-              </p>
             </div>
           </div>
         </div>
