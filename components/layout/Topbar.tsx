@@ -98,6 +98,11 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
 
           {/* Dropdown Menu */}
           {showUserMenu && (
+            <>
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowUserMenu(false)}
+              />
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
               <button className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <User className="w-4 h-4" />
@@ -111,6 +116,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
                 <span>Logout</span>
               </button>
             </div>
+            </>
           )}
         </div>
       </div>

@@ -46,11 +46,20 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const storedTheme = localStorage.getItem('exiby_theme');
     
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        localStorage.removeItem('exiby_user');
+      }
     }
     
     if (storedTheme) {
       setDarkMode(storedTheme === 'dark');
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDarkMode(prefersDark);
     }
     
     setLoading(false);
