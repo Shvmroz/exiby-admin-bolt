@@ -22,8 +22,8 @@ const SettingsSection: React.FC<{
 }> = ({ title, description, icon, children }) => (
   <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
     <div className="flex items-center space-x-3 mb-4">
-      <div className="p-2 bg-blue-600/10 rounded-lg">
-        <div className="text-blue-600">
+      <div className="p-2 bg-[#0077ED]/10 rounded-lg">
+        <div className="text-[#0077ED]">
           {icon}
         </div>
       </div>
@@ -92,7 +92,7 @@ const SettingsPage: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                  <button className="px-4 py-2 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors">
                     Change Photo
                   </button>
                   <p className="text-sm text-gray-500 mt-1">
@@ -113,7 +113,7 @@ const SettingsPage: React.FC = () => {
                       type="text"
                       value={profile.name}
                       onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -128,7 +128,7 @@ const SettingsPage: React.FC = () => {
                       type="email"
                       value={profile.email}
                       onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -143,7 +143,7 @@ const SettingsPage: React.FC = () => {
                       type="tel"
                       value={profile.phone}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -158,13 +158,13 @@ const SettingsPage: React.FC = () => {
                       type="text"
                       value={profile.company}
                       onChange={(e) => setProfile({ ...profile, company: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
                     />
                   </div>
                 </div>
               </div>
 
-              <button className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+              <button className="flex items-center space-x-2 px-6 py-3 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors">
                 <Save className="w-4 h-4" />
                 <span>Save Changes</span>
               </button>
@@ -189,7 +189,7 @@ const SettingsPage: React.FC = () => {
                     value={passwords.oldPassword}
                     onChange={(e) => setPasswords({ ...passwords, oldPassword: e.target.value })}
                     placeholder="Enter current password"
-                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -212,7 +212,7 @@ const SettingsPage: React.FC = () => {
                     value={passwords.newPassword}
                     onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
                     placeholder="Enter new password"
-                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -235,7 +235,7 @@ const SettingsPage: React.FC = () => {
                     value={passwords.confirmPassword}
                     onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
                     placeholder="Confirm new password"
-                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -247,7 +247,7 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <button className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+              <button className="flex items-center space-x-2 px-6 py-3 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors">
                 <Save className="w-4 h-4" />
                 <span>Update Password</span>
               </button>
@@ -280,14 +280,14 @@ const SettingsPage: React.FC = () => {
                     onChange={toggleDarkMode}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-600/20 dark:peer-focus:ring-blue-600/20 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#0077ED]/20 dark:peer-focus:ring-[#0077ED]/20 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#0077ED]"></div>
                 </label>
               </div>
             </div>
           </SettingsSection>
 
           {/* Account Overview */}
-          <div className="bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl p-6 text-white">
+          <div className="bg-gradient-to-br from-[#0077ED] to-[#4A9AFF] rounded-2xl p-6 text-white">
             <h3 className="text-lg font-semibold mb-4">Account Overview</h3>
             <div className="space-y-3">
               <div className="flex justify-between">
