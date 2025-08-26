@@ -99,19 +99,19 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, variant = 'temporary' 
               className={cn(
                 "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                 isActive 
-                  ? "bg-[#0077ED] text-white shadow-lg transform scale-105" 
+                  ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm" 
                   : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:scale-102"
               )}
             >
               <div className={cn(
                 "p-2 rounded-lg transition-colors duration-200",
                 isActive 
-                  ? "bg-white/20" 
+                  ? `${item.bgColor} dark:bg-gray-700` 
                   : `${item.bgColor} dark:bg-gray-700 group-hover:${item.bgColor}`
               )}>
                 <Icon className={cn(
                   "w-5 h-5 transition-colors duration-200",
-                  isActive ? "text-white" : item.color
+                  item.color
                 )} />
               </div>
               <span className="font-medium">{item.text}</span>
