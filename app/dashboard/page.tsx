@@ -107,9 +107,7 @@ const DashboardPage: React.FC = () => {
             Manage your events, organizations, and attendees
           </p>
         </div>
-        <button className="px-6 py-3 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-xl font-medium transition-colors shadow-lg hover:shadow-xl">
-          Create Event
-        </button>
+       
       </div>
 
       {/* Stats Grid */}
