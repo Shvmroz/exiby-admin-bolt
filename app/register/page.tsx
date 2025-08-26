@@ -179,12 +179,6 @@ export default function RegisterPage() {
         <div className="hidden lg:flex lg:col-span-6 items-center justify-center p-8 lg:p-16">
           <div className="max-w-lg text-center lg:text-left space-y-8">
             <div>
-              <div className="flex justify-center lg:justify-start mb-8">
-                <div className="w-20 h-20 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-3xl flex items-center justify-center shadow-2xl">
-                  <Calendar className="w-10 h-10 text-white" />
-                </div>
-              </div>
-
               <h1 className="text-5xl lg:text-6xl font-bold mb-2 leading-tight">
                 <span className="bg-gradient-to-r from-[#0077ED] via-[#4A9AFF] to-[#0077ED] bg-clip-text text-transparent">
                   ExiBy
