@@ -46,13 +46,13 @@ export default function LoginPage() {
         <div className="hidden lg:flex lg:col-span-6 items-center justify-center p-8 lg:p-16">
           <div className="max-w-lg text-center lg:text-left">
             <div className="flex justify-center lg:justify-start mb-8">
-              <div className="w-20 h-20 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-3xl flex items-center justify-center shadow-2xl">
+              <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-blue-500 rounded-3xl flex items-center justify-center shadow-2xl">
                 <Calendar className="w-10 h-10 text-white" />
               </div>
             </div>
 
             <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-[#0077ED] via-[#4A9AFF] to-[#0077ED] bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent">
                 ExiBy
               </span>
             </h1>
@@ -70,19 +70,19 @@ export default function LoginPage() {
 
             <div className="space-y-4">
               <div className="flex items-center justify-center lg:justify-start space-x-3">
-                <div className="w-2 h-2 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full"></div>
+                <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full"></div>
                 <span className="text-gray-600 dark:text-gray-400">
                   Seamless Event Creation
                 </span>
               </div>
               <div className="flex items-center justify-center lg:justify-start space-x-3">
-                <div className="w-2 h-2 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full"></div>
+                <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full"></div>
                 <span className="text-gray-600 dark:text-gray-400">
                   Organization Management
                 </span>
               </div>
               <div className="flex items-center justify-center lg:justify-start space-x-3">
-                <div className="w-2 h-2 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full"></div>
+                <div className="w-2 h-2 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full"></div>
                 <span className="text-gray-600 dark:text-gray-400">
                   Real-time Analytics
                 </span>
@@ -145,7 +145,7 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Enter your email"
                     />
                   </div>
@@ -170,7 +170,7 @@ export default function LoginPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0077ED] focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="block w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="Enter your password"
                     />
                     <button
@@ -190,7 +190,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] hover:from-[#0066CC] hover:to-[#3A8AEF] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0077ED] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                 >
                   {isLoading ? (
                     <div className="flex items-center">
@@ -218,7 +218,7 @@ export default function LoginPage() {
                 <div className="mt-6 text-center">
                   <Link
                     href="/register"
-                    className="font-medium text-[#0077ED] hover:text-[#0066CC] transition-colors"
+                    className="font-medium text-blue-600 hover:text-blue-700 transition-colors"
                   >
                     Create a new account
                   </Link>

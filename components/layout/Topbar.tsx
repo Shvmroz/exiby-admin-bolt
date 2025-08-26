@@ -52,7 +52,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
       {/* Right Section */}
       <div className="flex items-center space-x-4">
         {/* Quick Actions */}
-        <button className="hidden md:flex items-center space-x-2 px-4 py-2 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg transition-colors font-medium">
+        <button className="hidden md:flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium">
           <Plus className="w-4 h-4" />
           <span>New Event</span>
         </button>
@@ -81,7 +81,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
-            <div className="w-8 h-8 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
                 {user?.name?.charAt(0) || 'U'}
               </span>

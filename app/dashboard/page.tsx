@@ -108,6 +108,7 @@ const DashboardPage: React.FC = () => {
           </p>
         </div>
         <button className="px-6 py-3 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-xl font-medium transition-colors shadow-lg hover:shadow-xl">
+        <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-lg hover:shadow-xl">
           Create Event
         </button>
       </div>
@@ -157,7 +158,7 @@ const DashboardPage: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Recent Events
               </h2>
-              <button className="text-[#0077ED] hover:text-[#0066CC] font-medium text-sm">
+              <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
                 View All
               </button>
             </div>
@@ -220,7 +221,7 @@ const DashboardPage: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-gradient-to-br from-[#0077ED] to-[#4A9AFF] rounded-2xl p-6 text-white">
+          <div className="bg-gradient-to-br from-blue-600 to-blue-500 rounded-2xl p-6 text-white">
             <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
             <div className="space-y-3">
               <button className="w-full bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg p-3 text-left transition-colors">

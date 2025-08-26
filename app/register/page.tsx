@@ -180,13 +180,13 @@ export default function RegisterPage() {
           <div className="max-w-lg text-center lg:text-left space-y-8">
             <div>
               <div className="flex justify-center lg:justify-start mb-8">
-                <div className="w-20 h-20 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-3xl flex items-center justify-center shadow-2xl">
+                <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-blue-500 rounded-3xl flex items-center justify-center shadow-2xl">
                   <Calendar className="w-10 h-10 text-white" />
                 </div>
               </div>
 
               <h1 className="text-5xl lg:text-6xl font-bold mb-2 leading-tight">
-                <span className="bg-gradient-to-r from-[#0077ED] via-[#4A9AFF] to-[#0077ED] bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent">
                   ExiBy
                 </span>
               </h1>
@@ -251,7 +251,7 @@ export default function RegisterPage() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
               {/* Header */}
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-[#0077ED] via-[#4A9AFF] to-[#0077ED]  bg-clip-text text-transparent">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600 bg-clip-text text-transparent">
                   Join ExiBy
                 </h2>
                 <p className="mt-2 text-gray-600 dark:text-gray-400">
@@ -500,7 +500,7 @@ export default function RegisterPage() {
                     name="terms"
                     type="checkbox"
                     required
-                    className="h-4 w-4 text-[#0077ED] focus:ring-blue-600 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 mt-1"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-600 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 mt-1"
                   />
                   <label
                     htmlFor="terms"
@@ -509,14 +509,14 @@ export default function RegisterPage() {
                     I agree to the{" "}
                     <button
                       type="button"
-                      className="font-medium text-[#0077ED] hover:text-blue-500 underline"
+                      className="font-medium text-blue-600 hover:text-blue-500 underline"
                     >
                       Terms of Service
                     </button>{" "}
                     and{" "}
                     <button
                       type="button"
-                      className="font-medium text-[#0077ED] hover:text-blue-500 underline"
+                      className="font-medium text-blue-600 hover:text-blue-500 underline"
                     >
                       Privacy Policy
                     </button>
@@ -526,7 +526,7 @@ export default function RegisterPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] hover:from-[#0066CC] hover:to-[#3A8AEF] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0077ED] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
                 >
                   {isLoading ? (
                     <div className="flex items-center">
@@ -554,7 +554,7 @@ export default function RegisterPage() {
                 <div className="mt-6 text-center">
                   <Link
                     href="/login"
-                    className="font-medium text-[#0077ED] hover:text-blue-500 transition-colors"
+                    className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
                   >
                     Sign in to your account
                   </Link>
