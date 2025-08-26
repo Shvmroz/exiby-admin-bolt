@@ -21,7 +21,7 @@ export default function Home() {
 
   return (
     <Box className="min-h-screen flex items-center justify-center">
-      <CircularProgress size={40} sx={{ color: '#0077ED' }} />
+      <CircularProgress size={40} sx={{ color: '#2563eb' }} />
     </Box>
   );
 }
