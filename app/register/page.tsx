@@ -229,7 +229,7 @@ export default function RegisterPage() {
 
               <div className="mt-4 text-left">
                 <Link
-                  href="/pricing"
+                  // href="/pricing"
                   className="inline-block text-sm font-medium text-[#0077ED] hover:underline"
                 >
                   See full pricing
