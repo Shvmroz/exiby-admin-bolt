@@ -3,13 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail, Lock, Calendar } from "lucide-react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAppContext } from "@/contexts/AppContext";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
-  const registered = searchParams.get("registered");
 
   const [email, setEmail] = useState("admin@exiby.com");
   const [password, setPassword] = useState("admin123");
@@ -105,18 +103,6 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              {/* Registration Success Message */}
-              {registered && (
-                <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                    Registration successful! You can now sign in with your
-                    credentials.
-                  </p>
-                </div>
-              )}
-
-          
-
               {error && (
                 <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                   <p className="text-sm text-red-800 dark:text-red-200">
@@ -208,20 +194,6 @@ export default function LoginPage() {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-300 dark:border-gray-600" />
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                      Don't have an account?
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-6 text-center">
-                  <Link
-                    href="/register"
-                    className="font-medium text-[#0077ED] hover:text-[#0066CC] transition-colors"
-                  >
-                    Create a new account
-                  </Link>
                 </div>
               </div>
             </div>
