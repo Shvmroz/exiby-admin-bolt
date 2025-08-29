@@ -21,7 +21,7 @@ interface TopbarProps {
 }
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
-  const { user, logout, darkMode, toggleDarkMode } = useAppContext();
+  const { user, logout, darkMode, toggleDarkMode, unreadNotificationsCount } = useAppContext();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [showNotifications, setShowNotifications] = React.useState(false);
@@ -36,8 +36,6 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
     router.push(path);
   };
 
-  // Dummy unread count - in real app this would come from context/API
-  const unreadNotificationsCount = 5;
 
   return (
     <div className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 shadow-sm">
