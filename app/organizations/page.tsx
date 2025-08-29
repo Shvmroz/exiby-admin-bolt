@@ -38,7 +38,6 @@ interface Organization {
   bio: {
     description: string;
     website: string;
-    industry?: string;
   };
   subscription_status: string;
   subscription_start: string;
@@ -58,7 +57,7 @@ const dummyData = {
       {
         _id: "org_123",
         orgn_user: { _id: "orguser_456", name: "TechCorp Events" },
-        bio: { description: "Leading tech event organizer", website: "https://techcorp.com", industry: "Technology" },
+        bio: { description: "Leading tech event organizer", website: "https://techcorp.com" },
         subscription_status: "active",
         subscription_start: "2025-08-01T00:00:00.000Z",
         subscription_end: "2025-09-01T00:00:00.000Z",
@@ -72,7 +71,7 @@ const dummyData = {
       {
         _id: "org_124",
         orgn_user: { _id: "orguser_457", name: "Innovation Labs" },
-        bio: { description: "Cutting-edge innovation events", website: "https://innovationlabs.io", industry: "Technology" },
+        bio: { description: "Cutting-edge innovation events", website: "https://innovationlabs.io" },
         subscription_status: "active",
         subscription_start: "2025-07-15T00:00:00.000Z",
         subscription_end: "2025-08-15T00:00:00.000Z",
@@ -86,7 +85,7 @@ const dummyData = {
       {
         _id: "org_125",
         orgn_user: { _id: "orguser_458", name: "StartupHub" },
-        bio: { description: "Startup networking and pitch events", website: "https://startuphub.com", industry: "Business" },
+        bio: { description: "Startup networking and pitch events", website: "https://startuphub.com" },
         subscription_status: "inactive",
         subscription_start: "2025-06-01T00:00:00.000Z",
         subscription_end: "2025-07-01T00:00:00.000Z",
@@ -100,7 +99,7 @@ const dummyData = {
       {
         _id: "org_126",
         orgn_user: { _id: "orguser_459", name: "Digital Summit Co" },
-        bio: { description: "Digital transformation conferences", website: "https://digitalsummit.co", industry: "Technology" },
+        bio: { description: "Digital transformation conferences", website: "https://digitalsummit.co" },
         subscription_status: "active",
         subscription_start: "2025-07-20T00:00:00.000Z",
         subscription_end: "2025-08-20T00:00:00.000Z",
@@ -114,7 +113,7 @@ const dummyData = {
       {
         _id: "org_127",
         orgn_user: { _id: "orguser_460", name: "Event Masters" },
-        bio: { description: "Professional event management services", website: "https://eventmasters.com", industry: "Events" },
+        bio: { description: "Professional event management services", website: "https://eventmasters.com" },
         subscription_status: "pending",
         subscription_start: "2025-08-10T00:00:00.000Z",
         subscription_end: "2025-09-10T00:00:00.000Z",
