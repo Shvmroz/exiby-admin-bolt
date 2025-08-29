@@ -143,23 +143,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-     // Simple authentication check - accept admin credentials or any valid email/password combo
-     if ((email === 'admin@exiby.com' && password === 'admin123') || 
-         (email.includes('@') && password.length >= 3)) {
-       // Mock user data
-       const mockUser: User = {
-         id: '1',
-         name: 'John Smith',
-         email: email,
-         role: 'Event Manager',
-       };
-       
-       setUser(mockUser);
-       setIsAuthenticated(true);
-       localStorage.setItem('user', JSON.stringify(mockUser));
-     } else {
-       throw new Error('Invalid credentials');
-     }
+      // Mock user data
+      const mockUser: User = {
+        id: '1',
+        name: 'John Smith',
+        email: email,
+        role: 'Event Manager',
+      };
+      
+      setUser(mockUser);
+      setIsAuthenticated(true);
+      localStorage.setItem('user', JSON.stringify(mockUser));
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

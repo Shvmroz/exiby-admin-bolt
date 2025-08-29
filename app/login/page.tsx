@@ -24,8 +24,12 @@ export default function LoginPage() {
     setError("");
 
     try {
-     await login(email, password);
-     router.push("/dashboard");
+      const success = await login(email, password);
+      if (success) {
+        router.push("/dashboard");
+      } else {
+        setError("Invalid email or password");
+      }
     } catch (err) {
       setError("An error occurred during login");
     } finally {
