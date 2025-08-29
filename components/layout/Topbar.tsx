@@ -14,6 +14,7 @@ import {
   Lock,
   Settings,
 } from 'lucide-react';
+import NotificationsList from '@/components/notifications/NotificationsList';
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -23,6 +24,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const { user, logout, darkMode, toggleDarkMode } = useAppContext();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
+  const [showNotifications, setShowNotifications] = React.useState(false);
 
   const handleLogout = () => {
     setShowUserMenu(false);
@@ -33,6 +35,10 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
     setShowUserMenu(false);
     router.push(path);
   };
+
+  // Dummy unread count - in real app this would come from context/API
+  const unreadNotificationsCount = 5;
+
   return (
     <div className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 shadow-sm">
       {/* Left Section */}
@@ -60,10 +66,32 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
       <div className="flex items-center space-x-4">
      
         {/* Notifications */}
-        <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <Bell className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            {unreadNotificationsCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+              </span>
+            )}
+          </button>
+
+          {/* Notifications Dropdown */}
+          {showNotifications && (
+            <>
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowNotifications(false)}
+              />
+              <div className="absolute right-0 mt-2 z-50">
+                <NotificationsList onClose={() => setShowNotifications(false)} />
+              </div>
+            </>
+          )}
+        </div>
 
         {/* Theme Toggle */}
         <button
