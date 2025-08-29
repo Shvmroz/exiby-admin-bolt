@@ -18,6 +18,8 @@ import {
 import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-table';
 import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import OrganizationEditDialog from '@/components/organizations/OrganizationEditDialog';
+import OrganizationCreateDialog from '@/components/organizations/OrganizationCreateDialog';
+import OrganizationDetailView from '@/components/organizations/OrganizationDetailView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -165,8 +167,14 @@ const OrganizationsPage: React.FC = () => {
     open: boolean;
     organization: Organization | null;
   }>({ open: false, organization: null });
+  const [createDialog, setCreateDialog] = useState(false);
+  const [detailView, setDetailView] = useState<{
+    open: boolean;
+    organization: Organization | null;
+  }>({ open: false, organization: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
 
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -272,8 +280,43 @@ const OrganizationsPage: React.FC = () => {
     }
   };
 
+  const handleCreate = async (newOrganization: Organization) => {
+    setCreateLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Add to local state
+      setOrganizations(prev => [newOrganization, ...prev]);
+      setPagination(prev => ({ ...prev, total: prev.total + 1 }));
+      
+      setCreateDialog(false);
+    } catch (error) {
+      console.error('Error creating organization:', error);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
   const handleRowClick = (organization: Organization) => {
-    router.push(`/organizations/${organization._id}`);
+    setDetailView({ open: true, organization });
+  };
+
+  const handleDetailEdit = (updatedOrganization: Organization) => {
+    // Update local state
+    setOrganizations(prev =>
+      prev.map(org => org._id === updatedOrganization._id ? updatedOrganization : org)
+    );
+  };
+
+  const handleDetailDelete = (deletedOrganization: Organization) => {
+    // Remove from local state
+    setOrganizations(prev => 
+      prev.filter(org => org._id !== deletedOrganization._id)
+    );
+    
+    // Update pagination total
+    setPagination(prev => ({ ...prev, total: prev.total - 1 }));
   };
 
   const MENU_OPTIONS: MenuOption[] = [
@@ -436,7 +479,7 @@ const OrganizationsPage: React.FC = () => {
         </div>
         <div className="flex items-center space-x-3">
           <Button
-            onClick={() => router.push('/organizations/create')}
+            onClick={() => setCreateDialog(true)}
             className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -534,6 +577,24 @@ const OrganizationsPage: React.FC = () => {
         onSave={handleSaveEdit}
         loading={editLoading}
       />
+
+      {/* Create Organization Dialog */}
+      <OrganizationCreateDialog
+        open={createDialog}
+        onOpenChange={setCreateDialog}
+        onSave={handleCreate}
+        loading={createLoading}
+      />
+
+      {/* Organization Detail View */}
+      {detailView.open && detailView.organization && (
+        <OrganizationDetailView
+          organization={detailView.organization}
+          onClose={() => setDetailView({ open: false, organization: null })}
+          onEdit={handleDetailEdit}
+          onDelete={handleDetailDelete}
+        />
+      )}
     </div>
   );
 };
