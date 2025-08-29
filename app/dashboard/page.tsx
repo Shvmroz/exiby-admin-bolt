@@ -121,19 +121,25 @@ const OrganizationCard: React.FC<{
 
   const getRankColor = (rank: number) => {
     switch (rank) {
-      case 1: return 'from-yellow-400 to-yellow-500';
-      case 2: return 'from-gray-400 to-gray-500';
-      case 3: return 'from-orange-400 to-orange-500';
-      default: return 'from-[#0077ED] to-[#4A9AFF]';
+      case 1:
+        return 'from-green-500 to-green-600'; // Green Royal
+      case 2:
+        return 'from-orange-400 to-orange-500'; // Orange
+      case 3:
+        return 'from-sky-400 to-sky-500'; // Informational Blue
+      default:
+        return 'from-gray-400 to-gray-500'; // Gray for ranks 4+
     }
   };
+  
 
-  const getRankIcon = (rank: number) => {
-    if (rank <= 3) {
-      return <Star className="w-4 h-4 text-white" />;
-    }
-    return <span className="text-white font-bold text-sm">{rank}</span>;
-  };
+  const getRankIcon = (rank: number) => (
+    <div className="flex items-center space-x-1">
+      {/* {rank <= 3 ? <Star className="w-4 h-4 text-white" /> : null} */}
+      <span className="text-white font-bold text-sm">{rank}</span>
+    </div>
+  );
+  
 
   return (
     <div 

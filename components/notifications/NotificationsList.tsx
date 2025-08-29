@@ -12,6 +12,9 @@ import {
   Info,
   X,
   Check,
+  CheckCheck,
+  MailOpen,
+  Mail,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -178,7 +181,7 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="w-80 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 flex flex-col">
+    <div className="w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-2">
@@ -224,8 +227,8 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
-                  !notification.read ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''
+                className={`p-4 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors ${
+                  !notification.read ? 'bg-blue-100/30 dark:bg-blue-700/10' : ''
                 }`}
               >
                 <div className="flex items-start space-x-3">
@@ -249,7 +252,7 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
                         </h4>
                         <p className={`text-sm mt-1 ${
                           !notification.read 
-                            ? 'text-gray-600 dark:text-gray-400' 
+                            ? 'text-gray-800 dark:text-gray-300' 
                             : 'text-gray-500 dark:text-gray-500'
                         }`}>
                           {notification.message}
@@ -263,18 +266,17 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
                       <div className="flex items-center space-x-2 ml-2">
                         {!notification.read ? (
                           <>
-                            <div className="w-2 h-2 bg-[#0077ED] rounded-full"></div>
                             <button
                               onClick={() => markAsRead(notification.id)}
                               className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                               title="Mark as read"
                             >
-                              <Check className="w-4 h-4 text-gray-400 hover:text-[#0077ED]" />
+                              <Mail className="w-4 h-4 text-green-500 hover:text-green-500" />
                             </button>
                           </>
                         ) : (
                           <div className="w-4 h-4 flex items-center justify-center">
-                            <Check className="w-3 h-3 text-green-500" />
+                            <MailOpen className="w-4 h-4 text-gray-400" />
                           </div>
                         )}
                       </div>
@@ -287,14 +289,7 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
         )}
       </div>
 
-      {/* Footer */}
-      {notifications.length > 0 && (
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-          <button className="w-full text-center text-sm text-[#0077ED] hover:text-[#0066CC] font-medium py-2">
-            View All Notifications
-          </button>
-        </div>
-      )}
+      
     </div>
   );
 };
