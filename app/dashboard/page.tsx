@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Calendar,
   Users,
@@ -11,8 +11,8 @@ import {
   ArrowUpRight,
   Star,
   ChevronRight,
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Dummy data matching your API response structure
 const dashboardData = {
@@ -28,34 +28,34 @@ const dashboardData = {
         _id: "org_456",
         name: "TechCorp Events",
         total_events: 25,
-        total_revenue: 50000
+        total_revenue: 50000,
       },
       {
         _id: "org_789",
         name: "Innovation Labs",
         total_events: 18,
-        total_revenue: 35000
+        total_revenue: 35000,
       },
       {
         _id: "org_123",
         name: "StartupHub",
         total_events: 15,
-        total_revenue: 28000
+        total_revenue: 28000,
       },
       {
         _id: "org_321",
         name: "Digital Summit Co",
         total_events: 12,
-        total_revenue: 22000
+        total_revenue: 22000,
       },
       {
         _id: "org_654",
         name: "Event Masters",
         total_events: 10,
-        total_revenue: 18000
-      }
-    ]
-  }
+        total_revenue: 18000,
+      },
+    ],
+  },
 };
 
 const MetricCard: React.FC<{
@@ -67,38 +67,37 @@ const MetricCard: React.FC<{
   bgColor: string;
   onClick: () => void;
 }> = ({ title, value, icon, trend, color, bgColor, onClick }) => (
-  <div 
+  <div
     onClick={onClick}
-    className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer group"
+    // className="dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer group"
+    className={`${bgColor} dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer group`}
   >
     <div className="flex items-start justify-between">
       <div className="flex-1">
         <div className="flex items-center space-x-3 mb-4">
-          <div className={`p-3 rounded-lg ${bgColor} group-hover:scale-110 transition-transform duration-200`}>
-            <div className={color}>
-              {icon}
-            </div>
-          </div>
+          <div className={color}>{icon}</div>
           <div>
             <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
               {title}
             </p>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {typeof value === 'number' ? value.toLocaleString() : value}
+            {typeof value === "number" ? value.toLocaleString() : value}
           </p>
           {trend && (
             <div className="flex items-center">
               <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-green-500 text-sm font-medium">{trend}</span>
+              <span className="text-green-500 text-sm font-medium">
+                {trend}
+              </span>
             </div>
           )}
         </div>
       </div>
-      
+
       <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#0077ED] transition-colors" />
     </div>
   </div>
@@ -114,7 +113,7 @@ const OrganizationCard: React.FC<{
   rank: number;
 }> = ({ organization, rank }) => {
   const router = useRouter();
-  
+
   const handleClick = () => {
     router.push(`/organizations`);
   };
@@ -122,16 +121,15 @@ const OrganizationCard: React.FC<{
   const getRankColor = (rank: number) => {
     switch (rank) {
       case 1:
-        return 'from-green-500 to-green-600'; // Green Royal
+        return "from-green-500 to-green-600"; // Green Royal
       case 2:
-        return 'from-orange-400 to-orange-500'; // Orange
+        return "from-orange-400 to-orange-500"; // Orange
       case 3:
-        return 'from-sky-400 to-sky-500'; // Informational Blue
+        return "from-sky-400 to-sky-500"; // Informational Blue
       default:
-        return 'from-gray-400 to-gray-500'; // Gray for ranks 4+
+        return "from-gray-400 to-gray-500"; // Gray for ranks 4+
     }
   };
-  
 
   const getRankIcon = (rank: number) => (
     <div className="flex items-center space-x-1">
@@ -139,15 +137,18 @@ const OrganizationCard: React.FC<{
       <span className="text-white font-bold text-sm">{rank}</span>
     </div>
   );
-  
 
   return (
-    <div 
+    <div
       onClick={handleClick}
       className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-all duration-200 cursor-pointer group border border-gray-100 dark:border-gray-600"
     >
       <div className="flex items-center space-x-4">
-        <div className={`w-10 h-10 bg-gradient-to-r ${getRankColor(rank)} rounded-full flex items-center justify-center shadow-sm`}>
+        <div
+          className={`w-10 h-10 bg-gradient-to-r ${getRankColor(
+            rank
+          )} rounded-full flex items-center justify-center shadow-sm`}
+        >
           {getRankIcon(rank)}
         </div>
         <div>
@@ -177,58 +178,58 @@ const DashboardPage: React.FC = () => {
 
   const metrics = [
     {
-      title: 'Total Organizations',
+      title: "Total Organizations",
       value: data.total_organizations,
       icon: <Building2 className="w-5 h-5" />,
-      trend: '+8% this month',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-      path: '/organizations'
+      trend: "+8% this month",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20",
+      path: "/organizations",
     },
     {
-      title: 'Total Events',
+      title: "Total Events",
       value: data.total_events,
       icon: <Calendar className="w-5 h-5" />,
-      trend: '+12% this month',
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-      path: '/events'
+      trend: "+12% this month",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50 dark:bg-purple-900/20",
+      path: "/events",
     },
     {
-      title: 'Total Users',
+      title: "Total Users",
       value: data.total_users,
       icon: <Users className="w-5 h-5" />,
-      trend: '+23% this month',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50 dark:bg-green-900/20',
-      path: '/attendees'
+      trend: "+23% this month",
+      color: "text-green-600",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
+      path: "/attendees",
     },
     {
-      title: 'Total Revenue',
+      title: "Total Revenue",
       value: `$${data.total_revenue.toLocaleString()}`,
       icon: <DollarSign className="w-5 h-5" />,
-      trend: '+15% this month',
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
-      path: '/analytics'
+      trend: "+15% this month",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50 dark:bg-emerald-900/20",
+      path: "/analytics",
     },
     {
-      title: 'Monthly Revenue',
+      title: "Monthly Revenue",
       value: `$${data.monthly_revenue.toLocaleString()}`,
       icon: <TrendingUp className="w-5 h-5" />,
-      trend: '+18% vs last month',
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50 dark:bg-orange-900/20',
-      path: '/analytics'
+      trend: "+18% vs last month",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50 dark:bg-orange-900/20",
+      path: "/analytics",
     },
     {
-      title: 'Active Subscriptions',
+      title: "Active Subscriptions",
       value: data.active_subscriptions,
       icon: <CreditCard className="w-5 h-5" />,
-      trend: '+5% this month',
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
-      path: '/analytics'
+      trend: "+5% this month",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
+      path: "/analytics",
     },
   ];
 
@@ -245,8 +246,8 @@ const DashboardPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <button 
-            onClick={() => router.push('/analytics')}
+          <button
+            onClick={() => router.push("/analytics")}
             className="flex items-center space-x-2 px-4 py-2 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors shadow-sm"
           >
             <TrendingUp className="w-4 h-4" />
@@ -285,15 +286,15 @@ const DashboardPage: React.FC = () => {
                   Organizations ranked by revenue and activity
                 </p>
               </div>
-              <button 
-                onClick={() => router.push('/organizations')}
+              <button
+                onClick={() => router.push("/organizations")}
                 className="flex items-center space-x-1 text-[#0077ED] hover:text-[#0066CC] font-medium text-sm transition-colors"
               >
                 <span>View All</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-            
+
             <div className="space-y-3">
               {data.top_organizations.map((org, index) => (
                 <OrganizationCard
