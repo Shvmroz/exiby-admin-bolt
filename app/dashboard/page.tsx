@@ -112,8 +112,8 @@ const OrganizationRow: React.FC<{
     total_revenue: number;
   };
   rank: number;
-  maxRevenue: number;
-}> = ({ organization, rank }) => {
+  maxRevenue: number; // Make sure maxRevenue is received as a prop
+}> = ({ organization, rank, maxRevenue }) => {
   const router = useRouter();
 
   const handleClick = () => {
@@ -135,19 +135,24 @@ const OrganizationRow: React.FC<{
     }
   };
 
-  const getRankBadgeColor = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white"; // Gold
-      case 2:
-        return "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800"; // Silver
-      case 3:
-        return "bg-gradient-to-r from-orange-400 to-orange-500 text-white"; // Bronze
-      default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300";
-    }
+  const rankBadgeColorHash: { [key: number]: string } = {
+    1: "bg-gradient-to-r from-yellow-600 to-yellow-500 text-yellow-900",      
+    2: "bg-gradient-to-r from-yellow-500 to-yellow-400 text-yellow-900",
+    3: "bg-gradient-to-r from-yellow-300 to-yellow-200 text-yellow-900", 
+    4: "bg-gradient-to-r from-yellow-200 to-yellow-100 text-yellow-800", 
+    5: "bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700",  
   };
+  
+  const getRankBadgeColor = (rank: number) => {
+    return (
+      rankBadgeColorHash[rank] ??
+      "bg-gradient-to-r from-yellow-50 to-yellow-50 text-yellow-700" // Fallback = softest yellow
+    );
+  };
+  
+  
 
+  // Correctly calculate the revenue percentage using the maxRevenue prop
   const revenuePercentage = (organization.total_revenue / maxRevenue) * 100;
 
   return (
@@ -159,7 +164,7 @@ const OrganizationRow: React.FC<{
       <td className="px-6 py-4">
         <div className="flex items-center justify-center">
           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankBadgeColor(rank)}`}>
-            {rank <= 3 && rank === 1 && <Trophy className="w-4 h-4" />}
+            {rank <= 3 && rank === 1 && <span>{rank}</span>}
             {rank <= 3 && rank !== 1 && <span>{rank}</span>}
             {rank > 3 && <span>{rank}</span>}
           </div>
@@ -176,14 +181,14 @@ const OrganizationRow: React.FC<{
       {/* Events */}
       <td className="px-6 py-4">
         <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-          <Calendar className="w-4 h-4" />
+          <Calendar className="w-4 h-4 text-blue-500" />
           <span>{organization.total_events}</span>
         </div>
       </td>
 
       {/* Revenue */}
       <td className="px-6 py-4">
-        <div className="text-gray-900 dark:text-white font-medium">
+        <div className="text-green-500 dark:text-green-500 font-medium">
           ${organization.total_revenue.toLocaleString()}
         </div>
       </td>
@@ -192,7 +197,7 @@ const OrganizationRow: React.FC<{
       <td className="px-6 py-4">
         <div className="flex items-center space-x-3">
           <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-            <div 
+            <div
               className={`h-full ${getRankBarColor(rank)} transition-all duration-500`}
               style={{ width: `${Math.max(revenuePercentage, 5)}%` }}
             />
@@ -210,6 +215,7 @@ const OrganizationRow: React.FC<{
     </tr>
   );
 };
+
 
 const DashboardPage: React.FC = () => {
   const router = useRouter();

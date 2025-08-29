@@ -180,33 +180,19 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
                       <div className="flex items-center space-x-2 ml-2">
                         {!notification.read ? (
                           <>
-                            <button
+                            <div
                               onClick={() => markNotificationAsRead(notification.id)}
-                              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                              className="rounded transition-colors cursor-pointer"
                               title="Mark as read"
                             >
-                              <Mail className="w-4 h-4 text-blue-500 hover:text-blue-600" />
-                            </button>
-                            <button
-                              onClick={() => removeNotification(notification.id)}
-                              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
-                              title="Remove notification"
-                            >
-                              <X className="w-4 h-4 text-red-500 hover:text-red-600" />
-                            </button>
+                              <Mail className="w-4 h-4 text-green-500 hover:text-green-600" />
+                            </div>
                           </>
                         ) : (
                           <>
                             <div className="w-4 h-4 flex items-center justify-center">
                               <MailOpen className="w-4 h-4 text-gray-400" />
                             </div>
-                            <button
-                              onClick={() => removeNotification(notification.id)}
-                              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
-                              title="Remove notification"
-                            >
-                              <X className="w-4 h-4 text-red-500 hover:text-red-600" />
-                            </button>
                           </>
                         )}
                       </div>

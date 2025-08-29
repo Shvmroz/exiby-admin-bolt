@@ -27,7 +27,7 @@ const menuItems = [
     text: "Dashboard",
     icon: Home,
     path: "/dashboard",
-    color: "text-blue-600",
+    color: "text-blue-500",
     bgColor: "bg-blue-50",
   },
   {
@@ -55,14 +55,14 @@ const menuItems = [
     text: "Analytics",
     icon: BarChart3,
     path: "/analytics",
-    color: "text-indigo-600",
+    color: "text-indigo-500",
     bgColor: "bg-indigo-50",
   },
   {
     text: "Settings",
     icon: Settings,
     path: "/settings",
-    color: "text-gray-600",
+    color: "text-gray-400",
     bgColor: "bg-gray-50",
   },
 ];
