@@ -266,9 +266,9 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Top Organizations - Takes up more space */}
-        <div className="xl:col-span-3">
+        <div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -296,150 +296,6 @@ const DashboardPage: React.FC = () => {
                   rank={index + 1}
                 />
               ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar with Summary Cards */}
-        <div className="xl:col-span-1 space-y-6">
-          {/* Revenue Summary */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                <DollarSign className="w-4 h-4 text-emerald-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Revenue
-              </h3>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Total</span>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">All time</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  ${data.total_revenue.toLocaleString()}
-                </div>
-              </div>
-              
-              <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">This Month</span>
-                  <div className="flex items-center space-x-1">
-                    <ArrowUpRight className="w-3 h-3 text-green-500" />
-                    <span className="text-xs text-green-500 font-medium">+18%</span>
-                  </div>
-                </div>
-                <div className="text-xl font-bold text-emerald-600">
-                  ${data.monthly_revenue.toLocaleString()}
-                </div>
-              </div>
-              
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Avg. per Event</div>
-                <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                  ${Math.round(data.total_revenue / data.total_events).toLocaleString()}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Platform Stats */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="p-2 bg-[#0077ED]/10 rounded-lg">
-                <TrendingUp className="w-4 h-4 text-[#0077ED]" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Platform Stats
-              </h3>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Events per Org</span>
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {Math.round(data.total_events / data.total_organizations)}
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Users per Event</span>
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {Math.round(data.total_users / data.total_events)}
-                </span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Subscription Rate</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-green-400 to-green-500 rounded-full"
-                      style={{ width: `${Math.round((data.active_subscriptions / data.total_organizations) * 100)}%` }}
-                    />
-                  </div>
-                  <span className="font-semibold text-green-600 text-sm">
-                    {Math.round((data.active_subscriptions / data.total_organizations) * 100)}%
-                  </span>
-                </div>
-              </div>
-              
-              <div className="pt-3 border-t border-gray-100 dark:border-gray-700">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Active Subscriptions</span>
-                  <span className="font-semibold text-[#0077ED]">
-                    {data.active_subscriptions}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-gradient-to-br from-[#0077ED] to-[#4A9AFF] rounded-xl p-6 text-white">
-            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <button 
-                onClick={() => router.push('/events')}
-                className="w-full bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-lg p-3 text-left transition-all duration-200 hover:scale-105"
-              >
-                <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" />
-                  <div>
-                    <div className="font-medium text-sm">Manage Events</div>
-                    <div className="text-xs opacity-80">View and organize</div>
-                  </div>
-                </div>
-              </button>
-              
-              <button 
-                onClick={() => router.push('/organizations')}
-                className="w-full bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-lg p-3 text-left transition-all duration-200 hover:scale-105"
-              >
-                <div className="flex items-center space-x-2">
-                  <Building2 className="w-4 h-4" />
-                  <div>
-                    <div className="font-medium text-sm">Organizations</div>
-                    <div className="text-xs opacity-80">Manage partners</div>
-                  </div>
-                </div>
-              </button>
-              
-              <button 
-                onClick={() => router.push('/attendees')}
-                className="w-full bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-lg p-3 text-left transition-all duration-200 hover:scale-105"
-              >
-                <div className="flex items-center space-x-2">
-                  <Users className="w-4 h-4" />
-                  <div>
-                    <div className="font-medium text-sm">User Management</div>
-                    <div className="text-xs opacity-80">View insights</div>
-                  </div>
-                </div>
-              </button>
             </div>
           </div>
         </div>
