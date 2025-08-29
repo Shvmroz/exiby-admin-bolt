@@ -29,6 +29,7 @@ interface Organization {
     description: string;
     website: string;
   };
+  category: string;
   subscription_status: string;
   subscription_start: string;
   subscription_end: string;
@@ -54,6 +55,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
     name: '',
     description: '',
     website: '',
+    category: 'organization',
     subscription_status: 'active',
     subscription_start: '',
     subscription_end: '',
@@ -66,6 +68,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
         name: organization.orgn_user.name,
         description: organization.bio.description,
         website: organization.bio.website,
+        category: organization.category,
         subscription_status: organization.subscription_status,
         subscription_start: organization.subscription_start.split('T')[0],
         subscription_end: organization.subscription_end.split('T')[0],
@@ -87,6 +90,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
           description: formData.description,
           website: formData.website,
         },
+        category: formData.category,
         subscription_status: formData.subscription_status,
         subscription_start: new Date(formData.subscription_start).toISOString(),
         subscription_end: new Date(formData.subscription_end).toISOString(),
@@ -121,6 +125,26 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Category
+              </label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="organization">Organization</SelectItem>
+                  <SelectItem value="company">Company</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Website
               </label>
               <Input
@@ -130,21 +154,8 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
                 placeholder="https://example.com"
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
-            </label>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Enter organization description"
-              rows={3}
-            />
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Subscription Status
@@ -164,7 +175,19 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description
+            </label>
+            <Textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Enter organization description"
+              rows={3}
+            />
+          </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Subscription Start
@@ -176,6 +199,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
               />
             </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Subscription End

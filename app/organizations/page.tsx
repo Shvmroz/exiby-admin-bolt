@@ -39,6 +39,7 @@ interface Organization {
     description: string;
     website: string;
   };
+  category: string;
   subscription_status: string;
   subscription_start: string;
   subscription_end: string;
@@ -58,6 +59,7 @@ const dummyData = {
         _id: "org_123",
         orgn_user: { _id: "orguser_456", name: "TechCorp Events" },
         bio: { description: "Leading tech event organizer", website: "https://techcorp.com" },
+        category: "organization",
         subscription_status: "active",
         subscription_start: "2025-08-01T00:00:00.000Z",
         subscription_end: "2025-09-01T00:00:00.000Z",
@@ -72,6 +74,7 @@ const dummyData = {
         _id: "org_124",
         orgn_user: { _id: "orguser_457", name: "Innovation Labs" },
         bio: { description: "Cutting-edge innovation events", website: "https://innovationlabs.io" },
+        category: "company",
         subscription_status: "active",
         subscription_start: "2025-07-15T00:00:00.000Z",
         subscription_end: "2025-08-15T00:00:00.000Z",
@@ -86,6 +89,7 @@ const dummyData = {
         _id: "org_125",
         orgn_user: { _id: "orguser_458", name: "StartupHub" },
         bio: { description: "Startup networking and pitch events", website: "https://startuphub.com" },
+        category: "organization",
         subscription_status: "inactive",
         subscription_start: "2025-06-01T00:00:00.000Z",
         subscription_end: "2025-07-01T00:00:00.000Z",
@@ -100,6 +104,7 @@ const dummyData = {
         _id: "org_126",
         orgn_user: { _id: "orguser_459", name: "Digital Summit Co" },
         bio: { description: "Digital transformation conferences", website: "https://digitalsummit.co" },
+        category: "company",
         subscription_status: "active",
         subscription_start: "2025-07-20T00:00:00.000Z",
         subscription_end: "2025-08-20T00:00:00.000Z",
@@ -114,6 +119,7 @@ const dummyData = {
         _id: "org_127",
         orgn_user: { _id: "orguser_460", name: "Event Masters" },
         bio: { description: "Professional event management services", website: "https://eventmasters.com" },
+        category: "organization",
         subscription_status: "pending",
         subscription_start: "2025-08-10T00:00:00.000Z",
         subscription_end: "2025-09-10T00:00:00.000Z",
@@ -133,6 +139,7 @@ const dummyData = {
 
 const TABLE_HEAD: TableHeader[] = [
   { key: 'organization', label: 'Organization', type: 'custom' },
+  { key: 'category', label: 'Category', type: 'custom' },
   { key: 'subscription_status', label: 'Status', type: 'custom' },
   { key: 'subscription_period', label: 'Subscription Period', type: 'custom' },
   { key: 'total_events', label: 'Events', type: 'custom' },
@@ -149,6 +156,7 @@ const OrganizationsPage: React.FC = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     organization: Organization | null;
@@ -187,6 +195,10 @@ const OrganizationsPage: React.FC = () => {
       if (statusFilter !== 'all') {
         filteredData = filteredData.filter(org => org.subscription_status === statusFilter);
       }
+      
+      if (categoryFilter !== 'all') {
+        filteredData = filteredData.filter(org => org.category === categoryFilter);
+      }
 
       setOrganizations(filteredData);
       setPagination(prev => ({ ...prev, total: filteredData.length }));
@@ -199,7 +211,7 @@ const OrganizationsPage: React.FC = () => {
 
   useEffect(() => {
     loadOrganizations();
-  }, [searchQuery, statusFilter, pagination.page, pagination.limit]);
+  }, [searchQuery, statusFilter, categoryFilter, pagination.page, pagination.limit]);
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -230,8 +242,10 @@ const OrganizationsPage: React.FC = () => {
         prev.filter(org => org._id !== deleteDialog.organization!._id)
       );
       
+      // Update pagination total
+      setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+      
       setDeleteDialog({ open: false, organization: null });
-      await loadOrganizations(); // Refresh the list
     } catch (error) {
       console.error('Error deleting organization:', error);
     } finally {
@@ -329,6 +343,20 @@ const OrganizationsPage: React.FC = () => {
                 </a>
               )}
             </div>
+          </div>
+        );
+
+      case 'category':
+        return (
+          <div className="flex items-center space-x-2">
+            {organization.category === 'organization' ? (
+              <Building2 className="w-4 h-4 text-blue-500" />
+            ) : (
+              <Building className="w-4 h-4 text-green-500" />
+            )}
+            <span className="font-medium text-gray-900 dark:text-white capitalize">
+              {organization.category}
+            </span>
           </div>
         );
 
@@ -444,6 +472,18 @@ const OrganizationsPage: React.FC = () => {
                   <SelectItem value="inactive">Inactive</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="expired">Expired</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="organization">Organization</SelectItem>
+                  <SelectItem value="company">Company</SelectItem>
                 </SelectContent>
               </Select>
             </div>
