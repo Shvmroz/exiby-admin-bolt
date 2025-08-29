@@ -123,6 +123,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Check credentials
+      if (email !== 'admin@exiby.com' || password !== 'admin123') {
+        throw new Error('Invalid email or password');
+      }
+      
       const mockUser: User = {
         id: '1',
         name: 'John Doe',
@@ -135,8 +140,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       
       setIsAuthenticated(true);
       setUser(mockUser);
+      return true;
     } catch (error) {
-      throw new Error('Login failed');
+      return false;
     } finally {
       setLoading(false);
     }
