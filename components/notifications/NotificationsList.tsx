@@ -17,15 +17,8 @@ import {
   Mail,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useAppContext } from '@/contexts/AppContext';
 
-export interface Notification {
-  id: string;
-  notification_type: 'event' | 'user' | 'organization' | 'payment' | 'alert' | 'success' | 'info';
-  title: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-}
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -87,101 +80,22 @@ const getNotificationBgColor = (type: string) => {
   }
 };
 
-// Dummy notifications data
-const initialNotifications: Notification[] = [
-  {
-    id: '1',
-    notification_type: 'event',
-    title: 'New Event Created',
-    message: 'TechCorp Events created "Annual Tech Conference 2024"',
-    read: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-  },
-  {
-    id: '2',
-    notification_type: 'payment',
-    title: 'Payment Received',
-    message: 'Payment of $2,500 received from Innovation Labs',
-    read: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-  },
-  {
-    id: '3',
-    notification_type: 'user',
-    title: 'New User Registration',
-    message: '15 new users registered for "Digital Marketing Summit"',
-    read: true,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), // 4 hours ago
-  },
-  {
-    id: '4',
-    notification_type: 'organization',
-    title: 'Organization Updated',
-    message: 'StartupHub updated their organization profile',
-    read: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(), // 6 hours ago
-  },
-  {
-    id: '5',
-    notification_type: 'alert',
-    title: 'Event Capacity Warning',
-    message: 'Event "AI Workshop" is 90% full - only 10 spots remaining',
-    read: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(), // 8 hours ago
-  },
-  {
-    id: '6',
-    notification_type: 'success',
-    title: 'Event Completed',
-    message: 'Event "Web Development Bootcamp" completed successfully with 150 attendees',
-    read: true,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12 hours ago
-  },
-  {
-    id: '7',
-    notification_type: 'info',
-    title: 'System Maintenance',
-    message: 'Scheduled maintenance will occur tonight from 2:00 AM to 4:00 AM',
-    read: true,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-  },
-  {
-    id: '8',
-    notification_type: 'payment',
-    title: 'Subscription Renewed',
-    message: 'Event Masters renewed their premium subscription',
-    read: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 36).toISOString(), // 1.5 days ago
-  },
-];
 
 interface NotificationsListProps {
   onClose?: () => void;
 }
 
 const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(notification =>
-        notification.id === id
-          ? { ...notification, read: true }
-          : notification
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(notification => ({ ...notification, read: true }))
-    );
-  };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const { 
+    notifications, 
+    unreadNotificationsCount, 
+    markNotificationAsRead, 
+    markAllNotificationsAsRead,
+    removeNotification 
+  } = useAppContext();
 
   return (
-    <div className="w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 flex flex-col">
+    <div className="w-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-2">
@@ -189,16 +103,16 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
           <h3 className="font-semibold text-gray-900 dark:text-white">
             Notifications
           </h3>
-          {unreadCount > 0 && (
+          {unreadNotificationsCount > 0 && (
             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-              {unreadCount}
+              {unreadNotificationsCount}
             </span>
           )}
         </div>
         <div className="flex items-center space-x-2">
-          {unreadCount > 0 && (
+          {unreadNotificationsCount > 0 && (
             <button
-              onClick={markAllAsRead}
+              onClick={markAllNotificationsAsRead}
               className="text-xs text-[#0077ED] hover:text-[#0066CC] font-medium"
             >
               Mark all read
@@ -216,7 +130,7 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
       </div>
 
       {/* Notifications List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {notifications.length === 0 ? (
           <div className="p-8 text-center">
             <Bell className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
@@ -267,17 +181,33 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
                         {!notification.read ? (
                           <>
                             <button
-                              onClick={() => markAsRead(notification.id)}
+                              onClick={() => markNotificationAsRead(notification.id)}
                               className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                               title="Mark as read"
                             >
-                              <Mail className="w-4 h-4 text-green-500 hover:text-green-500" />
+                              <Mail className="w-4 h-4 text-blue-500 hover:text-blue-600" />
+                            </button>
+                            <button
+                              onClick={() => removeNotification(notification.id)}
+                              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                              title="Remove notification"
+                            >
+                              <X className="w-4 h-4 text-red-500 hover:text-red-600" />
                             </button>
                           </>
                         ) : (
-                          <div className="w-4 h-4 flex items-center justify-center">
-                            <MailOpen className="w-4 h-4 text-gray-400" />
-                          </div>
+                          <>
+                            <div className="w-4 h-4 flex items-center justify-center">
+                              <MailOpen className="w-4 h-4 text-gray-400" />
+                            </div>
+                            <button
+                              onClick={() => removeNotification(notification.id)}
+                              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                              title="Remove notification"
+                            >
+                              <X className="w-4 h-4 text-red-500 hover:text-red-600" />
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>

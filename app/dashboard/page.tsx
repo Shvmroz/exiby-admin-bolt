@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   Star,
   ChevronRight,
+  Trophy,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -103,7 +104,7 @@ const MetricCard: React.FC<{
   </div>
 );
 
-const OrganizationCard: React.FC<{
+const OrganizationRow: React.FC<{
   organization: {
     _id: string;
     name: string;
@@ -111,6 +112,7 @@ const OrganizationCard: React.FC<{
     total_revenue: number;
   };
   rank: number;
+  maxRevenue: number;
 }> = ({ organization, rank }) => {
   const router = useRouter();
 
@@ -118,63 +120,101 @@ const OrganizationCard: React.FC<{
     router.push(`/organizations`);
   };
 
-  const getRankColor = (rank: number) => {
+  const getRankBarColor = (rank: number) => {
     switch (rank) {
       case 1:
-        return "from-green-500 to-green-600"; // Green Royal
+        return "bg-[#0077ED]"; // Darkest blue
       case 2:
-        return "from-orange-400 to-orange-500"; // Orange
+        return "bg-[#2B8AFF]"; // Medium-dark blue
       case 3:
-        return "from-sky-400 to-sky-500"; // Informational Blue
+        return "bg-[#4A9AFF]"; // Medium blue
+      case 4:
+        return "bg-[#6BADFF]"; // Medium-light blue
       default:
-        return "from-gray-400 to-gray-500"; // Gray for ranks 4+
+        return "bg-[#8CC0FF]"; // Lightest blue
     }
   };
 
-  const getRankIcon = (rank: number) => (
-    <div className="flex items-center space-x-1">
-      {/* {rank <= 3 ? <Star className="w-4 h-4 text-white" /> : null} */}
-      <span className="text-white font-bold text-sm">{rank}</span>
-    </div>
-  );
+  const getRankBadgeColor = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return "bg-gradient-to-r from-yellow-400 to-yellow-500 text-white"; // Gold
+      case 2:
+        return "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800"; // Silver
+      case 3:
+        return "bg-gradient-to-r from-orange-400 to-orange-500 text-white"; // Bronze
+      default:
+        return "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300";
+    }
+  };
+
+  const revenuePercentage = (organization.total_revenue / maxRevenue) * 100;
 
   return (
-    <div
+    <tr
       onClick={handleClick}
-      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-all duration-200 cursor-pointer group border border-gray-100 dark:border-gray-600"
+      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group"
     >
-      <div className="flex items-center space-x-4">
-        <div
-          className={`w-10 h-10 bg-gradient-to-r ${getRankColor(
-            rank
-          )} rounded-full flex items-center justify-center shadow-sm`}
-        >
-          {getRankIcon(rank)}
-        </div>
-        <div>
-          <h4 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#0077ED] transition-colors">
-            {organization.name}
-          </h4>
-          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center space-x-1">
-              <Calendar className="w-3 h-3" />
-              <span>{organization.total_events} events</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <DollarSign className="w-3 h-3" />
-              <span>${organization.total_revenue.toLocaleString()}</span>
-            </div>
+      {/* Rank */}
+      <td className="px-6 py-4">
+        <div className="flex items-center justify-center">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankBadgeColor(rank)}`}>
+            {rank <= 3 && rank === 1 && <Trophy className="w-4 h-4" />}
+            {rank <= 3 && rank !== 1 && <span>{rank}</span>}
+            {rank > 3 && <span>{rank}</span>}
           </div>
         </div>
-      </div>
-      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#0077ED] transition-colors" />
-    </div>
+      </td>
+
+      {/* Organization Name */}
+      <td className="px-6 py-4">
+        <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#0077ED] transition-colors">
+          {organization.name}
+        </div>
+      </td>
+
+      {/* Events */}
+      <td className="px-6 py-4">
+        <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
+          <Calendar className="w-4 h-4" />
+          <span>{organization.total_events}</span>
+        </div>
+      </td>
+
+      {/* Revenue */}
+      <td className="px-6 py-4">
+        <div className="text-gray-900 dark:text-white font-medium">
+          ${organization.total_revenue.toLocaleString()}
+        </div>
+      </td>
+
+      {/* Performance Bar */}
+      <td className="px-6 py-4">
+        <div className="flex items-center space-x-3">
+          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div 
+              className={`h-full ${getRankBarColor(rank)} transition-all duration-500`}
+              style={{ width: `${Math.max(revenuePercentage, 5)}%` }}
+            />
+          </div>
+          <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right">
+            {Math.round(revenuePercentage)}%
+          </span>
+        </div>
+      </td>
+
+      {/* Action */}
+      <td className="px-6 py-4">
+        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#0077ED] transition-colors" />
+      </td>
+    </tr>
   );
 };
 
 const DashboardPage: React.FC = () => {
   const router = useRouter();
   const { data } = dashboardData;
+  const maxRevenue = Math.max(...data.top_organizations.map(org => org.total_revenue));
 
   const metrics = [
     {
@@ -295,14 +335,41 @@ const DashboardPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-3">
-              {data.top_organizations.map((org, index) => (
-                <OrganizationCard
-                  key={org._id}
-                  organization={org}
-                  rank={index + 1}
-                />
-              ))}
+            <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700/50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Rank
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Organization
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Events
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Revenue
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Performance
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {data.top_organizations.map((org, index) => (
+                    <OrganizationRow
+                      key={org._id}
+                      organization={org}
+                      rank={index + 1}
+                      maxRevenue={maxRevenue}
+                    />
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
