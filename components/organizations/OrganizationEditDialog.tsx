@@ -28,6 +28,7 @@ interface Organization {
   bio: {
     description: string;
     website: string;
+    industry?: string;
   };
   subscription_status: string;
   subscription_start: string;
@@ -54,6 +55,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
     name: '',
     description: '',
     website: '',
+    industry: '',
     subscription_status: 'active',
     subscription_start: '',
     subscription_end: '',
@@ -66,6 +68,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
         name: organization.orgn_user.name,
         description: organization.bio.description,
         website: organization.bio.website,
+        industry: organization.bio.industry || '',
         subscription_status: organization.subscription_status,
         subscription_start: organization.subscription_start.split('T')[0],
         subscription_end: organization.subscription_end.split('T')[0],
@@ -86,6 +89,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
         bio: {
           description: formData.description,
           website: formData.website,
+          industry: formData.industry,
         },
         subscription_status: formData.subscription_status,
         subscription_start: new Date(formData.subscription_start).toISOString(),
@@ -128,6 +132,17 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
                 value={formData.website}
                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                 placeholder="https://example.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Industry
+              </label>
+              <Input
+                value={formData.industry}
+                onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                placeholder="e.g., Technology, Healthcare"
               />
             </div>
           </div>
