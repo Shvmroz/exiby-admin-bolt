@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useAppContext } from '@/contexts/AppContext';
+import { useRouter } from 'next/navigation';
 import {
   Menu,
   Bell,
@@ -10,7 +11,8 @@ import {
   Moon,
   User,
   LogOut,
-  Plus,
+  Lock,
+  Settings,
 } from 'lucide-react';
 
 interface TopbarProps {
@@ -19,6 +21,7 @@ interface TopbarProps {
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const { user, logout, darkMode, toggleDarkMode } = useAppContext();
+  const router = useRouter();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
 
   const handleLogout = () => {
@@ -26,6 +29,10 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
     logout();
   };
 
+  const handleNavigation = (path: string) => {
+    setShowUserMenu(false);
+    router.push(path);
+  };
   return (
     <div className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 shadow-sm">
       {/* Left Section */}
@@ -99,10 +106,28 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
                 onClick={() => setShowUserMenu(false)}
               />
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
-              <button className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <button 
+                onClick={() => handleNavigation('/profile')}
+                className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
                 <User className="w-4 h-4" />
                 <span>Profile</span>
               </button>
+              <button 
+                onClick={() => handleNavigation('/change-password')}
+                className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Change Password</span>
+              </button>
+              <button 
+                onClick={() => handleNavigation('/settings')}
+                className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Settings</span>
+              </button>
+              <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
               <button
                 onClick={handleLogout}
                 className="flex items-center space-x-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
