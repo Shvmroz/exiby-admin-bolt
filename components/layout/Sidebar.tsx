@@ -29,18 +29,18 @@ const menuItems = [
     bgColor: "bg-blue-50",
   },
   {
-    text: "Companies",
-    icon: Building,
-    path: "/companies",
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
-  },
-  {
     text: "Organizations",
     icon: Building2,
     path: "/organizations",
     color: "text-green-600",
     bgColor: "bg-green-50",
+  },
+  {
+    text: "Companies",
+    icon: Building,
+    path: "/companies",
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
   },
   {
     text: "Analytics",
