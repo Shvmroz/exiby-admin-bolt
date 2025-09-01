@@ -155,7 +155,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((item) => (
+              <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                {data.map((item) => (
                 <TableRow
                   key={item._id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
@@ -203,7 +204,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
+                ))}
+              </div>
             )}
           </TableBody>
         </Table>

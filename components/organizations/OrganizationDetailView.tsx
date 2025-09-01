@@ -30,6 +30,7 @@ import {
   DialogActions,
   IconButton,
 } from "@mui/material";
+import { useAppContext } from '@/contexts/AppContext';
 
 interface PaymentPlan {
   plan_name: string;
@@ -181,6 +182,8 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
   organization,
   onClose,
 }) => {
+  const { darkMode } = useAppContext();
+
   // Use mock data for demonstration
   const currentSubscription =
     organization.current_subscription || mockCurrentSubscription;
@@ -265,9 +268,20 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
   };
 
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog 
+      open 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000',
+        }
+      }}
+    >
       <DialogTitle>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-xl flex items-center justify-center">
               <Building2 className="w-6 h-6 text-white" />
@@ -288,6 +302,11 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
         sx={{ paddingTop: 2, paddingBottom: 4 }}
         dividers
         className="flex flex-col h-[80vh]"
+        style={{ 
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000',
+          borderColor: darkMode ? '#374151' : '#e5e7eb'
+        }}
       >
         {/* Tabs stay at top */}
         <Tabs defaultValue="overview" className="flex flex-col flex-1">
@@ -299,7 +318,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
           </TabsList>
 
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto space-y-6 mt-4">
+          <div className="flex-1 overflow-y-auto space-y-6 mt-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
             <TabsContent value="overview" className="space-y-6">
               {/* Organization Info */}
               <div className="lg:flex lg:gap-6">
@@ -726,7 +745,14 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} className="px-6">
+        <Button 
+          onClick={onClose} 
+          className="px-6"
+          style={{ 
+            backgroundColor: darkMode ? '#374151' : '#f3f4f6',
+            color: darkMode ? '#ffffff' : '#000000'
+          }}
+        >
           Close
         </Button>
       </DialogActions>

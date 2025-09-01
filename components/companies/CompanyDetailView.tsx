@@ -28,6 +28,7 @@ import {
   DialogActions,
   IconButton,
 } from "@mui/material";
+import { useAppContext } from '@/contexts/AppContext';
 
 interface MonthlyBreakdown {
   month: string;
@@ -109,6 +110,8 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
   company,
   onClose,
 }) => {
+  const { darkMode } = useAppContext();
+
   // Use mock data for demonstration
   const companyStats = company.company_stats || mockCompanyStats;
 
@@ -153,9 +156,20 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
   };
 
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog 
+      open 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000',
+        }
+      }}
+    >
       <DialogTitle>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
               <Building className="w-6 h-6 text-white" />
@@ -176,6 +190,11 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
         sx={{ paddingTop: 2, paddingBottom: 4 }}
         dividers
         className="flex flex-col h-[80vh]"
+        style={{ 
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000',
+          borderColor: darkMode ? '#374151' : '#e5e7eb'
+        }}
       >
         <Tabs defaultValue="overview" className="flex flex-col flex-1">
           <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
@@ -184,7 +203,7 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
             <TabsTrigger value="events">Top Events</TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-y-auto space-y-6 mt-4">
+          <div className="flex-1 overflow-y-auto space-y-6 mt-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
             <TabsContent value="overview" className="space-y-6">
               <div className="lg:flex lg:gap-6">
                 {/* Left side: Company Info */}
@@ -448,7 +467,14 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} className="px-6">
+        <Button 
+          onClick={onClose} 
+          className="px-6"
+          style={{ 
+            backgroundColor: darkMode ? '#374151' : '#f3f4f6',
+            color: darkMode ? '#ffffff' : '#000000'
+          }}
+        >
           Close
         </Button>
       </DialogActions>
