@@ -370,7 +370,7 @@ const OrganizationsPage: React.FC = () => {
               <div className="font-semibold text-gray-900 dark:text-white">
                 {organization.orgn_user.name}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              <div className="text-sm text-gray-700 dark:text-gray-300 truncate">
                 {organization.bio.description}
               </div>
               {organization.bio.website && (
@@ -378,7 +378,7 @@ const OrganizationsPage: React.FC = () => {
                   href={organization.bio.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center text-xs text-[#0077ED] hover:text-[#0066CC] mt-1"
+                  className="inline-flex items-center text-xs text-[#0077ED] dark:text-[#4A9AFF] hover:text-[#0066CC] dark:hover:text-[#6BB6FF] mt-1"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <ExternalLink className="w-3 h-3 mr-1" />
@@ -393,9 +393,9 @@ const OrganizationsPage: React.FC = () => {
         return (
           <div className="flex items-center space-x-2">
             {organization.category === 'organization' ? (
-              <Building2 className="w-4 h-4 text-blue-500" />
+              <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             ) : (
-              <Building className="w-4 h-4 text-green-500" />
+              <Building className="w-4 h-4 text-green-600 dark:text-green-400" />
             )}
             <span className="font-medium text-gray-900 dark:text-white capitalize">
               {organization.category}
@@ -412,7 +412,7 @@ const OrganizationsPage: React.FC = () => {
             <div className="text-gray-900 dark:text-white">
               {formatDate(organization.subscription_start)}
             </div>
-            <div className="text-gray-500 dark:text-gray-400">
+            <div className="text-gray-600 dark:text-gray-300">
               to {formatDate(organization.subscription_end)}
             </div>
           </div>
@@ -421,7 +421,7 @@ const OrganizationsPage: React.FC = () => {
       case 'total_events':
         return (
           <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-purple-500" />
+            <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             <span className="font-medium text-gray-900 dark:text-white">
               {organization.total_events}
             </span>
@@ -431,7 +431,7 @@ const OrganizationsPage: React.FC = () => {
       case 'total_companies':
         return (
           <div className="flex items-center space-x-2">
-            <Building className="w-4 h-4 text-blue-500" />
+            <Building className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span className="font-medium text-gray-900 dark:text-white">
               {organization.total_companies}
             </span>
@@ -441,7 +441,7 @@ const OrganizationsPage: React.FC = () => {
       case 'total_revenue':
         return (
           <div className="flex items-center space-x-2">
-            <DollarSign className="w-4 h-4 text-green-500" />
+            <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
             <span className="font-medium text-green-600 dark:text-green-400">
               ${organization.total_revenue.toLocaleString()}
             </span>
@@ -451,7 +451,7 @@ const OrganizationsPage: React.FC = () => {
       case 'total_attendees':
         return (
           <div className="flex items-center space-x-2">
-            <Users className="w-4 h-4 text-orange-500" />
+            <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             <span className="font-medium text-gray-900 dark:text-white">
               {organization.total_attendees.toLocaleString()}
             </span>
@@ -459,7 +459,7 @@ const OrganizationsPage: React.FC = () => {
         );
 
       default:
-        return <span>{organization[header.key as keyof Organization] as string}</span>;
+        return <span className="text-gray-900 dark:text-white">{organization[header.key as keyof Organization] as string}</span>;
     }
   };
 
@@ -473,7 +473,7 @@ const OrganizationsPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Organizations
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="text-gray-700 dark:text-gray-300 mt-2">
             Manage and monitor all organizations on your platform
           </p>
         </div>
@@ -489,11 +489,11 @@ const OrganizationsPage: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-600">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
               <Input
                 placeholder="Search organizations..."
                 value={searchQuery}
@@ -504,7 +504,7 @@ const OrganizationsPage: React.FC = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
+              <Filter className="w-4 h-4 text-gray-600 dark:text-gray-400" />
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Filter by status" />

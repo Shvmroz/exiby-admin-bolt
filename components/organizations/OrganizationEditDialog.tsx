@@ -124,7 +124,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Organization Name
               </label>
               <Input
@@ -141,7 +141,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Category
               </label>
               <Select
@@ -173,7 +173,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Website
               </label>
               <Input
@@ -191,7 +191,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
 
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Subscription Status
               </label>
               <Select
@@ -224,7 +224,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               Description
             </label>
             <Textarea
@@ -240,7 +240,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
             />
           </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Subscription Start
               </label>
               <Input
@@ -257,7 +257,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Subscription End
               </label>
               <Input
@@ -273,15 +273,15 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-600">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
               style={{
-                backgroundColor: darkMode ? '#374151' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
+                backgroundColor: darkMode ? '#374151' : '#f9fafb',
+                color: darkMode ? '#f3f4f6' : '#374151',
                 borderColor: darkMode ? '#4b5563' : '#d1d5db'
               }}
             >
@@ -291,7 +291,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#0077ED] hover:bg-[#0066CC]"
+              className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
             >
               {loading ? (
                 <div className="flex items-center">
