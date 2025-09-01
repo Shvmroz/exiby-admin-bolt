@@ -30,7 +30,6 @@ import {
   DialogActions,
   IconButton,
 } from "@mui/material";
-import { useAppContext } from '@/contexts/AppContext';
 
 interface PaymentPlan {
   plan_name: string;
@@ -182,8 +181,6 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
   organization,
   onClose,
 }) => {
-  const { darkMode } = useAppContext();
-
   // Use mock data for demonstration
   const currentSubscription =
     organization.current_subscription || mockCurrentSubscription;
@@ -268,43 +265,27 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
   };
 
   return (
-    <Dialog 
-      open 
-      onClose={onClose} 
-      maxWidth="md" 
-      fullWidth
-      PaperProps={{
-        sx: {
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#f9fafb' : '#111827',
-        }
-      }}
-    >
+    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        <div className="flex items-center justify-between" style={{ color: darkMode ? '#f9fafb' : '#111827' }}>
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-xl flex items-center justify-center">
               <Building2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: darkMode ? '#f9fafb' : '#111827' }}>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {organization.orgn_user.name}
               </h1>
             </div>
           </div>
-          <IconButton onClick={onClose} sx={{ color: darkMode ? '#f9fafb' : '#111827' }}>
+          <IconButton onClick={onClose}>
             <X className="w-5 h-5" />
           </IconButton>
         </div>
       </DialogTitle>
 
       <DialogContent
-        sx={{ 
-          paddingTop: 2, 
-          paddingBottom: 4,
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#f9fafb' : '#111827',
-        }}
+        sx={{ paddingTop: 2, paddingBottom: 4 }}
         dividers
         className="flex flex-col h-[80vh]"
       >
@@ -745,14 +726,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button 
-          onClick={onClose} 
-          className="px-6"
-          style={{ 
-            backgroundColor: darkMode ? '#374151' : '#f3f4f6',
-            color: darkMode ? '#f9fafb' : '#111827',
-          }}
-        >
+        <Button onClick={onClose} className="px-6">
           Close
         </Button>
       </DialogActions>

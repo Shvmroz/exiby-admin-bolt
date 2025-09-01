@@ -128,7 +128,7 @@ const NotificationsList: React.FC<NotificationsListProps> = ({ onClose }) => {
       </div>
 
       {/* Notifications List */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {notifications.length === 0 ? (
           <div className="p-8 text-center">
             <Bell className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
