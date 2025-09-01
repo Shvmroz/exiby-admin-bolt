@@ -61,6 +61,8 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
   const [formData, setFormData] = useState({
     plan_name: '',
     description: '',
+    plan_type: 'recurring',
+    billing_cycle: 'monthly',
     price: 0,
     currency: 'USD',
     max_events: 0,
@@ -68,10 +70,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
     max_companies: 0,
     is_active: true,
     is_popular: false,
-    plan_type: 'recurring',
-    billing_cycle: 'monthly',
     trial_days: 14,
-    target_audience: '',
   });
 
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
@@ -83,6 +82,8 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
       setFormData({
         plan_name: plan.plan_name,
         description: plan.description,
+        plan_type: plan.plan_type,
+        billing_cycle: plan.billing_cycle,
         price: plan.price,
         currency: plan.currency,
         max_events: plan.max_events,
@@ -90,10 +91,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
         max_companies: plan.max_companies,
         is_active: plan.is_active,
         is_popular: plan.is_popular,
-        plan_type: plan.plan_type,
-        billing_cycle: plan.billing_cycle,
         trial_days: plan.trial_days,
-        target_audience: plan.target_audience || '',
       });
     }
   }, [plan]);
@@ -145,23 +143,6 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
                   borderColor: darkMode ? '#4b5563' : '#d1d5db'
                 }}
                 required
-              />
-            </div>
-
-            {/* Target Audience */}
-            <div>
-              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                Target Audience
-              </label>
-              <Input
-                value={formData.target_audience}
-                onChange={(e) => setFormData({ ...formData, target_audience: e.target.value })}
-                placeholder="e.g., Small Organizations"
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                }}
               />
             </div>
 
@@ -373,16 +354,16 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
             <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               Description
             </label>
-            <div data-color-mode={darkMode ? 'dark' : 'light'}>
-              <MDEditor
-                value={formData.description}
-                onChange={(value) => setFormData({ ...formData, description: value || '' })}
-                preview="edit"
-                hideToolbar={false}
-                height={200}
-                data-color-mode={darkMode ? 'dark' : 'light'}
-              />
-            </div>
+            <Input
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Enter plan description"
+              style={{
+                backgroundColor: darkMode ? '#374151' : '#ffffff',
+                color: darkMode ? '#ffffff' : '#000000',
+                borderColor: darkMode ? '#4b5563' : '#d1d5db'
+              }}
+            />
           </div>
 
           {/* Checkboxes */}

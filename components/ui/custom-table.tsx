@@ -118,9 +118,9 @@ const CustomTable: React.FC<CustomTableProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 w-full">
       <div className="overflow-x-auto table-scroll">
-        <Table>
+        <Table className="min-w-full">
           <TableHeader>
             <TableRow className="bg-gray-50 dark:bg-gray-700/50">
               {checkbox_selection && (
@@ -137,7 +137,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
               {TABLE_HEAD.map((header) => (
                 <TableHead
                   key={header.key}
-                  className={`text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${header.width || ''}`}
+                  className={`text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap ${header.width || ''}`}
                 >
                   {header.label}
                 </TableHead>
@@ -158,7 +158,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
               data.map((item) => (
                 <TableRow
                   key={item._id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                   onClick={() => onRowClick?.(item)}
                 >
                   {checkbox_selection && (
@@ -170,7 +170,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                     </TableCell>
                   )}
                   {TABLE_HEAD.map((header) => (
-                    <TableCell key={header.key} className="py-4">
+                    <TableCell key={header.key} className="py-4 whitespace-nowrap">
                       {header.type === 'action' ? (
                         <div onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>

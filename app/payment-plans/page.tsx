@@ -22,7 +22,6 @@ import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-tab
 import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import PaymentPlanEditDialog from '@/components/payment-plans/PaymentPlanEditDialog';
 import PaymentPlanCreateDialog from '@/components/payment-plans/PaymentPlanCreateDialog';
-import PaymentPlanDetailView from '@/components/payment-plans/PaymentPlanDetailView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -149,10 +148,11 @@ const dummyData = {
 const TABLE_HEAD: TableHeader[] = [
   { key: 'plan', label: 'Plan', type: 'custom' },
   { key: 'pricing', label: 'Pricing', type: 'custom' },
-  { key: 'limits', label: 'Limits', type: 'custom' },
+  { key: 'max_events', label: 'Max Events', type: 'custom' },
+  { key: 'max_attendees', label: 'Max Attendees', type: 'custom' },
+  { key: 'max_companies', label: 'Max Companies', type: 'custom' },
   { key: 'status', label: 'Status', type: 'custom' },
   { key: 'trial_days', label: 'Trial', type: 'custom' },
-  { key: 'target_audience', label: 'Target', type: 'custom' },
   { key: 'created_at', label: 'Created', type: 'custom' },
   { key: 'action', label: '', type: 'action', width: 'w-12' },
 ];
@@ -174,10 +174,6 @@ const PaymentPlansPage: React.FC = () => {
     plan: PaymentPlan | null;
   }>({ open: false, plan: null });
   const [createDialog, setCreateDialog] = useState(false);
-  const [detailView, setDetailView] = useState<{
-    open: boolean;
-    plan: PaymentPlan | null;
-  }>({ open: false, plan: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -306,27 +302,6 @@ const PaymentPlansPage: React.FC = () => {
     }
   };
 
-  const handleRowClick = (plan: PaymentPlan) => {
-    setDetailView({ open: true, plan });
-  };
-
-  const handleDetailEdit = (updatedPlan: PaymentPlan) => {
-    // Update local state
-    setPaymentPlans(prev =>
-      prev.map(plan => plan._id === updatedPlan._id ? updatedPlan : plan)
-    );
-  };
-
-  const handleDetailDelete = (deletedPlan: PaymentPlan) => {
-    // Remove from local state
-    setPaymentPlans(prev => 
-      prev.filter(plan => plan._id !== deletedPlan._id)
-    );
-    
-    // Update pagination total
-    setPagination(prev => ({ ...prev, total: prev.total - 1 }));
-  };
-
   const MENU_OPTIONS: MenuOption[] = [
     {
       label: 'Edit',
@@ -416,27 +391,33 @@ const PaymentPlansPage: React.FC = () => {
           </div>
         );
 
-      case 'limits':
+      case 'max_events':
         return (
-          <div className="space-y-1 text-sm">
-            <div className="flex items-center space-x-1">
-              <Calendar className="w-3 h-3 text-purple-500" />
-              <span className="text-gray-600 dark:text-gray-400">
-                {plan.max_events} events
-              </span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Users className="w-3 h-3 text-blue-500" />
-              <span className="text-gray-600 dark:text-gray-400">
-                {plan.max_attendees.toLocaleString()} attendees
-              </span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Building className="w-3 h-3 text-orange-500" />
-              <span className="text-gray-600 dark:text-gray-400">
-                {plan.max_companies} companies
-              </span>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4 text-purple-500" />
+            <span className="font-medium text-gray-900 dark:text-white">
+              {plan.max_events}
+            </span>
+          </div>
+        );
+
+      case 'max_attendees':
+        return (
+          <div className="flex items-center space-x-2">
+            <Users className="w-4 h-4 text-blue-500" />
+            <span className="font-medium text-gray-900 dark:text-white">
+              {plan.max_attendees.toLocaleString()}
+            </span>
+          </div>
+        );
+
+      case 'max_companies':
+        return (
+          <div className="flex items-center space-x-2">
+            <Building className="w-4 h-4 text-orange-500" />
+            <span className="font-medium text-gray-900 dark:text-white">
+              {plan.max_companies}
+            </span>
           </div>
         );
 
@@ -451,13 +432,6 @@ const PaymentPlansPage: React.FC = () => {
               {plan.trial_days} days
             </span>
           </div>
-        );
-
-      case 'target_audience':
-        return (
-          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
-            {plan.target_audience || 'General'}
-          </Badge>
         );
 
       case 'created_at':
@@ -559,7 +533,6 @@ const PaymentPlansPage: React.FC = () => {
         selected={selected}
         setSelected={setSelected}
         checkbox_selection={true}
-        onRowClick={handleRowClick}
         renderCell={renderCell}
         loading={loading}
         emptyMessage="No payment plans found"
@@ -592,16 +565,6 @@ const PaymentPlansPage: React.FC = () => {
         onSave={handleCreate}
         loading={createLoading}
       />
-
-      {/* Payment Plan Detail View */}
-      {detailView.open && detailView.plan && (
-        <PaymentPlanDetailView
-          plan={detailView.plan}
-          onClose={() => setDetailView({ open: false, plan: null })}
-          onEdit={handleDetailEdit}
-          onDelete={handleDetailDelete}
-        />
-      )}
     </div>
   );
 };
