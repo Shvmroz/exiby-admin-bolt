@@ -41,7 +41,6 @@ const menuItems = [
     path: "/payment-plans",
     color: "text-green-600",
     bgColor: "bg-green-50",
-    
   },
   {
     text: "Organizations",
@@ -64,7 +63,7 @@ const menuItems = [
     color: "text-indigo-500",
     bgColor: "bg-indigo-50",
   },
- 
+
   {
     text: "Configuration",
     icon: Cog,
@@ -102,7 +101,13 @@ const menuItems = [
     color: "text-gray-400",
     bgColor: "bg-gray-50",
   },
-
+  {
+    text: "Logout",
+    icon: LogOut,
+    path: "/",
+    color: "text-red-400",
+    bgColor: "bg-red-50",
+  },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -117,17 +122,17 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // Auto-expand configuration menu if on a config page
   React.useEffect(() => {
-    if (pathname.startsWith('/configuration')) {
-      setExpandedItems(prev => 
-        prev.includes('Configuration') ? prev : [...prev, 'Configuration']
+    if (pathname.startsWith("/configuration")) {
+      setExpandedItems((prev) =>
+        prev.includes("Configuration") ? prev : [...prev, "Configuration"]
       );
     }
   }, [pathname]);
 
   const toggleExpanded = (itemText: string) => {
-    setExpandedItems(prev =>
+    setExpandedItems((prev) =>
       prev.includes(itemText)
-        ? prev.filter(item => item !== itemText)
+        ? prev.filter((item) => item !== itemText)
         : [...prev, itemText]
     );
   };
@@ -162,8 +167,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Navigation */}
       <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {menuItems.map((item) => {
-          const isActive = item.subItems 
-            ? item.subItems.some(subItem => pathname === subItem.path)
+          const isActive = item.subItems
+            ? item.subItems.some((subItem) => pathname === subItem.path)
             : pathname === item.path;
           const isExpanded = expandedItems.includes(item.text);
           const Icon = item.icon;
@@ -198,31 +203,47 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                     <span className="font-medium">{item.text}</span>
                   </div>
-                  <div className={cn(
-                    "transition-transform duration-200",
-                    isExpanded ? "rotate-90" : ""
-                  )}>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <div
+                    className={cn(
+                      "transition-transform duration-200",
+                      isExpanded ? "rotate-90" : ""
+                    )}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </div>
                 </button>
-                
+
                 {/* Sub-items */}
-                <div className={cn(
-                  "overflow-hidden transition-all duration-200 ease-in-out",
-                  isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                )}>
+                <div
+                  className={cn(
+                    "overflow-hidden transition-all duration-200 ease-in-out",
+                    isExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                  )}
+                >
                   <div className="ml-4 mt-2 space-y-1">
                     {item.subItems.map((subItem) => {
                       const isSubActive = pathname === subItem.path;
                       const SubIcon = subItem.icon;
-                      
+
                       return (
                         <Link
                           key={subItem.text}
                           href={subItem.path}
-                          onClick={variant === "temporary" ? onClose : undefined}
+                          onClick={
+                            variant === "temporary" ? onClose : undefined
+                          }
                           className={cn(
                             "flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-200 group",
                             isSubActive
@@ -245,13 +266,33 @@ const Sidebar: React.FC<SidebarProps> = ({
                               )}
                             />
                           </div>
-                          <span className="font-medium text-sm">{subItem.text}</span>
+                          <span className="font-medium text-sm">
+                            {subItem.text}
+                          </span>
                         </Link>
                       );
                     })}
                   </div>
                 </div>
               </div>
+            );
+          }
+
+          // For logout item, use button instead of Link
+          if (item.text === "Logout") {
+            return (
+              <button
+                key={item.text}
+                onClick={handleLogoutClick}
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200
+                group text-red-600 dark:text-red-400
+                hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 transition-colors duration-200">
+                  <Icon className="w-5 h-5 transition-colors duration-200" />
+                </div>
+                <span className="font-medium">{item.text}</span>
+              </button>
             );
           }
 
@@ -286,19 +327,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             </Link>
           );
         })}
-      </div>
-
-      {/* Logout Button */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-        <button
-          onClick={handleLogoutClick}
-          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
-        >
-          <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors duration-200">
-            <LogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
-          </div>
-          <span className="font-medium">Logout</span>
-        </button>
       </div>
 
       {/* Logout Confirmation Dialog */}
