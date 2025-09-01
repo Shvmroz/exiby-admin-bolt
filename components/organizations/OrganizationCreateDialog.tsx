@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAppContext } from '@/contexts/AppContext';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
   onSave,
   loading = false,
 }) => {
+  const { darkMode } = useAppContext();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -83,9 +85,19 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent 
+        className="max-w-2xl"
+        style={{
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000',
+          borderColor: darkMode ? '#374151' : '#e5e7eb'
+        }}
+      >
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+          <DialogTitle 
+            className="text-xl font-semibold flex items-center"
+            style={{ color: darkMode ? '#ffffff' : '#000000' }}
+          >
             <Building2 className="w-5 h-5 mr-2 text-[#0077ED]" />
             Create Organization
           </DialogTitle>
@@ -101,6 +113,11 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter organization name"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
                 required
               />
             </div>
@@ -114,10 +131,22 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
                 required
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
                   <SelectItem value="organization">
                     <div className="flex items-center">
                       <Building2 className="w-4 h-4 mr-2" />
@@ -145,6 +174,11 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
                 value={formData.website}
                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                 placeholder="https://example.com"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
 
@@ -156,10 +190,22 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
                 value={formData.subscription_status}
                 onValueChange={(value) => setFormData({ ...formData, subscription_status: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
@@ -178,6 +224,11 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
                 type="date"
                 value={formData.subscription_start}
                 onChange={(e) => setFormData({ ...formData, subscription_start: e.target.value })}
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
 
@@ -189,6 +240,11 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
                 type="date"
                 value={formData.subscription_end}
                 onChange={(e) => setFormData({ ...formData, subscription_end: e.target.value })}
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
           </div>
@@ -202,6 +258,11 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Enter organization description"
               rows={4}
+              style={{
+                backgroundColor: darkMode ? '#374151' : '#ffffff',
+                color: darkMode ? '#ffffff' : '#000000',
+                borderColor: darkMode ? '#4b5563' : '#d1d5db'
+              }}
             />
           </div>
 
@@ -211,6 +272,11 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              style={{
+                backgroundColor: darkMode ? '#374151' : '#ffffff',
+                color: darkMode ? '#ffffff' : '#000000',
+                borderColor: darkMode ? '#4b5563' : '#d1d5db'
+              }}
             >
               <X className="w-4 h-4 mr-2" />
               Cancel
