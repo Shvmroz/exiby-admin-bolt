@@ -4,6 +4,8 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useAppContext } from "@/contexts/AppContext";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
 import {
   Calendar,
   Building2,
@@ -15,6 +17,7 @@ import {
   Cog,
   CreditCard,
   Mail,
+  LogOut,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -97,7 +100,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   variant = "temporary",
 }) => {
   const pathname = usePathname();
+  const { logout } = useAppContext();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
+  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
 
   // Auto-expand configuration menu if on a config page
   React.useEffect(() => {
@@ -116,6 +121,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutDialog(false);
+    if (variant === "temporary") {
+      onClose();
+    }
+  };
+
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl border-r border-gray-200 dark:border-gray-700">
       {/* Header */}
@@ -132,7 +149,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 py-6 px-4 space-y-2">
+      <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {menuItems.map((item) => {
           const isActive = item.subItems 
             ? item.subItems.some(subItem => pathname === subItem.path)
@@ -260,7 +277,29 @@ const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
-   
+      {/* Logout Button */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <button
+          onClick={handleLogoutClick}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
+        >
+          <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors duration-200">
+            <LogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
+          </div>
+          <span className="font-medium">Logout</span>
+        </button>
+      </div>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmDeleteDialog
+        open={showLogoutDialog}
+        onOpenChange={setShowLogoutDialog}
+        title="Confirm Logout"
+        content="Are you sure you want to logout? You will need to sign in again to access your account."
+        confirmButtonText="Logout"
+        cancelButtonText="Cancel"
+        onConfirm={confirmLogout}
+      />
     </div>
   );
 

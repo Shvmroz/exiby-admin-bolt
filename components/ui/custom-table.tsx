@@ -119,7 +119,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-      <div className="overflow-hidden">
+      <div className="overflow-x-auto table-scroll">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50 dark:bg-gray-700/50">
@@ -155,8 +155,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 </TableCell>
               </TableRow>
             ) : (
-              <div className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-                {data.map((item) => (
+              data.map((item) => (
                 <TableRow
                   key={item._id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
@@ -204,8 +203,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                     </TableCell>
                   ))}
                 </TableRow>
-                ))}
-              </div>
+              ))
             )}
           </TableBody>
         </Table>
