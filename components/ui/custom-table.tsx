@@ -243,11 +243,12 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 size="sm"
                 onClick={() => handleChangePage(page - 1)}
                 disabled={page <= 1}
+                className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-gray-800 dark:text-gray-200 font-medium">
                 Page {page} of {totalPages}
               </span>
               
@@ -256,6 +257,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 size="sm"
                 onClick={() => handleChangePage(page + 1)}
                 disabled={page >= totalPages}
+                className="text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>

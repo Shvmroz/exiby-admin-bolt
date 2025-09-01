@@ -329,18 +329,18 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                       <div className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
                           <div>
-                            <p className="text-gray-600 dark:text-gray-400 font-bold  mt-2">
+                            <p className="text-gray-800 dark:text-gray-200 font-bold mt-2">
                               {organization.orgn_user.name}
                             </p>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
-                              {organization.bio.description} lor
+                            <p className="text-gray-700 dark:text-gray-300 text-sm mt-2">
+                              {organization.bio.description}
                             </p>
                             {organization.bio.website && (
                               <a
                                 href={organization.bio.website}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center text-[#0077ED] hover:text-[#0066CC] mt-2 text-sm"
+                                className="inline-flex items-center text-[#0077ED] dark:text-[#4A9AFF] hover:text-[#0066CC] dark:hover:text-[#6BB6FF] mt-2 text-sm"
                               >
                                 <Globe className="w-4 h-4 mr-1" />
                                 Visit Website
@@ -372,7 +372,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
                             {organizationStats.total_events}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Total Events
                           </div>
                         </div>
@@ -382,7 +382,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
                             {organizationStats.active_events}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Active Events
                           </div>
                         </div>
@@ -392,7 +392,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
                             {organizationStats.completed_events}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Completed Events
                           </div>
                         </div>
@@ -402,7 +402,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
                             {organizationStats.total_companies}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Companies
                           </div>
                         </div>
@@ -412,7 +412,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
                             {formatCurrency(organizationStats.total_revenue)}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Revenue
                           </div>
                         </div>
@@ -422,7 +422,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           <div className="text-lg font-bold text-gray-900 dark:text-white">
                             {organizationStats.total_attendees.toLocaleString()}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Attendees
                           </div>
                         </div>
@@ -442,7 +442,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                     </CardHeader>
                     <CardContent className="space-y-4 flex-1">
                       <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
                           Plan
                         </div>
                         <div className="font-semibold text-gray-900 dark:text-white">
@@ -450,7 +450,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
                           Price
                         </div>
                         <div className="font-semibold text-gray-900 dark:text-white">
@@ -459,7 +459,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
                           Status
                         </div>
                         <div className="flex items-center space-x-2">
@@ -472,7 +472,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
                           Next Billing
                         </div>
                         <div className="font-medium text-gray-900 dark:text-white">
@@ -494,7 +494,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                         Plan Name
                       </label>
                       <div className="text-gray-900 dark:text-white capitalize">
@@ -502,7 +502,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                         Billing Cycle
                       </label>
                       <div className="text-gray-900 dark:text-white capitalize">
@@ -510,7 +510,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                         Current Price
                       </label>
                       <div className="text-gray-900 dark:text-white font-semibold">
@@ -518,7 +518,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                         Start Date
                       </label>
                       <div className="text-gray-900 dark:text-white">
@@ -526,7 +526,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                         End Date
                       </label>
                       <div className="text-gray-900 dark:text-white">
@@ -534,7 +534,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                         Auto Renew
                       </label>
                       <div className="text-gray-900 dark:text-white">
@@ -565,7 +565,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                             <div className="font-medium text-gray-900 dark:text-white">
                               {subscription.payment_plan.plan_name}
                             </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                            <div className="text-sm text-gray-700 dark:text-gray-300">
                               {formatDate(subscription.start_date)} -{" "}
                               {formatDate(subscription.end_date)}
                             </div>
@@ -576,7 +576,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                             {formatCurrency(subscription.price)}/
                             {subscription.billing_cycle}
                           </div>
-                          <div className="text-sm">
+                          <div className="text-sm mt-1">
                             {getStatusBadge(subscription.status)}
                           </div>
                         </div>
@@ -601,10 +601,10 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                     {organizationStats.monthly_breakdown.map((month, index) => (
                       <div
                         key={index}
-                        className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                        className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
                       >
                         <div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Month
                           </div>
                           <div className="font-semibold text-gray-900 dark:text-white">
@@ -612,7 +612,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Events
                           </div>
                           <div className="font-semibold text-gray-900 dark:text-white">
@@ -620,7 +620,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Revenue
                           </div>
                           <div className="font-semibold text-green-600 dark:text-green-400">
@@ -628,7 +628,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             Attendees
                           </div>
                           <div className="font-semibold text-gray-900 dark:text-white">
@@ -654,7 +654,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                             )
                           : 0}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         Avg. Attendees per Event
                       </div>
                     </div>
@@ -671,7 +671,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                             )
                           : "$0"}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         Avg. Revenue per Event
                       </div>
                     </div>
@@ -688,7 +688,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                             )
                           : 0}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         Avg. Companies per Event
                       </div>
                     </div>
@@ -720,7 +720,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                             <div className="font-medium text-gray-900 dark:text-white">
                               {event.title}
                             </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                            <div className="text-sm text-gray-700 dark:text-gray-300">
                               {event.attendees} attendees
                             </div>
                           </div>
@@ -729,7 +729,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
                           <div className="font-semibold text-green-600 dark:text-green-400">
                             {formatCurrency(event.revenue)}
                           </div>
-                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <div className="text-sm text-gray-700 dark:text-gray-300">
                             {formatCurrency(event.revenue / event.attendees)}{" "}
                             per attendee
                           </div>
@@ -749,8 +749,8 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
           onClick={onClose} 
           className="px-6"
           style={{ 
-            backgroundColor: darkMode ? '#374151' : '#f3f4f6',
-            color: darkMode ? '#ffffff' : '#000000'
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            color: darkMode ? '#f3f4f6' : '#374151'
           }}
         >
           Close
