@@ -15,7 +15,10 @@ import {
   Cog,
   CreditCard,
   Mail,
+  LogOut,
 } from "lucide-react";
+import { useAppContext } from '@/contexts/AppContext';
+import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 
 interface SidebarProps {
   open: boolean;
@@ -98,6 +101,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
+  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
+  const { logout } = useAppContext();
 
   // Auto-expand configuration menu if on a config page
   React.useEffect(() => {
@@ -116,7 +121,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
+  const handleLogout = () => {
+    setShowLogoutDialog(false);
+    logout();
+  };
+
   const sidebarContent = (
+    <>
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl border-r border-gray-200 dark:border-gray-700">
       {/* Header */}
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 ">
@@ -132,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 py-6 px-4 space-y-2">
+      <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto scrollbar-thin">
         {menuItems.map((item) => {
           const isActive = item.subItems 
             ? item.subItems.some(subItem => pathname === subItem.path)
@@ -260,8 +271,31 @@ const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
-   
+      {/* Logout Button */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setShowLogoutDialog(true)}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+        >
+          <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20">
+            <LogOut className="w-5 h-5 text-red-600" />
+          </div>
+          <span className="font-medium">Logout</span>
+        </button>
+      </div>
     </div>
+
+    {/* Logout Confirmation Dialog */}
+    <ConfirmDeleteDialog
+      open={showLogoutDialog}
+      onOpenChange={setShowLogoutDialog}
+      title="Confirm Logout"
+      content="Are you sure you want to logout? You will need to sign in again to access your account."
+      confirmButtonText="Logout"
+      cancelButtonText="Cancel"
+      onConfirm={handleLogout}
+    />
+    </>
   );
 
   if (variant === "permanent") {

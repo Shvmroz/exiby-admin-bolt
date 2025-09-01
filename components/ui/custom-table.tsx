@@ -118,8 +118,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-      <div className="overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div className="overflow-auto scrollbar-thin">
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50 dark:bg-gray-700/50">

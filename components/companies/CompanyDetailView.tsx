@@ -28,6 +28,7 @@ import {
   DialogActions,
   IconButton,
 } from "@mui/material";
+import { useAppContext } from '@/contexts/AppContext';
 
 interface MonthlyBreakdown {
   month: string;
@@ -109,6 +110,8 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
   company,
   onClose,
 }) => {
+  const { darkMode } = useAppContext();
+
   // Use mock data for demonstration
   const companyStats = company.company_stats || mockCompanyStats;
 
@@ -153,27 +156,43 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
   };
 
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog 
+      open 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#f9fafb' : '#111827',
+        }
+      }}
+    >
       <DialogTitle>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" style={{ color: darkMode ? '#f9fafb' : '#111827' }}>
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
               <Building className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl font-bold" style={{ color: darkMode ? '#f9fafb' : '#111827' }}>
                 {company.orgn_user.name}
               </h1>
             </div>
           </div>
-          <IconButton onClick={onClose}>
+          <IconButton onClick={onClose} sx={{ color: darkMode ? '#f9fafb' : '#111827' }}>
             <X className="w-5 h-5" />
           </IconButton>
         </div>
       </DialogTitle>
 
       <DialogContent
-        sx={{ paddingTop: 2, paddingBottom: 4 }}
+        sx={{ 
+          paddingTop: 2, 
+          paddingBottom: 4,
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#f9fafb' : '#111827',
+        }}
         dividers
         className="flex flex-col h-[80vh]"
       >
@@ -448,7 +467,14 @@ const CompanyDetailView: React.FC<CompanyDetailViewProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} className="px-6">
+        <Button 
+          onClick={onClose} 
+          className="px-6"
+          style={{ 
+            backgroundColor: darkMode ? '#374151' : '#f3f4f6',
+            color: darkMode ? '#f9fafb' : '#111827',
+          }}
+        >
           Close
         </Button>
       </DialogActions>
