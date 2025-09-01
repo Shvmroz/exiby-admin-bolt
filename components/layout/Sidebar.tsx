@@ -36,11 +36,19 @@ const menuItems = [
     bgColor: "bg-blue-50",
   },
   {
+    text: "Payment Plans",
+    icon: Receipt,
+    path: "/payment-plans",
+    color: "text-green-600",
+    bgColor: "bg-green-50",
+    
+  },
+  {
     text: "Organizations",
     icon: Building2,
     path: "/organizations",
-    color: "text-green-600",
-    bgColor: "bg-green-50",
+    color: "text-rose-600",
+    bgColor: "bg-rose-50",
   },
   {
     text: "Companies",
@@ -56,6 +64,7 @@ const menuItems = [
     color: "text-indigo-500",
     bgColor: "bg-indigo-50",
   },
+ 
   {
     text: "Configuration",
     icon: Cog,
@@ -93,13 +102,7 @@ const menuItems = [
     color: "text-gray-400",
     bgColor: "bg-gray-50",
   },
-  {
-    text: "Payment Plans",
-    icon: Receipt,
-    path: "/payment-plans",
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
-  },
+
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
