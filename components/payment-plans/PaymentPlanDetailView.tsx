@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   CreditCard,
   DollarSign,
@@ -27,11 +27,11 @@ import {
   DialogActions,
   IconButton,
 } from "@mui/material";
-import { useAppContext } from '@/contexts/AppContext';
-import dynamic from 'next/dynamic';
+import { useAppContext } from "@/contexts/AppContext";
+import dynamic from "next/dynamic";
 
 const MDEditor = dynamic(
-  () => import('@uiw/react-md-editor').then((mod) => mod.default),
+  () => import("@uiw/react-md-editor").then((mod) => mod.default),
   { ssr: false }
 );
 
@@ -56,7 +56,6 @@ interface PaymentPlan {
 interface PaymentPlanDetailViewProps {
   plan: PaymentPlan;
   onClose: () => void;
-  onEdit?: (plan: PaymentPlan) => void;
   onDelete?: (plan: PaymentPlan) => void;
 }
 
@@ -74,10 +73,18 @@ const mockUsageStats = {
     { month: "2024-09", signups: 10, revenue: 3120 },
   ],
   top_organizations: [
-    { name: "TechCorp Events", subscription_date: "2024-12-15", status: "active" },
-    { name: "Innovation Labs", subscription_date: "2024-11-20", status: "active" },
+    {
+      name: "TechCorp Events",
+      subscription_date: "2024-12-15",
+      status: "active",
+    },
+    {
+      name: "Innovation Labs",
+      subscription_date: "2024-11-20",
+      status: "active",
+    },
     { name: "StartupHub", subscription_date: "2024-10-05", status: "active" },
-  ]
+  ],
 };
 
 const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
@@ -86,44 +93,43 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
 }) => {
   const { darkMode } = useAppContext();
 
-  const getStatusBadge = (isActive: boolean, isPopular: boolean) => {
-    return (
-      <div className="flex items-center space-x-2">
-        {isActive ? (
-          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Active
-          </Badge>
-        ) : (
-          <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
-            <XCircle className="w-3 h-3 mr-1" />
-            Inactive
-          </Badge>
-        )}
-        {isPopular && (
-          <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
-            <Star className="w-3 h-3 mr-1" />
-            Popular
-          </Badge>
-        )}
-      </div>
-    );
-  };
+  const [isEditing, setIsEditing] = useState(false);
+  const [description, setDescription] = useState(plan.description);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+
+  const getStatusBadge = (isActive: boolean, isPopular: boolean) => (
+    <div className="flex items-center space-x-2">
+      {isActive ? (
+        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+          <CheckCircle className="w-3 h-3 mr-1" />
+          Active
+        </Badge>
+      ) : (
+        <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
+          <XCircle className="w-3 h-3 mr-1" />
+          Inactive
+        </Badge>
+      )}
+      {isPopular && (
+        <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
+          <Star className="w-3 h-3 mr-1" />
+          Popular
+        </Badge>
+      )}
+    </div>
+  );
+
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number, currency: string) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
+      amount
+    );
 
   const formatMonth = (monthString: string) => {
     const [year, month] = monthString.split("-");
@@ -137,20 +143,20 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
   };
 
   return (
-    <Dialog 
-      open 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open
+      onClose={onClose}
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#000000',
-        }
+          backgroundColor: darkMode ? "#1f2937" : "#ffffff",
+          color: darkMode ? "#ffffff" : "#000000",
+        },
       }}
     >
       <DialogTitle>
-        <div className="flex items-center justify-between" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center">
               <CreditCard className="w-6 h-6 text-white" />
@@ -160,7 +166,8 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
                 {plan.plan_name}
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {formatCurrency(plan.price, plan.currency)} per {plan.billing_cycle}
+                {formatCurrency(plan.price, plan.currency)} per{" "}
+                {plan.billing_cycle}
               </p>
             </div>
           </div>
@@ -174,10 +181,10 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
         sx={{ paddingTop: 2, paddingBottom: 4 }}
         dividers
         className="flex flex-col h-[80vh]"
-        style={{ 
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#000000',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
+        style={{
+          backgroundColor: darkMode ? "#1f2937" : "#ffffff",
+          color: darkMode ? "#ffffff" : "#000000",
+          borderColor: darkMode ? "#374151" : "#e5e7eb",
         }}
       >
         <Tabs defaultValue="overview" className="flex flex-col flex-1">
@@ -202,44 +209,58 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
                             </h3>
                             {getStatusBadge(plan.is_active, plan.is_popular)}
                           </div>
-                          
+
                           <div className="space-y-4">
                             <div>
-                              <label className="text-sm text-gray-600 dark:text-gray-400">Description</label>
-                              <div data-color-mode={darkMode ? 'dark' : 'light'} className="mt-1">
-                                <MDEditor.Markdown 
-                                  source={plan.description} 
-                                  style={{ 
-                                    backgroundColor: 'transparent',
-                                    color: darkMode ? '#ffffff' : '#000000'
-                                  }}
+                              <label className="text-sm text-gray-600 dark:text-gray-400">
+                                Description
+                              </label>
+                              <div
+                                data-color-mode={darkMode ? "dark" : "light"}
+                                className="mt-1"
+                              >
+                                <MDEditor
+                                  value={description}
+                                  onChange={(val) => setDescription(val || "")} // ensure it's always a string
+                                  height={200}
+                                  preview="edit"
+                                  textareaProps={{ readOnly: !isEditing }}
                                 />
                               </div>
+                             
                             </div>
-                            
+
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <label className="text-sm text-gray-600 dark:text-gray-400">Plan Type</label>
+                                <label className="text-sm text-gray-600 dark:text-gray-400">
+                                  Plan Type
+                                </label>
                                 <p className="font-medium text-gray-900 dark:text-white capitalize">
                                   {plan.plan_type}
                                 </p>
                               </div>
                               <div>
-                                <label className="text-sm text-gray-600 dark:text-gray-400">Billing Cycle</label>
+                                <label className="text-sm text-gray-600 dark:text-gray-400">
+                                  Billing Cycle
+                                </label>
                                 <p className="font-medium text-gray-900 dark:text-white capitalize">
                                   {plan.billing_cycle}
                                 </p>
                               </div>
                               <div>
-                                <label className="text-sm text-gray-600 dark:text-gray-400">Trial Period</label>
+                                <label className="text-sm text-gray-600 dark:text-gray-400">
+                                  Trial Period
+                                </label>
                                 <p className="font-medium text-gray-900 dark:text-white">
                                   {plan.trial_days} days
                                 </p>
                               </div>
                               <div>
-                                <label className="text-sm text-gray-600 dark:text-gray-400">Target Audience</label>
+                                <label className="text-sm text-gray-600 dark:text-gray-400">
+                                  Target Audience
+                                </label>
                                 <p className="font-medium text-gray-900 dark:text-white">
-                                  {plan.target_audience || 'General'}
+                                  {plan.target_audience || "General"}
                                 </p>
                               </div>
                             </div>
@@ -303,7 +324,7 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
                           per {plan.billing_cycle}
                         </div>
                       </div>
-                      
+
                       <div className="space-y-3">
                         <div>
                           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -336,6 +357,7 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
               </div>
             </TabsContent>
 
+            {/* Usage Stats & Subscribers tabs remain unchanged */}
             <TabsContent value="usage" className="space-y-6">
               {/* Usage Statistics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -367,7 +389,10 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
                   <CardContent className="p-6">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        {formatCurrency(mockUsageStats.monthly_revenue, plan.currency)}
+                        {formatCurrency(
+                          mockUsageStats.monthly_revenue,
+                          plan.currency
+                        )}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         Monthly Revenue
@@ -479,12 +504,12 @@ const PaymentPlanDetailView: React.FC<PaymentPlanDetailViewProps> = ({
       </DialogContent>
 
       <DialogActions>
-        <Button 
-          onClick={onClose} 
+        <Button
+          onClick={onClose}
           className="px-6"
-          style={{ 
-            backgroundColor: darkMode ? '#374151' : '#f3f4f6',
-            color: darkMode ? '#ffffff' : '#000000'
+          style={{
+            backgroundColor: darkMode ? "#374151" : "#f3f4f6",
+            color: darkMode ? "#ffffff" : "#000000",
           }}
         >
           Close
