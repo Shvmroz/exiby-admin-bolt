@@ -18,6 +18,7 @@ import {
   CreditCard,
   Mail,
   LogOut,
+  Receipt,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -91,6 +92,13 @@ const menuItems = [
     path: "/settings",
     color: "text-gray-400",
     bgColor: "bg-gray-50",
+  },
+  {
+    text: "Payment Plans",
+    icon: Receipt,
+    path: "/payment-plans",
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
   },
 ];
 
