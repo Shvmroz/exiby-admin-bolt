@@ -2,7 +2,7 @@
 
 import React from "react";
 import {
-  Building,
+  Calendar,
   Users,
   Building2,
   TrendingUp,
@@ -12,6 +12,8 @@ import {
   Star,
   ChevronRight,
   Trophy,
+  Building,
+  User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -20,42 +22,10 @@ const dashboardData = {
   data: {
     total_organizations: 150,
     total_companies: 300,
-    total_users: 12500,
     total_revenue: 250000,
     monthly_revenue: 45000,
+    total_users: 300,
     active_subscriptions: 145,
-    top_companies: [
-      {
-        _id: "comp_456",
-        name: "Microsoft Corp",
-        total_events: 15,
-        total_payments: 45000,
-      },
-      {
-        _id: "comp_789",
-        name: "Google LLC",
-        total_events: 22,
-        total_payments: 67000,
-      },
-      {
-        _id: "comp_123",
-        name: "Apple Inc",
-        total_events: 18,
-        total_payments: 89000,
-      },
-      {
-        _id: "comp_321",
-        name: "Amazon Web Services",
-        total_events: 12,
-        total_payments: 34000,
-      },
-      {
-        _id: "comp_654",
-        name: "Tesla Motors",
-        total_events: 8,
-        total_payments: 28000,
-      },
-    ],
     top_organizations: [
       {
         _id: "org_456",
@@ -136,20 +106,20 @@ const MetricCard: React.FC<{
   </div>
 );
 
-const CompanyRow: React.FC<{
-  company: {
+const OrganizationRow: React.FC<{
+  organization: {
     _id: string;
     name: string;
     total_events: number;
-    total_payments: number;
+    total_revenue: number;
   };
   rank: number;
-  maxPayments: number;
-}> = ({ company, rank, maxPayments }) => {
+  maxRevenue: number; // Make sure maxRevenue is received as a prop
+}> = ({ organization, rank, maxRevenue }) => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/companies`);
+    router.push(`/organizations`);
   };
 
   const getRankBarColor = (rank: number) => {
@@ -168,24 +138,22 @@ const CompanyRow: React.FC<{
   };
 
   const rankBadgeColorHash: { [key: number]: string } = {
-    1: "bg-gradient-to-r from-yellow-600 to-yellow-500 text-yellow-900",      
+    1: "bg-gradient-to-r from-yellow-600 to-yellow-500 text-yellow-900",
     2: "bg-gradient-to-r from-yellow-500 to-yellow-400 text-yellow-900",
-    3: "bg-gradient-to-r from-yellow-300 to-yellow-200 text-yellow-900", 
-    4: "bg-gradient-to-r from-yellow-200 to-yellow-100 text-yellow-800", 
-    5: "bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700",  
+    3: "bg-gradient-to-r from-yellow-300 to-yellow-200 text-yellow-900",
+    4: "bg-gradient-to-r from-yellow-200 to-yellow-100 text-yellow-800",
+    5: "bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700",
   };
-  
+
   const getRankBadgeColor = (rank: number) => {
     return (
       rankBadgeColorHash[rank] ??
       "bg-gradient-to-r from-yellow-50 to-yellow-50 text-yellow-700" // Fallback = softest yellow
     );
   };
-  
-  
 
-  // Correctly calculate the payments percentage using the maxPayments prop
-  const paymentsPercentage = (company.total_payments / maxPayments) * 100;
+  // Correctly calculate the revenue percentage using the maxRevenue prop
+  const revenuePercentage = (organization.total_revenue / maxRevenue) * 100;
 
   return (
     <tr
@@ -195,7 +163,11 @@ const CompanyRow: React.FC<{
       {/* Rank */}
       <td className="px-6 py-4">
         <div className="flex items-center justify-center">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankBadgeColor(rank)}`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankBadgeColor(
+              rank
+            )}`}
+          >
             {rank <= 3 && rank === 1 && <span>{rank}</span>}
             {rank <= 3 && rank !== 1 && <span>{rank}</span>}
             {rank > 3 && <span>{rank}</span>}
@@ -206,22 +178,22 @@ const CompanyRow: React.FC<{
       {/* Organization Name */}
       <td className="px-6 py-4">
         <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#0077ED] transition-colors">
-          {company.name}
+          {organization.name}
         </div>
       </td>
 
       {/* Events */}
       <td className="px-6 py-4">
         <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-          <Building className="w-4 h-4 text-purple-500" />
-          <span>{company.total_events}</span>
+          <Calendar className="w-4 h-4 text-blue-500" />
+          <span>{organization.total_events}</span>
         </div>
       </td>
 
-      {/* Payments */}
+      {/* Revenue */}
       <td className="px-6 py-4">
         <div className="text-green-500 dark:text-green-500 font-medium">
-          ${company.total_payments.toLocaleString()}
+          ${organization.total_revenue.toLocaleString()}
         </div>
       </td>
 
@@ -230,12 +202,14 @@ const CompanyRow: React.FC<{
         <div className="flex items-center space-x-3">
           <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
             <div
-              className={`h-full ${getRankBarColor(rank)} transition-all duration-500`}
-              style={{ width: `${Math.max(paymentsPercentage, 5)}%` }}
+              className={`h-full ${getRankBarColor(
+                rank
+              )} transition-all duration-500`}
+              style={{ width: `${Math.max(revenuePercentage, 5)}%` }}
             />
           </div>
           <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right">
-            {Math.round(paymentsPercentage)}%
+            {Math.round(revenuePercentage)}%
           </span>
         </div>
       </td>
@@ -248,11 +222,12 @@ const CompanyRow: React.FC<{
   );
 };
 
-
 const DashboardPage: React.FC = () => {
   const router = useRouter();
   const { data } = dashboardData;
-  const maxPayments = Math.max(...data.top_companies.map(company => company.total_payments));
+  const maxRevenue = Math.max(
+    ...data.top_organizations.map((org) => org.total_revenue)
+  );
 
   const metrics = [
     {
@@ -260,15 +235,15 @@ const DashboardPage: React.FC = () => {
       value: data.total_organizations,
       icon: <Building2 className="w-5 h-5" />,
       trend: "+8% this month",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50 dark:bg-blue-900/20",
+      color: "text-sky-600",
+      bgColor: "bg-sky-50 dark:bg-sky-900/20", 
       path: "/organizations",
     },
     {
       title: "Total Companies",
       value: data.total_companies,
       icon: <Building className="w-5 h-5" />,
-      trend: "+12% this month",
+      trend: "+15% this month",
       color: "text-purple-600",
       bgColor: "bg-purple-50 dark:bg-purple-900/20",
       path: "/companies",
@@ -276,19 +251,20 @@ const DashboardPage: React.FC = () => {
     {
       title: "Total Users",
       value: data.total_users,
-      icon: <Users className="w-5 h-5" />,
-      trend: "+23% this month",
-      color: "text-green-600",
-      bgColor: "bg-green-50 dark:bg-green-900/20",
+      icon: <User className="w-5 h-5" />,
+      trend: "+12% this month",
+      color: "text-red-600",
+      bgColor: "bg-red-50 dark:bg-red-900/20",
       path: "/analytics",
     },
+
     {
-      title: "Total Revenue",
-      value: `$${data.total_revenue.toLocaleString()}`,
-      icon: <DollarSign className="w-5 h-5" />,
-      trend: "+15% this month",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50 dark:bg-emerald-900/20",
+      title: "Active Subscriptions",
+      value: data.active_subscriptions,
+      icon: <CreditCard className="w-5 h-5" />,
+      trend: "+5% this month",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
       path: "/analytics",
     },
     {
@@ -301,12 +277,12 @@ const DashboardPage: React.FC = () => {
       path: "/analytics",
     },
     {
-      title: "Active Subscriptions",
-      value: data.active_subscriptions,
-      icon: <CreditCard className="w-5 h-5" />,
-      trend: "+5% this month",
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
+      title: "Total Revenue",
+      value: `$${data.total_revenue.toLocaleString()}`,
+      icon: <DollarSign className="w-5 h-5" />,
+      trend: "+15% this month",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50 dark:bg-emerald-900/20",
       path: "/analytics",
     },
   ];
@@ -352,20 +328,20 @@ const DashboardPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="grid grid-cols-1 gap-8">
-        {/* Top Companies - Takes up more space */}
+        {/* Top Organizations - Takes up more space */}
         <div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Top Companies
+                  Top Organizations
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Companies ranked by payments and activity
+                  Organizations ranked by revenue and activity
                 </p>
               </div>
               <button
-                onClick={() => router.push("/companies")}
+                onClick={() => router.push("/organizations")}
                 className="flex items-center space-x-1 text-[#0077ED] hover:text-[#0066CC] font-medium text-sm transition-colors"
               >
                 <span>View All</span>
@@ -381,29 +357,27 @@ const DashboardPage: React.FC = () => {
                       Rank
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Company
+                      Organization
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Events
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Payments
+                      Revenue
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Performance
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      
-                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"></th>
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {data.top_companies.map((company, index) => (
-                    <CompanyRow
-                      key={company._id}
-                      company={company}
+                  {data.top_organizations.map((org, index) => (
+                    <OrganizationRow
+                      key={org._id}
+                      organization={org}
                       rank={index + 1}
-                      maxPayments={maxPayments}
+                      maxRevenue={maxRevenue}
                     />
                   ))}
                 </tbody>
