@@ -11,9 +11,7 @@ import {
   BarChart3,
   Settings,
   Home,
-  Ticket,
-  MapPin,
-  TrendingUp,
+  Building,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -31,9 +29,9 @@ const menuItems = [
     bgColor: "bg-blue-50",
   },
   {
-    text: "Events",
-    icon: Calendar,
-    path: "/events",
+    text: "Companies",
+    icon: Building,
+    path: "/companies",
     color: "text-purple-600",
     bgColor: "bg-purple-50",
   },
@@ -43,13 +41,6 @@ const menuItems = [
     path: "/organizations",
     color: "text-green-600",
     bgColor: "bg-green-50",
-  },
-  {
-    text: "Attendees",
-    icon: Users,
-    path: "/attendees",
-    color: "text-orange-600",
-    bgColor: "bg-orange-50",
   },
   {
     text: "Analytics",

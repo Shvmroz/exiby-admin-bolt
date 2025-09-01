@@ -2,7 +2,7 @@
 
 import React from "react";
 import {
-  Calendar,
+  Building,
   Users,
   Building2,
   TrendingUp,
@@ -19,11 +19,43 @@ import { useRouter } from "next/navigation";
 const dashboardData = {
   data: {
     total_organizations: 150,
-    total_events: 450,
+    total_companies: 300,
     total_users: 12500,
     total_revenue: 250000,
     monthly_revenue: 45000,
     active_subscriptions: 145,
+    top_companies: [
+      {
+        _id: "comp_456",
+        name: "Microsoft Corp",
+        total_events: 15,
+        total_payments: 45000,
+      },
+      {
+        _id: "comp_789",
+        name: "Google LLC",
+        total_events: 22,
+        total_payments: 67000,
+      },
+      {
+        _id: "comp_123",
+        name: "Apple Inc",
+        total_events: 18,
+        total_payments: 89000,
+      },
+      {
+        _id: "comp_321",
+        name: "Amazon Web Services",
+        total_events: 12,
+        total_payments: 34000,
+      },
+      {
+        _id: "comp_654",
+        name: "Tesla Motors",
+        total_events: 8,
+        total_payments: 28000,
+      },
+    ],
     top_organizations: [
       {
         _id: "org_456",
@@ -104,20 +136,20 @@ const MetricCard: React.FC<{
   </div>
 );
 
-const OrganizationRow: React.FC<{
-  organization: {
+const CompanyRow: React.FC<{
+  company: {
     _id: string;
     name: string;
     total_events: number;
-    total_revenue: number;
+    total_payments: number;
   };
   rank: number;
-  maxRevenue: number; // Make sure maxRevenue is received as a prop
-}> = ({ organization, rank, maxRevenue }) => {
+  maxPayments: number;
+}> = ({ company, rank, maxPayments }) => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/organizations`);
+    router.push(`/companies`);
   };
 
   const getRankBarColor = (rank: number) => {
@@ -152,8 +184,8 @@ const OrganizationRow: React.FC<{
   
   
 
-  // Correctly calculate the revenue percentage using the maxRevenue prop
-  const revenuePercentage = (organization.total_revenue / maxRevenue) * 100;
+  // Correctly calculate the payments percentage using the maxPayments prop
+  const paymentsPercentage = (company.total_payments / maxPayments) * 100;
 
   return (
     <tr
@@ -174,22 +206,22 @@ const OrganizationRow: React.FC<{
       {/* Organization Name */}
       <td className="px-6 py-4">
         <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#0077ED] transition-colors">
-          {organization.name}
+          {company.name}
         </div>
       </td>
 
       {/* Events */}
       <td className="px-6 py-4">
         <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-          <Calendar className="w-4 h-4 text-blue-500" />
-          <span>{organization.total_events}</span>
+          <Building className="w-4 h-4 text-purple-500" />
+          <span>{company.total_events}</span>
         </div>
       </td>
 
-      {/* Revenue */}
+      {/* Payments */}
       <td className="px-6 py-4">
         <div className="text-green-500 dark:text-green-500 font-medium">
-          ${organization.total_revenue.toLocaleString()}
+          ${company.total_payments.toLocaleString()}
         </div>
       </td>
 
@@ -199,11 +231,11 @@ const OrganizationRow: React.FC<{
           <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
             <div
               className={`h-full ${getRankBarColor(rank)} transition-all duration-500`}
-              style={{ width: `${Math.max(revenuePercentage, 5)}%` }}
+              style={{ width: `${Math.max(paymentsPercentage, 5)}%` }}
             />
           </div>
           <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right">
-            {Math.round(revenuePercentage)}%
+            {Math.round(paymentsPercentage)}%
           </span>
         </div>
       </td>
@@ -220,7 +252,7 @@ const OrganizationRow: React.FC<{
 const DashboardPage: React.FC = () => {
   const router = useRouter();
   const { data } = dashboardData;
-  const maxRevenue = Math.max(...data.top_organizations.map(org => org.total_revenue));
+  const maxPayments = Math.max(...data.top_companies.map(company => company.total_payments));
 
   const metrics = [
     {
@@ -233,13 +265,13 @@ const DashboardPage: React.FC = () => {
       path: "/organizations",
     },
     {
-      title: "Total Events",
-      value: data.total_events,
-      icon: <Calendar className="w-5 h-5" />,
+      title: "Total Companies",
+      value: data.total_companies,
+      icon: <Building className="w-5 h-5" />,
       trend: "+12% this month",
       color: "text-purple-600",
       bgColor: "bg-purple-50 dark:bg-purple-900/20",
-      path: "/events",
+      path: "/companies",
     },
     {
       title: "Total Users",
@@ -248,7 +280,7 @@ const DashboardPage: React.FC = () => {
       trend: "+23% this month",
       color: "text-green-600",
       bgColor: "bg-green-50 dark:bg-green-900/20",
-      path: "/attendees",
+      path: "/analytics",
     },
     {
       title: "Total Revenue",
@@ -320,20 +352,20 @@ const DashboardPage: React.FC = () => {
 
       {/* Main Content */}
       <div className="grid grid-cols-1 gap-8">
-        {/* Top Organizations - Takes up more space */}
+        {/* Top Companies - Takes up more space */}
         <div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Top Organizations
+                  Top Companies
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Organizations ranked by revenue and activity
+                  Companies ranked by payments and activity
                 </p>
               </div>
               <button
-                onClick={() => router.push("/organizations")}
+                onClick={() => router.push("/companies")}
                 className="flex items-center space-x-1 text-[#0077ED] hover:text-[#0066CC] font-medium text-sm transition-colors"
               >
                 <span>View All</span>
@@ -349,13 +381,13 @@ const DashboardPage: React.FC = () => {
                       Rank
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Organization
+                      Company
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Events
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Revenue
+                      Payments
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Performance
@@ -366,12 +398,12 @@ const DashboardPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {data.top_organizations.map((org, index) => (
-                    <OrganizationRow
-                      key={org._id}
-                      organization={org}
+                  {data.top_companies.map((company, index) => (
+                    <CompanyRow
+                      key={company._id}
+                      company={company}
                       rank={index + 1}
-                      maxRevenue={maxRevenue}
+                      maxPayments={maxPayments}
                     />
                   ))}
                 </tbody>
