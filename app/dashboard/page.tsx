@@ -12,7 +12,6 @@ import {
   Star,
   ChevronRight,
   Trophy,
-  Building,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -20,7 +19,8 @@ import { useRouter } from "next/navigation";
 const dashboardData = {
   data: {
     total_organizations: 150,
-    total_companies: 300,
+    total_events: 450,
+    total_users: 12500,
     total_revenue: 250000,
     monthly_revenue: 45000,
     active_subscriptions: 145,
@@ -233,13 +233,22 @@ const DashboardPage: React.FC = () => {
       path: "/organizations",
     },
     {
-      title: "Total Companies",
-      value: data.total_companies,
-      icon: <Building className="w-5 h-5" />,
-      trend: "+15% this month",
+      title: "Total Events",
+      value: data.total_events,
+      icon: <Calendar className="w-5 h-5" />,
+      trend: "+12% this month",
       color: "text-purple-600",
       bgColor: "bg-purple-50 dark:bg-purple-900/20",
-      path: "/companies",
+      path: "/events",
+    },
+    {
+      title: "Total Users",
+      value: data.total_users,
+      icon: <Users className="w-5 h-5" />,
+      trend: "+23% this month",
+      color: "text-green-600",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
+      path: "/attendees",
     },
     {
       title: "Total Revenue",
