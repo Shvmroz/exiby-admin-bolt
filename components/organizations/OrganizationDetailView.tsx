@@ -8,8 +8,6 @@ import {
   Users,
   DollarSign,
   CreditCard,
-  Edit,
-  Trash2,
   ExternalLink,
   CheckCircle,
   Clock,
@@ -25,8 +23,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
-import OrganizationEditDialog from '@/components/organizations/OrganizationEditDialog';
 
 interface PaymentPlan {
   plan_name: string;
@@ -105,8 +101,6 @@ interface Organization {
 interface OrganizationDetailViewProps {
   organization: Organization;
   onClose: () => void;
-  onEdit: (organization: Organization) => void;
-  onDelete: (organization: Organization) => void;
 }
 
 // Mock data for demonstration
@@ -175,45 +169,11 @@ const mockOrganizationStats: OrganizationStats = {
 const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
   organization,
   onClose,
-  onEdit,
-  onDelete,
 }) => {
-  const [deleteDialog, setDeleteDialog] = useState(false);
-  const [editDialog, setEditDialog] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
-
   // Use mock data for demonstration
   const currentSubscription = organization.current_subscription || mockCurrentSubscription;
   const subscriptionHistory = organization.subscription_history || mockSubscriptionHistory;
   const organizationStats = organization.organization_stats || mockOrganizationStats;
-
-  const handleDelete = async () => {
-    setDeleteLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      onDelete(organization);
-      onClose();
-    } catch (error) {
-      console.error('Error deleting organization:', error);
-    } finally {
-      setDeleteLoading(false);
-      setDeleteDialog(false);
-    }
-  };
-
-  const handleSaveEdit = async (updatedOrganization: Organization) => {
-    setEditLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      onEdit(updatedOrganization);
-      setEditDialog(false);
-    } catch (error) {
-      console.error('Error updating organization:', error);
-    } finally {
-      setEditLoading(false);
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -288,22 +248,6 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              onClick={() => setEditDialog(true)}
-              size="sm"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setDeleteDialog(true)}
-              size="sm"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -720,26 +664,6 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
             </TabsContent>
           </Tabs>
         </div>
-
-        {/* Delete Confirmation Dialog */}
-        <ConfirmDeleteDialog
-          open={deleteDialog}
-          onOpenChange={setDeleteDialog}
-          title="Delete Organization"
-          content={`Are you sure you want to delete "${organization.orgn_user.name}"? This action cannot be undone and will remove all associated data including events, attendees, and subscription history.`}
-          confirmButtonText="Delete Organization"
-          onConfirm={handleDelete}
-          loading={deleteLoading}
-        />
-
-        {/* Edit Organization Dialog */}
-        <OrganizationEditDialog
-          open={editDialog}
-          onOpenChange={setEditDialog}
-          organization={organization}
-          onSave={handleSaveEdit}
-          loading={editLoading}
-        />
       </div>
     </div>
   );
