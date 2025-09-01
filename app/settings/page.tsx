@@ -1,14 +1,9 @@
-'use client';
+"use client";
 
-import React from 'react';
-import {
-  User,
-  Lock,
-  Settings as SettingsIcon,
-  ArrowRight,
-} from 'lucide-react';
-import { useAppContext } from '@/contexts/AppContext';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { User, Lock, Settings as SettingsIcon, ArrowRight } from "lucide-react";
+import { useAppContext } from "@/contexts/AppContext";
+import { useRouter } from "next/navigation";
 
 const SettingsPage: React.FC = () => {
   const { user } = useAppContext();
@@ -16,20 +11,20 @@ const SettingsPage: React.FC = () => {
 
   const navigationItems = [
     {
-      title: 'Profile Settings',
-      description: 'Update your personal information and profile details',
+      title: "Profile Settings",
+      description: "Update your personal information and profile details",
       icon: <User className="w-5 h-5" />,
-      path: '/profile',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+      path: "/profile",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20",
     },
     {
-      title: 'Change Password',
-      description: 'Update your account password for better security',
+      title: "Change Password",
+      description: "Update your account password for better security",
       icon: <Lock className="w-5 h-5" />,
-      path: '/change-password',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50 dark:bg-green-900/20',
+      path: "/change-password",
+      color: "text-green-600",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
     },
   ];
 
@@ -62,7 +57,7 @@ const SettingsPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
               <div className="space-y-4">
                 {navigationItems.map((item, index) => (
@@ -73,9 +68,7 @@ const SettingsPage: React.FC = () => {
                   >
                     <div className="flex items-center space-x-4">
                       <div className={`p-2 rounded-lg ${item.bgColor}`}>
-                        <div className={item.color}>
-                          {item.icon}
-                        </div>
+                        <div className={item.color}>{item.icon}</div>
                       </div>
                       <div className="text-left">
                         <h4 className="font-medium text-gray-900 dark:text-white">
@@ -96,9 +89,21 @@ const SettingsPage: React.FC = () => {
 
         {/* Account Overview Sidebar */}
         <div className="space-y-6">
-          {/* Account Overview */}
-          <div className="bg-gradient-to-br from-[#0077ED] to-[#4A9AFF] rounded-2xl p-6 text-white">
-            <h3 className="text-lg font-semibold mb-4">Account Overview</h3>
+          <div className="bg-sky-100 dark:bg-sky-900 rounded-2xl p-6 text-sky-900 dark:text-sky-100">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Account Overview</h3>
+              {/* Status Chip */}
+              <span
+  className={`px-3 py-1 text-sm font-medium rounded-full border ${
+    true
+      ? "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-700 dark:text-emerald-100 dark:border-emerald-500"
+      : "bg-red-100 text-red-800 border-red-300 dark:bg-red-700 dark:text-red-100 dark:border-red-500"
+  }`}
+>
+  Active
+</span>
+
+            </div>
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="opacity-80">Account Type</span>
@@ -115,28 +120,6 @@ const SettingsPage: React.FC = () => {
               <div className="flex justify-between">
                 <span className="opacity-80">Member Since</span>
                 <span className="font-medium">Jan 2024</span>
-              </div>
-            </div>
-          </div>
-
-          {/* User Info Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full flex items-center justify-center">
-                <span className="text-white text-xl font-bold">
-                  {user?.name?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white">
-                  {user?.name}
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {user?.email}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-500">
-                  {user?.role}
-                </p>
               </div>
             </div>
           </div>
