@@ -554,7 +554,7 @@ const PaymentPlansPage: React.FC = () => {
         open={editDialog.open}
         onOpenChange={(open) => setEditDialog({ open, plan: null })}
         plan={editDialog.plan}
-        onSave={handleSaveEdit}
+        onSaveEdit={handleSaveEdit}
         loading={editLoading}
       />
 

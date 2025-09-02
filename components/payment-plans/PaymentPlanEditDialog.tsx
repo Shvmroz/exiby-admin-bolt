@@ -39,7 +39,7 @@ interface PaymentPlanEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   plan: PaymentPlan | null;
-  onSave: (plan: PaymentPlan) => void;
+  onSaveEdit: (plan: any) => void;
   loading?: boolean;
 }
 
@@ -47,7 +47,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
   open,
   onOpenChange,
   plan,
-  onSave,
+  onSaveEdit,
   loading = false,
 }) => {
   const { darkMode } = useAppContext();
@@ -96,7 +96,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
         ...plan,
         ...formData,
       };
-      onSave(updatedPlan);
+       onSaveEdit(updatedPlan);
     }
   };
 
