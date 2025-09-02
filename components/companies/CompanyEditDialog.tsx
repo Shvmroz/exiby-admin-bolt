@@ -44,7 +44,7 @@ interface CompanyEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   company: Company | null;
-  onSave: (company: Company) => void;
+  onSave: (company: any) => void;
   loading?: boolean;
 }
 

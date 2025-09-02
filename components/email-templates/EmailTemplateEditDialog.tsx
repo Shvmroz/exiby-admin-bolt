@@ -33,7 +33,7 @@ interface EmailTemplateEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   template: EmailTemplate | null;
-  onSave: (template: EmailTemplate) => void;
+  onSave: (template: any) => void;
   loading?: boolean;
 }
 

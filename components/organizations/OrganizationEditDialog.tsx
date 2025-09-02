@@ -39,7 +39,7 @@ interface OrganizationEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   organization: Organization | null;
-  onSave: (organization: Organization) => void;
+  onSave: (organization: any) => void;
   loading?: boolean;
 }
 
