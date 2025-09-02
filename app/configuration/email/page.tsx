@@ -253,25 +253,23 @@ const EmailConfigurationPage: React.FC = () => {
           </div>
 
           {/* Logo */}
-          <div className="md:col-span-2">
+          <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Email Logo URL
             </label>
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    type="url"
-                    value={formData.logo}
-                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                    disabled={!isEditing}
-                    className="pl-10"
-                    placeholder="Enter logo URL"
-                  />
-                </div>
-              </div>
-              {formData.logo && (
+            <div className="relative">
+              <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="url"
+                value={formData.logo}
+                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                disabled={!isEditing}
+                className="pl-10"
+                placeholder="Enter logo URL"
+              />
+            </div>
+            {formData.logo && (
+              <div className="mt-3">
                 <img
                   src={formData.logo}
                   alt="Email Logo"
@@ -280,8 +278,8 @@ const EmailConfigurationPage: React.FC = () => {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Updated At (Read-only) */}
