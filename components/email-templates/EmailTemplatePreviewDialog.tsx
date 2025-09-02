@@ -2,14 +2,11 @@
 
 import React from "react";
 import { useAppContext } from "@/contexts/AppContext";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  useTheme,
-  IconButton,
-} from "@mui/material";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import IconButton from '@mui/material/IconButton';
 import { Button } from "@/components/ui/button";
 import { X, Mail, Eye } from "lucide-react";
 import { Badge } from "../ui/badge";
@@ -37,7 +34,6 @@ const EmailTemplatePreviewDialog: React.FC<EmailTemplatePreviewDialogProps> = ({
   template,
 }) => {
   const { darkMode } = useAppContext();
-  const theme = useTheme();
 
   if (!template) return null;
 

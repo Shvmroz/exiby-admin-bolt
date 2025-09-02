@@ -2,13 +2,10 @@
 
 import React, { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  useTheme,
-} from '@mui/material';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -34,7 +31,6 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
   loading = false,
 }) => {
   const { darkMode } = useAppContext();
-  const theme = useTheme();
   const [formData, setFormData] = useState({
     plan_name: '',
     description: '',

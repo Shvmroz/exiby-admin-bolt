@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export', // removed so middleware & SSR work
   experimental: {
     optimizeCss: false,
+    optimizePackageImports: ['@mui/material', '@mui/icons-material'],
   },
   eslint: {
     ignoreDuringBuilds: true,
