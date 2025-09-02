@@ -60,23 +60,23 @@ const menuItems = [
     text: "Email Templates",
     icon: Mail,
     path: "/email-templates",
-    color: "text-indigo-600",
+    color: "text-indigo-800",
     bgColor: "bg-indigo-50",
   },
   {
     text: "Analytics",
     icon: BarChart3,
     path: "/analytics",
-    color: "text-indigo-500",
-    bgColor: "bg-indigo-50",
+    color: "text-orange-800",
+    bgColor: "bg-orange-50",
   },
 
   {
     text: "Configuration",
     icon: Cog,
     path: "/configuration",
-    color: "text-orange-500",
-    bgColor: "bg-orange-50",
+    color: "text-yellow-600",
+    bgColor: "bg-yellow-50",
     subItems: [
       {
         text: "General",
@@ -105,8 +105,8 @@ const menuItems = [
     text: "Settings",
     icon: Settings,
     path: "/settings",
-    color: "text-gray-400",
-    bgColor: "bg-gray-50",
+    color: "text-gray-600",
+    bgColor: "bg-gray-100",
   },
   {
     text: "Logout",

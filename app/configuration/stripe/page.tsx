@@ -144,6 +144,23 @@ const StripeConfigurationPage: React.FC = () => {
         </div>
       </div>
 
+         {/* Security Notice */}
+         <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
+        <CardContent className="p-6">
+          <div className="flex items-start space-x-3">
+            <Shield className="w-5 h-5 text-yellow-600 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-yellow-800 dark:text-yellow-200">
+                Security Notice
+              </h4>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                Keep your API keys secure and never share them publicly. Live keys should only be used in production environments.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Current Mode Display */}
       <Card>
         <CardContent className="p-6">
@@ -314,22 +331,7 @@ const StripeConfigurationPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Security Notice */}
-      <Card className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
-        <CardContent className="p-6">
-          <div className="flex items-start space-x-3">
-            <Shield className="w-5 h-5 text-yellow-600 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-yellow-800 dark:text-yellow-200">
-                Security Notice
-              </h4>
-              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                Keep your API keys secure and never share them publicly. Live keys should only be used in production environments.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+   
     </div>
   );
 };
