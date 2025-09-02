@@ -123,7 +123,7 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
       </DialogTitle>
 
       <DialogContent 
-        sx={{ paddingTop: 2, paddingBottom: 0 }}
+        sx={{ paddingTop: 2, paddingBottom: 3 }}
         style={{ 
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000'
@@ -247,7 +247,9 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
               }}
             />
           </div>
-            <div>
+
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div>
               <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Subscription Start
               </label>
@@ -262,8 +264,6 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
                 }}
               />
             </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Subscription End
@@ -280,10 +280,11 @@ const OrganizationEditDialog: React.FC<OrganizationEditDialogProps> = ({
               />
             </div>
           </div>
+        
         </form>
       </DialogContent>
 
-      <DialogActions sx={{ padding: 3, borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+      <DialogActions sx={{ borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
         <Button
           type="button"
           variant="outline"

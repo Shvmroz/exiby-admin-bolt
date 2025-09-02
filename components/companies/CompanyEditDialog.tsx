@@ -145,7 +145,7 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
       </DialogTitle>
 
       <DialogContent 
-        sx={{ paddingTop: 2, paddingBottom: 0 }}
+        sx={{ paddingTop: 2, paddingBottom: 2 }}
         style={{ 
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000'
@@ -295,7 +295,7 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
         </form>
       </DialogContent>
 
-      <DialogActions sx={{ padding: 3, borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+      <DialogActions sx={{ borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
         <Button
           type="button"
           variant="outline"

@@ -91,14 +91,18 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
     }
   };
 
-  const extractVariables = (content: string) => {
+  const extractVariables = (content: string): string[] => {
     const regex = /\{\{([^}]+)\}\}/g;
-    const matches = content.match(regex);
+    const matches: RegExpMatchArray | null = content.match(regex);
+  
     if (matches) {
-      return [...new Set(matches.map(match => match.replace(/[{}]/g, '')))];
+      const cleaned = matches.map((match: string) => match.replace(/[{}]/g, ''));
+      return Array.from(new Set(cleaned));
     }
+  
     return [];
   };
+  
 
   const handleContentChange = (content: string) => {
     setFormData({
@@ -155,7 +159,7 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
       </DialogTitle>
 
       <DialogContent 
-        sx={{ paddingTop: 2, paddingBottom: 0, overflow: 'visible' }}
+        sx={{ paddingTop: 2, paddingBottom: 2, overflow: 'visible' }}
         style={{ 
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000'
@@ -301,7 +305,7 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
         </div>
       </DialogContent>
 
-      <DialogActions sx={{ padding: 3, borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+      <DialogActions sx={{ borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
         <Button
           type="button"
           variant="outline"

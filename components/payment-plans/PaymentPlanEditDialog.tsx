@@ -19,12 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Save, X } from 'lucide-react';
-import dynamic from 'next/dynamic';
 
-const MDEditor = dynamic(
-  () => import('@uiw/react-md-editor').then((mod) => mod.default),
-  { ssr: false }
-);
 
 interface PaymentPlan {
   _id: string;
@@ -129,7 +124,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
       </DialogTitle>
 
       <DialogContent 
-        sx={{ paddingTop: 2, paddingBottom: 0 }}
+        sx={{ paddingTop: 2, paddingBottom: 2 }}
         style={{ 
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000'
@@ -406,7 +401,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
         </form>
       </DialogContent>
 
-      <DialogActions sx={{ padding: 3, borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+      <DialogActions sx={{ borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
         <Button
           type="button"
           variant="outline"

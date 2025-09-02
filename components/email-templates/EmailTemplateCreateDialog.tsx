@@ -153,7 +153,7 @@ const EmailTemplateCreateDialog: React.FC<EmailTemplateCreateDialogProps> = ({
       </DialogTitle>
 
       <DialogContent
-        sx={{ paddingTop: 2, paddingBottom: 0, overflow: "visible" }}
+        sx={{ paddingTop: 2, paddingBottom: 2, overflow: "visible" }}
         style={{
           backgroundColor: darkMode ? "#1f2937" : "#ffffff",
           color: darkMode ? "#ffffff" : "#000000",
@@ -315,7 +315,7 @@ const EmailTemplateCreateDialog: React.FC<EmailTemplateCreateDialogProps> = ({
 
       <DialogActions
         sx={{
-          padding: 3,
+          
           borderTop: `1px solid ${darkMode ? "#374151" : "#e5e7eb"}`,
         }}
       >
