@@ -92,13 +92,6 @@ const menuItems = [
         color: "text-blue-500",
         bgColor: "bg-blue-50",
       },
-      {
-        text: "Email Templates",
-        icon: Mail,
-        path: "/configuration/email-templates",
-        color: "text-purple-500",
-        bgColor: "bg-purple-50",
-      },
     ],
   },
   {
