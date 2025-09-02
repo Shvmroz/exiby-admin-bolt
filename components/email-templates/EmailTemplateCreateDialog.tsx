@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+  DialogContent,
+  DialogActions,
+  useTheme,
+} from '@mui/material';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,6 +35,7 @@ const EmailTemplateCreateDialog: React.FC<EmailTemplateCreateDialogProps> = ({
   loading = false,
 }) => {
   const { darkMode } = useAppContext();
+  const theme = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     subject: '',
@@ -120,29 +122,38 @@ const EmailTemplateCreateDialog: React.FC<EmailTemplateCreateDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="max-w-6xl max-h-[90vh] overflow-y-auto"
-        style={{
+    <Dialog 
+      open={open} 
+      onClose={() => onOpenChange(false)}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{
+        sx: {
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
+          borderRadius: '12px',
+          maxHeight: '90vh',
+        }
+      }}
+    >
+      <DialogTitle>
+        <div className="flex items-center" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+          <Mail className="w-5 h-5 mr-2 text-[#0077ED]" />
+          Create Email Template
+        </div>
+      </DialogTitle>
+
+      <DialogContent 
+        sx={{ paddingTop: 2, paddingBottom: 0, overflow: 'visible' }}
+        style={{ 
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000'
         }}
       >
-        <DialogHeader>
-          <DialogTitle 
-            className="text-xl font-semibold flex items-center"
-            style={{ color: darkMode ? '#ffffff' : '#000000' }}
-          >
-            <Mail className="w-5 h-5 mr-2 text-[#0077ED]" />
-            Create Email Template
-          </DialogTitle>
-        </DialogHeader>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Form */}
           <div>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" id="template-create-form">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
@@ -260,53 +271,6 @@ const EmailTemplateCreateDialog: React.FC<EmailTemplateCreateDialogProps> = ({
                   Active Template
                 </label>
               </div>
-
-              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-600">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowPreview(!showPreview)}
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#f9fafb',
-                    color: darkMode ? '#f3f4f6' : '#374151',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  {showPreview ? 'Hide Preview' : 'Show Preview'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={loading}
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#f9fafb',
-                    color: darkMode ? '#f3f4f6' : '#374151',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading || !formData.name || !formData.subject || !formData.content}
-                  className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
-                >
-                  {loading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating...
-                    </div>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Create Template
-                    </>
-                  )}
-                </Button>
-              </div>
             </form>
           </div>
 
@@ -326,6 +290,54 @@ const EmailTemplateCreateDialog: React.FC<EmailTemplateCreateDialogProps> = ({
           )}
         </div>
       </DialogContent>
+
+      <DialogActions sx={{ padding: 3, borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setShowPreview(!showPreview)}
+          style={{
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            color: darkMode ? '#f3f4f6' : '#374151',
+            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+          }}
+        >
+          <Eye className="w-4 h-4 mr-2" />
+          {showPreview ? 'Hide Preview' : 'Show Preview'}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={loading}
+          style={{
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            color: darkMode ? '#f3f4f6' : '#374151',
+            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+          }}
+        >
+          <X className="w-4 h-4 mr-2" />
+          Cancel
+        </Button>
+        <Button
+          form="template-create-form"
+          type="submit"
+          disabled={loading || !formData.name || !formData.subject || !formData.content}
+          className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
+        >
+          {loading ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Creating...
+            </div>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Create Template
+            </>
+          )}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

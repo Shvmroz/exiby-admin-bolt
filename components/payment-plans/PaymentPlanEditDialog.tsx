@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+  DialogContent,
+  DialogActions,
+  useTheme,
+} from '@mui/material';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -58,6 +59,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
   loading = false,
 }) => {
   const { darkMode } = useAppContext();
+  const theme = useTheme();
   const [formData, setFormData] = useState({
     plan_name: '',
     description: '',
@@ -108,25 +110,32 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="max-w-4xl max-h-[90vh] overflow-y-auto"
-        style={{
+    <Dialog 
+      open={open} 
+      onClose={() => onOpenChange(false)}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{
+        sx: {
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
+          borderRadius: '12px',
+          maxHeight: '90vh',
+        }
+      }}
+    >
+      <DialogTitle style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+        Edit Payment Plan
+      </DialogTitle>
+
+      <DialogContent 
+        sx={{ paddingTop: 2, paddingBottom: 0 }}
+        style={{ 
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000'
         }}
       >
-        <DialogHeader>
-          <DialogTitle 
-            className="text-xl font-semibold"
-            style={{ color: darkMode ? '#ffffff' : '#000000' }}
-          >
-            Edit Payment Plan
-          </DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" id="payment-plan-edit-form">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Plan Name */}
             <div>
@@ -394,42 +403,43 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
               </label>
             </div>
           </div>
-
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-600">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-              style={{
-                backgroundColor: darkMode ? '#374151' : '#f9fafb',
-                color: darkMode ? '#f3f4f6' : '#374151',
-                borderColor: darkMode ? '#4b5563' : '#d1d5db'
-              }}
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
-                </div>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </div>
         </form>
       </DialogContent>
+
+      <DialogActions sx={{ padding: 3, borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={loading}
+          style={{
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            color: darkMode ? '#f3f4f6' : '#374151',
+            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+          }}
+        >
+          <X className="w-4 h-4 mr-2" />
+          Cancel
+        </Button>
+        <Button
+          form="payment-plan-edit-form"
+          type="submit"
+          disabled={loading}
+          className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
+        >
+          {loading ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Saving...
+            </div>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </>
+          )}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

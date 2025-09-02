@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useAppContext } from '@/contexts/AppContext';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+  DialogContent,
+  DialogActions,
+  useTheme,
+} from '@mui/material';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -56,6 +58,8 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
   onSave,
   loading = false,
 }) => {
+  const { darkMode } = useAppContext();
+  const theme = useTheme();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -123,15 +127,31 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
-            Edit Company
-          </DialogTitle>
-        </DialogHeader>
+    <Dialog 
+      open={open} 
+      onClose={() => onOpenChange(false)}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000',
+          borderRadius: '12px',
+        }
+      }}
+    >
+      <DialogTitle style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+        Edit Company
+      </DialogTitle>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <DialogContent 
+        sx={{ paddingTop: 2, paddingBottom: 0 }}
+        style={{ 
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000'
+        }}
+      >
+        <form onSubmit={handleSubmit} className="space-y-6" id="company-edit-form">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -141,6 +161,11 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter company name"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
                 required
               />
             </div>
@@ -153,10 +178,22 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
                 value={formData.industry}
                 onValueChange={(value) => setFormData({ ...formData, industry: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
                   {industries.map(industry => (
                     <SelectItem key={industry} value={industry}>
                       {industry}
@@ -177,6 +214,11 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="company@example.com"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
 
@@ -189,6 +231,11 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="+1-555-0123"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
           </div>
@@ -203,6 +250,11 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
                 value={formData.website}
                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                 placeholder="https://example.com"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
 
@@ -215,6 +267,11 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
                 value={formData.linkedin}
                 onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
                 placeholder="https://linkedin.com/company/example"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
           </div>
@@ -228,39 +285,50 @@ const CompanyEditDialog: React.FC<CompanyEditDialogProps> = ({
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Enter company description"
               rows={4}
+              style={{
+                backgroundColor: darkMode ? '#374151' : '#ffffff',
+                color: darkMode ? '#ffffff' : '#000000',
+                borderColor: darkMode ? '#4b5563' : '#d1d5db'
+              }}
             />
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-100 dark:border-gray-700">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="bg-[#0077ED] hover:bg-[#0066CC]"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Saving...
-                </div>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
           </div>
         </form>
       </DialogContent>
+
+      <DialogActions sx={{ padding: 3, borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={loading}
+          style={{
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            color: darkMode ? '#f3f4f6' : '#374151',
+            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+          }}
+        >
+          <X className="w-4 h-4 mr-2" />
+          Cancel
+        </Button>
+        <Button
+          form="company-edit-form"
+          type="submit"
+          disabled={loading}
+          className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
+        >
+          {loading ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Saving...
+            </div>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </>
+          )}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

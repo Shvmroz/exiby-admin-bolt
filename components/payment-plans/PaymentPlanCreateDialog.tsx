@@ -4,10 +4,11 @@ import React, { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+  DialogContent,
+  DialogActions,
+  useTheme,
+} from '@mui/material';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -39,6 +40,7 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
   loading = false,
 }) => {
   const { darkMode } = useAppContext();
+  const theme = useTheme();
   const [formData, setFormData] = useState({
     plan_name: '',
     description: '',
@@ -87,26 +89,35 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="max-w-4xl max-h-[90vh] overflow-y-auto"
-        style={{
+    <Dialog 
+      open={open} 
+      onClose={() => onOpenChange(false)}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{
+        sx: {
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
+          borderRadius: '12px',
+          maxHeight: '90vh',
+        }
+      }}
+    >
+      <DialogTitle>
+        <div className="flex items-center" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+          <CreditCard className="w-5 h-5 mr-2 text-[#0077ED]" />
+          Create Payment Plan
+        </div>
+      </DialogTitle>
+
+      <DialogContent 
+        sx={{ paddingTop: 2, paddingBottom: 0 }}
+        style={{ 
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000'
         }}
       >
-        <DialogHeader>
-          <DialogTitle 
-            className="text-xl font-semibold flex items-center"
-            style={{ color: darkMode ? '#ffffff' : '#000000' }}
-          >
-            <CreditCard className="w-5 h-5 mr-2 text-[#0077ED]" />
-            Create Payment Plan
-          </DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" id="payment-plan-create-form">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Plan Name */}
             <div>
@@ -377,42 +388,43 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
               </label>
             </div>
           </div>
-
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-600">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-              style={{
-                backgroundColor: darkMode ? '#374151' : '#f9fafb',
-                color: darkMode ? '#f3f4f6' : '#374151',
-                borderColor: darkMode ? '#4b5563' : '#d1d5db'
-              }}
-            >
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading || !formData.plan_name || formData.price <= 0}
-              className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating...
-                </div>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Create Plan
-                </>
-              )}
-            </Button>
-          </div>
         </form>
       </DialogContent>
+
+      <DialogActions sx={{ padding: 3, borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={loading}
+          style={{
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            color: darkMode ? '#f3f4f6' : '#374151',
+            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+          }}
+        >
+          <X className="w-4 h-4 mr-2" />
+          Cancel
+        </Button>
+        <Button
+          form="payment-plan-create-form"
+          type="submit"
+          disabled={loading || !formData.plan_name || formData.price <= 0}
+          className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
+        >
+          {loading ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Creating...
+            </div>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Create Plan
+            </>
+          )}
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };

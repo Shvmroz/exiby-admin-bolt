@@ -4,10 +4,12 @@ import React from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+  DialogContent,
+  DialogActions,
+  IconButton,
+  useTheme,
+} from '@mui/material';
 import { Button } from '@/components/ui/button';
 import { X, Mail, Eye } from 'lucide-react';
 
@@ -34,6 +36,7 @@ const EmailTemplatePreviewDialog: React.FC<EmailTemplatePreviewDialogProps> = ({
   template,
 }) => {
   const { darkMode } = useAppContext();
+  const theme = useTheme();
 
   if (!template) return null;
 
@@ -74,25 +77,40 @@ const EmailTemplatePreviewDialog: React.FC<EmailTemplatePreviewDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="max-w-4xl max-h-[90vh] overflow-y-auto"
-        style={{
+    <Dialog 
+      open={open} 
+      onClose={() => onOpenChange(false)}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
-        }}
-      >
-        <DialogHeader>
-          <DialogTitle 
-            className="text-xl font-semibold flex items-center"
-            style={{ color: darkMode ? '#ffffff' : '#000000' }}
-          >
+          borderRadius: '12px',
+          maxHeight: '90vh',
+        }
+      }}
+    >
+      <DialogTitle>
+        <div className="flex items-center justify-between" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+          <div className="flex items-center">
             <Eye className="w-5 h-5 mr-2 text-[#0077ED]" />
             Email Template Preview
-          </DialogTitle>
-        </DialogHeader>
+          </div>
+          <IconButton onClick={() => onOpenChange(false)}>
+            <X className="w-5 h-5" />
+          </IconButton>
+        </div>
+      </DialogTitle>
 
+      <DialogContent 
+        sx={{ paddingTop: 2, paddingBottom: 4 }}
+        dividers
+        style={{ 
+          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#000000'
+        }}
+      >
         <div className="space-y-6">
           {/* Template Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -148,21 +166,22 @@ const EmailTemplatePreviewDialog: React.FC<EmailTemplatePreviewDialogProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-600">
-            <Button
-              onClick={() => onOpenChange(false)}
-              style={{
-                backgroundColor: darkMode ? '#374151' : '#f9fafb',
-                color: darkMode ? '#f3f4f6' : '#374151',
-                borderColor: darkMode ? '#4b5563' : '#d1d5db'
-              }}
-            >
-              <X className="w-4 h-4 mr-2" />
-              Close
-            </Button>
-          </div>
         </div>
       </DialogContent>
+
+      <DialogActions>
+        <Button
+          onClick={() => onOpenChange(false)}
+          style={{
+            backgroundColor: darkMode ? '#374151' : '#f9fafb',
+            color: darkMode ? '#f3f4f6' : '#374151',
+            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+          }}
+        >
+          <X className="w-4 h-4 mr-2" />
+          Close
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 };
