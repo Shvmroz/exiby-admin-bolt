@@ -105,7 +105,7 @@ const menuItems = [
     text: "Settings",
     icon: Settings,
     path: "/settings",
-    color: "text-gray-600",
+    color: "text-gray-400",
     bgColor: "bg-gray-100",
   },
   {
