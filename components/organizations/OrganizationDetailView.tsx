@@ -293,7 +293,7 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
             </div>
           </div>
           <IconButton onClick={onClose}>
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-foreground" />
           </IconButton>
         </div>
       </DialogTitle>

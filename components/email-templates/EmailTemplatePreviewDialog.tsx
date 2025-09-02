@@ -7,8 +7,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
   useTheme,
+  IconButton,
 } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { X, Mail, Eye } from "lucide-react";
@@ -128,7 +128,7 @@ const EmailTemplatePreviewDialog: React.FC<EmailTemplatePreviewDialogProps> = ({
             {template.name}
           </div>
           <IconButton onClick={() => onOpenChange(false)}>
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-foreground" />
           </IconButton>
         </div>
       </DialogTitle>
@@ -153,12 +153,14 @@ const EmailTemplatePreviewDialog: React.FC<EmailTemplatePreviewDialogProps> = ({
           </div>
 
           {/* Email Content Preview */}
-          <div>
-            <div
-              className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white"
-              dangerouslySetInnerHTML={{ __html: renderPreview() }}
-            />
-          </div>
+          <div
+            className={`border rounded-lg p-4 ${
+              darkMode
+                ? "border-gray-600 bg-gray-800 text-gray-100"
+                : "border-gray-200 bg-white text-gray-900"
+            }`}
+            dangerouslySetInnerHTML={{ __html: renderPreview() }}
+          />
 
           {/* Variables Used */}
           <div className="space-y-4">

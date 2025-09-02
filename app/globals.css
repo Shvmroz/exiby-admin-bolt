@@ -88,74 +88,44 @@
   @apply min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800;
 }
 
-/* Custom scrollbar styles */
-.scrollbar-thin {
+/* ----------------------------- */
+/* Light Mode Variables           */
+/* ----------------------------- */
+:root {
+  --scrollbar-thumb: #d1d5db; 
+  --scrollbar-thumb-hover: #9ca3af; 
+}
+
+/* ----------------------------- */
+/* Dark Mode Variables            */
+/* ----------------------------- */
+.dark {
+  --scrollbar-thumb: #4b5563; 
+  --scrollbar-thumb-hover: #6b7280; 
+}
+
+/* Apply to all scrollable elements */
+* {
   scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
-.dark .scrollbar-thin {
-  scrollbar-color: #4b5563 transparent;
-}
-
-/* Webkit scrollbar styles */
-.scrollbar-thin::-webkit-scrollbar {
+/* Webkit Browsers */
+*::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
-.dark .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #4b5563;
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: #9ca3af;
-}
-
-.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: #6b7280;
-}
-/* Table scrollbar styles */
-.table-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
-}
-
-.dark .table-scroll {
-  scrollbar-color: #4b5563 transparent;
-}
-
-.table-scroll::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.table-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.table-scroll::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
-  border-radius: 4px;
-}
-
-.dark .table-scroll::-webkit-scrollbar-thumb {
-  background-color: #4b5563;
-}
-
-.table-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: #9ca3af;
-}
-
-.dark .table-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: #6b7280;
-}
