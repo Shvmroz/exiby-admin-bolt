@@ -198,23 +198,25 @@ const ConfigurationPage: React.FC = () => {
             </div>
 
             {/* Site Logo */}
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Site Logo URL
               </label>
-              <div className="relative">
-                <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  type="url"
-                  value={formData.site_logo}
-                  onChange={(e) => setFormData({ ...formData, site_logo: e.target.value })}
-                  disabled={!isEditing}
-                  className="pl-10"
-                  placeholder="Enter logo URL"
-                />
-              </div>
-              {formData.site_logo && (
-                <div className="mt-3">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Image className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      type="url"
+                      value={formData.site_logo}
+                      onChange={(e) => setFormData({ ...formData, site_logo: e.target.value })}
+                      disabled={!isEditing}
+                      className="pl-10"
+                      placeholder="Enter logo URL"
+                    />
+                  </div>
+                </div>
+                {formData.site_logo && (
                   <img
                     src={formData.site_logo}
                     alt="Site Logo"
@@ -223,8 +225,8 @@ const ConfigurationPage: React.FC = () => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Time Zone */}
@@ -252,28 +254,6 @@ const ConfigurationPage: React.FC = () => {
                 </Select>
               </div>
             </div>
-          </div>
-
-          {/* Admin Settings */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Admin Settings (JSON)
-            </label>
-            <Textarea
-              value={JSON.stringify(formData.admin_settings, null, 2)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value);
-                  setFormData({ ...formData, admin_settings: parsed });
-                } catch {
-                  // Invalid JSON, keep the text but don't update state
-                }
-              }}
-              disabled={!isEditing}
-              rows={4}
-              placeholder="Enter admin settings as JSON"
-              className="font-mono text-sm"
-            />
           </div>
 
           {/* Updated At (Read-only) */}

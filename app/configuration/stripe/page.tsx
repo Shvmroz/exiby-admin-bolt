@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface StripeConfig {
   live_str_pub_key: string;
@@ -44,10 +45,10 @@ const StripeConfigurationPage: React.FC = () => {
   });
   
   const [originalData] = useState<StripeConfig>({
-    live_str_pub_key: "pk_live_51234567890abcdef",
-    live_str_private_key: "sk_live_51234567890abcdef",
-    sand_str_pub_key: "pk_test_51234567890abcdef",
-    sand_str_private_key: "sk_test_51234567890abcdef",
+    live_str_pub_key: "pk_live_***",
+    live_str_private_key: "pk_live_***",
+    sand_str_pub_key: "",
+    sand_str_private_key: "",
     mode: "live",
     supportedCurrencies: ["USD", "EUR", "GBP", "CAD"]
   });
@@ -144,6 +145,14 @@ const StripeConfigurationPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Alert */}
+      <Alert className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+        <AlertDescription className="text-blue-800 dark:text-blue-200">
+          <strong>Important:</strong> Make sure to use your actual Stripe API keys from your Stripe Dashboard. 
+          Keep your secret keys secure and never share them publicly.
+        </AlertDescription>
+      </Alert>
+
       {/* Current Mode Display */}
       <Card>
         <CardContent className="p-6">
@@ -169,7 +178,7 @@ const StripeConfigurationPage: React.FC = () => {
       </Card>
 
       {/* API Keys Configuration */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Live Keys */}
         <Card>
           <CardHeader>
@@ -223,65 +232,6 @@ const StripeConfigurationPage: React.FC = () => {
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
                   {showKeys.live_private ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Sandbox Keys */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <CreditCard className="w-5 h-5 mr-2 text-yellow-600" />
-              Sandbox Environment
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Sandbox Public Key */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Sandbox Public Key
-              </label>
-              <div className="relative">
-                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  value={isEditing ? formData.sand_str_pub_key : maskKey(formData.sand_str_pub_key, showKeys.sand_pub)}
-                  onChange={(e) => setFormData({ ...formData, sand_str_pub_key: e.target.value })}
-                  disabled={!isEditing}
-                  className="pl-10 pr-12 font-mono text-sm"
-                  placeholder="pk_test_..."
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleKeyVisibility('sand_pub')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showKeys.sand_pub ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Sandbox Private Key */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Sandbox Private Key
-              </label>
-              <div className="relative">
-                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  value={isEditing ? formData.sand_str_private_key : maskKey(formData.sand_str_private_key, showKeys.sand_private)}
-                  onChange={(e) => setFormData({ ...formData, sand_str_private_key: e.target.value })}
-                  disabled={!isEditing}
-                  className="pl-10 pr-12 font-mono text-sm"
-                  placeholder="sk_test_..."
-                />
-                <button
-                  type="button"
-                  onClick={() => toggleKeyVisibility('sand_private')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showKeys.sand_private ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
