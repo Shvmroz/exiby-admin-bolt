@@ -8,7 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import QuillEditor from "@/components/ui/quill-editor";
 import {
   Select,
   SelectContent,
@@ -284,10 +284,10 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
             <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
               Description
             </label>
-            <Textarea
+            <QuillEditor
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+              onChange={(value) =>
+                setFormData({ ...formData, description: value })
               }
               placeholder="Enter organization description"
               rows={4}
@@ -296,6 +296,7 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
                 color: darkMode ? "#ffffff" : "#000000",
                 borderColor: darkMode ? "#4b5563" : "#d1d5db",
               }}
+              disabled={false}
             />
           </div>
         </form>
