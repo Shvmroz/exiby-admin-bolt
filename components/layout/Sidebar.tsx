@@ -57,6 +57,13 @@ const menuItems = [
     bgColor: "bg-purple-50",
   },
   {
+    text: "Email Templates",
+    icon: Mail,
+    path: "/email-templates",
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50",
+  },
+  {
     text: "Analytics",
     icon: BarChart3,
     path: "/analytics",
