@@ -18,13 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem } from "@/components/ui/select";
 
 export interface TableHeader {
   key: string;
@@ -252,9 +246,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 value={rows_per_page.toString()}
                 onValueChange={(value) => onRowsPerPageChange(parseInt(value))}
               >
-                <SelectTrigger className="w-20">
-                  <SelectValue />
-                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="20">20</SelectItem>

@@ -12,13 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem } from '@/components/ui/select';
 import { Save, X, Building } from 'lucide-react';
 
 interface CompanyCreateDialogProps {
@@ -157,24 +151,14 @@ const CompanyCreateDialog: React.FC<CompanyCreateDialogProps> = ({
               <Select
                 value={formData.industry}
                 onValueChange={(value) => setFormData({ ...formData, industry: value })}
+                placeholder="Select industry"
                 required
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                }}
               >
-                <SelectTrigger
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
-                  <SelectValue placeholder="Select industry" />
-                </SelectTrigger>
-                <SelectContent
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
+                <SelectContent>
                   {industries.map(industry => (
                     <SelectItem key={industry} value={industry}>
                       {industry}

@@ -24,13 +24,7 @@ import CompanyCreateDialog from '@/components/companies/CompanyCreateDialog';
 import CompanyDetailView from '@/components/companies/CompanyDetailView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
 interface Company {
@@ -566,10 +560,12 @@ const CompaniesPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-500" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
+              <Select 
+                value={statusFilter} 
+                onValueChange={setStatusFilter}
+                placeholder="Filter by status"
+                style={{ width: '160px' }}
+              >
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
@@ -578,10 +574,12 @@ const CompaniesPage: React.FC = () => {
               </Select>
             </div>
             <div className="flex items-center space-x-2">
-              <Select value={industryFilter} onValueChange={setIndustryFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by industry" />
-                </SelectTrigger>
+              <Select 
+                value={industryFilter} 
+                onValueChange={setIndustryFilter}
+                placeholder="Filter by industry"
+                style={{ width: '160px' }}
+              >
                 <SelectContent>
                   <SelectItem value="all">All Industries</SelectItem>
                   {industries.map(industry => (

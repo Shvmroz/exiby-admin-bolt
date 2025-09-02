@@ -1,55 +1,114 @@
 'use client';
 
-import * as React from 'react';
-import * as TabsPrimitive from '@radix-ui/react-tabs';
+import React from 'react';
+import { Tabs as MuiTabs, Tab, Box } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-import { cn } from '@/lib/utils';
+const StyledTabs = styled(MuiTabs)(({ theme }) => ({
+  '& .MuiTabs-indicator': {
+    backgroundColor: '#0077ED',
+  },
+  '& .MuiTab-root': {
+    textTransform: 'none',
+    fontWeight: 500,
+    fontSize: '14px',
+    color: theme.palette.mode === 'dark' ? '#9ca3af' : '#6b7280',
+    '&.Mui-selected': {
+      color: '#0077ED',
+    },
+  },
+}));
 
-const Tabs = TabsPrimitive.Root;
+interface TabsProps {
+  defaultValue: string;
+  children: React.ReactNode;
+  className?: string;
+}
 
-const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
-      className
-    )}
-    {...props}
-  />
-));
-TabsList.displayName = TabsPrimitive.List.displayName;
+interface TabsListProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
-const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
-      className
-    )}
-    {...props}
-  />
-));
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
+interface TabsTriggerProps {
+  value: string;
+  children: React.ReactNode;
+}
 
-const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.Content
-    ref={ref}
-    className={cn(
-      'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-      className
-    )}
-    {...props}
-  />
-));
-TabsContent.displayName = TabsPrimitive.Content.displayName;
+interface TabsContentProps {
+  value: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const TabsContext = React.createContext<{
+  value: string;
+  setValue: (value: string) => void;
+}>({
+  value: '',
+  setValue: () => {},
+});
+
+const Tabs: React.FC<TabsProps> = ({ defaultValue, children, className }) => {
+  const [value, setValue] = React.useState(defaultValue);
+
+  return (
+    <TabsContext.Provider value={{ value, setValue }}>
+      <div className={className}>
+        {children}
+      </div>
+    </TabsContext.Provider>
+  );
+};
+
+const TabsList: React.FC<TabsListProps> = ({ children, className }) => {
+  const { value, setValue } = React.useContext(TabsContext);
+  
+  // Extract tab values from children
+  const tabValues: string[] = [];
+  React.Children.forEach(children, (child) => {
+    if (React.isValidElement(child) && child.props.value) {
+      tabValues.push(child.props.value);
+    }
+  });
+
+  return (
+    <StyledTabs
+      value={value}
+      onChange={(_, newValue) => setValue(newValue)}
+      className={className}
+    >
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          return (
+            <Tab
+              label={child.props.children}
+              value={child.props.value}
+            />
+          );
+        }
+        return child;
+      })}
+    </StyledTabs>
+  );
+};
+
+const TabsTrigger: React.FC<TabsTriggerProps> = ({ value, children }) => {
+  return null; // This is handled by TabsList
+};
+
+const TabsContent: React.FC<TabsContentProps> = ({ value, children, className }) => {
+  const { value: currentValue } = React.useContext(TabsContext);
+  
+  if (currentValue !== value) {
+    return null;
+  }
+
+  return (
+    <Box className={className} sx={{ mt: 2 }}>
+      {children}
+    </Box>
+  );
+};
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };

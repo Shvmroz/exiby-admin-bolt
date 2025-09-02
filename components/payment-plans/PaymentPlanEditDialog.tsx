@@ -11,13 +11,7 @@ import {
 } from '@mui/material';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem } from '@/components/ui/select';
 import { Save, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
@@ -184,23 +178,12 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
               <Select
                 value={formData.currency}
                 onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                }}
               >
-                <SelectTrigger
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
+                <SelectContent>
                   {currencies.map(currency => (
                     <SelectItem key={currency} value={currency}>
                       {currency}
@@ -218,23 +201,12 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
               <Select
                 value={formData.plan_type}
                 onValueChange={(value) => setFormData({ ...formData, plan_type: value })}
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                }}
               >
-                <SelectTrigger
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
+                <SelectContent>
                   {planTypes.map(type => (
                     <SelectItem key={type} value={type}>
                       {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -252,23 +224,12 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
               <Select
                 value={formData.billing_cycle}
                 onValueChange={(value) => setFormData({ ...formData, billing_cycle: value })}
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                }}
               >
-                <SelectTrigger
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                >
+                <SelectContent>
                   {billingCycles.map(cycle => (
                     <SelectItem key={cycle} value={cycle}>
                       {cycle.charAt(0).toUpperCase() + cycle.slice(1)}

@@ -24,13 +24,7 @@ import PaymentPlanEditDialog from '@/components/payment-plans/PaymentPlanEditDia
 import PaymentPlanCreateDialog from '@/components/payment-plans/PaymentPlanCreateDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
 interface PaymentPlan {
@@ -488,10 +482,12 @@ const PaymentPlansPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-500" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
+              <Select 
+                value={statusFilter} 
+                onValueChange={setStatusFilter}
+                placeholder="Filter by status"
+                style={{ width: '160px' }}
+              >
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
@@ -500,10 +496,12 @@ const PaymentPlansPage: React.FC = () => {
               </Select>
             </div>
             <div className="flex items-center space-x-2">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
+              <Select 
+                value={typeFilter} 
+                onValueChange={setTypeFilter}
+                placeholder="Filter by type"
+                style={{ width: '160px' }}
+              >
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="recurring">Recurring</SelectItem>

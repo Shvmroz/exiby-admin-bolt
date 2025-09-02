@@ -16,13 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface GeneralSettings {
@@ -238,10 +232,8 @@ const ConfigurationPage: React.FC = () => {
                   value={formData.time_zone}
                   onValueChange={(value) => setFormData({ ...formData, time_zone: value })}
                   disabled={!isEditing}
+                  style={{ paddingLeft: '40px' }}
                 >
-                  <SelectTrigger className="pl-10">
-                    <SelectValue />
-                  </SelectTrigger>
                   <SelectContent>
                     {timeZones.map(tz => (
                       <SelectItem key={tz} value={tz}>
