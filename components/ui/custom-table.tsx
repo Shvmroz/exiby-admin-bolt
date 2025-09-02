@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Table,
   TableBody,
@@ -8,28 +8,28 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
+} from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 export interface TableHeader {
   key: string;
   label: string;
-  type?: 'text' | 'action' | 'custom';
+  type?: "text" | "action" | "custom";
   sortable?: boolean;
   width?: string;
 }
@@ -38,7 +38,7 @@ export interface MenuOption {
   label: string;
   action: (item: any) => void;
   icon?: React.ReactNode;
-  variant?: 'default' | 'destructive';
+  variant?: "default" | "destructive";
 }
 
 export interface PaginationConfig {
@@ -80,13 +80,19 @@ const CustomTable: React.FC<CustomTableProps> = ({
   onRowClick,
   renderCell,
   loading = false,
-  emptyMessage = 'No data available',
+  emptyMessage = "No data available",
 }) => {
-  const { total_count, rows_per_page, page, handleChangePage, onRowsPerPageChange } = custom_pagination;
+  const {
+    total_count,
+    rows_per_page,
+    page,
+    handleChangePage,
+    onRowsPerPageChange,
+  } = custom_pagination;
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelected(data.map(item => item._id));
+      setSelected(data.map((item) => item._id));
     } else {
       setSelected([]);
     }
@@ -96,7 +102,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
     if (checked) {
       setSelected([...selected, id]);
     } else {
-      setSelected(selected.filter(selectedId => selectedId !== id));
+      setSelected(selected.filter((selectedId) => selectedId !== id));
     }
   };
 
@@ -128,7 +134,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   <Checkbox
                     checked={isAllSelected}
                     onCheckedChange={handleSelectAll}
-                    ref={(ref) => {
+                    ref={(ref: any) => {
                       if (ref) ref.indeterminate = isIndeterminate;
                     }}
                   />
@@ -137,7 +143,9 @@ const CustomTable: React.FC<CustomTableProps> = ({
               {TABLE_HEAD.map((header) => (
                 <TableHead
                   key={header.key}
-                  className={`text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap ${header.width || ''}`}
+                  className={`text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap ${
+                    header.width || ""
+                  }`}
                 >
                   {header.label}
                 </TableHead>
@@ -151,7 +159,9 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   colSpan={TABLE_HEAD.length + (checkbox_selection ? 1 : 0)}
                   className="text-center py-12"
                 >
-                  <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {emptyMessage}
+                  </p>
                 </TableCell>
               </TableRow>
             ) : (
@@ -165,17 +175,26 @@ const CustomTable: React.FC<CustomTableProps> = ({
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selected.includes(item._id)}
-                        onCheckedChange={(checked) => handleSelectRow(item._id, checked as boolean)}
+                        onCheckedChange={(checked) =>
+                          handleSelectRow(item._id, checked as boolean)
+                        }
                       />
                     </TableCell>
                   )}
                   {TABLE_HEAD.map((header) => (
-                    <TableCell key={header.key} className="py-4 whitespace-nowrap">
-                      {header.type === 'action' ? (
+                    <TableCell
+                      key={header.key}
+                      className="py-4 whitespace-nowrap"
+                    >
+                      {header.type === "action" ? (
                         <div onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -184,9 +203,15 @@ const CustomTable: React.FC<CustomTableProps> = ({
                                 <DropdownMenuItem
                                   key={index}
                                   onClick={() => option.action(item)}
-                                  className={option.variant === 'destructive' ? 'text-red-600' : ''}
+                                  className={
+                                    option.variant === "destructive"
+                                      ? "text-red-600"
+                                      : ""
+                                  }
                                 >
-                                  {option.icon && <span className="mr-2">{option.icon}</span>}
+                                  {option.icon && (
+                                    <span className="mr-2">{option.icon}</span>
+                                  )}
                                   {option.label}
                                 </DropdownMenuItem>
                               ))}
@@ -220,7 +245,9 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-700 dark:text-gray-300">Rows per page:</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Rows per page:
+              </span>
               <Select
                 value={rows_per_page.toString()}
                 onValueChange={(value) => onRowsPerPageChange(parseInt(value))}
@@ -247,11 +274,11 @@ const CustomTable: React.FC<CustomTableProps> = ({
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              
+
               <span className="text-sm text-gray-800 dark:text-gray-200 font-medium">
                 Page {page} of {totalPages}
               </span>
-              
+
               <Button
                 variant="outline"
                 size="sm"
