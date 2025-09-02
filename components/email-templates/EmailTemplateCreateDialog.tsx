@@ -77,14 +77,17 @@ const EmailTemplateCreateDialog: React.FC<EmailTemplateCreateDialogProps> = ({
     setShowPreview(false);
   };
 
-  const extractVariables = (content: string) => {
+  const extractVariables = (content: string): string[] => {
     const regex = /\{\{([^}]+)\}\}/g;
     const matches = content.match(regex);
-    if (matches) {
-      return [...new Set(matches.map(match => match.replace(/[{}]/g, '')))];
-    }
-    return [];
+    
+    if (!matches) return [];
+  
+    // Remove curly braces and return unique variables
+    const variables = matches.map(match => match.replace(/{{|}}/g, ''));
+    return Array.from(new Set(variables));
   };
+  
 
   const handleContentChange = (content: string) => {
     setFormData({
