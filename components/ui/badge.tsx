@@ -1,59 +1,36 @@
-'use client';
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-import React from 'react';
-import { Chip, ChipProps } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { cn } from '@/lib/utils';
 
-const StyledChip = styled(Chip)(({ theme }) => ({
-  borderRadius: '9999px',
-  fontSize: '12px',
-  fontWeight: 600,
-  height: '24px',
-  '& .MuiChip-label': {
-    paddingLeft: '10px',
-    paddingRight: '10px',
-  },
-}));
-
-export interface BadgeProps extends Omit<ChipProps, 'variant'> {
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
-  className?: string;
-}
-
-const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
-  ({ variant = 'default', className, ...props }, ref) => {
-    const getMuiVariant = () => {
-      switch (variant) {
-        case 'outline':
-          return 'outlined';
+const badgeVariants = cva(
+  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+  {
+    variants: {
+      variant: {
         default:
-          return 'filled';
-      }
-    };
-
-    const getMuiColor = () => {
-      switch (variant) {
-        case 'destructive':
-          return 'error';
-        case 'secondary':
-          return 'secondary';
-        default:
-          return 'primary';
-      }
-    };
-
-    return (
-      <StyledChip
-        ref={ref}
-        variant={getMuiVariant()}
-        color={getMuiColor()}
-        size="small"
-        {...props}
-      />
-    );
+          'border-transparent bg-primary text-primary-foreground ',
+        secondary:
+          'border-transparent bg-secondary text-secondary-foreground ',
+        destructive:
+          'border-transparent bg-destructive text-destructive-foreground ',
+        outline: 'text-foreground border-current',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
   }
 );
 
-Badge.displayName = 'Badge';
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
 
-export { Badge };
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  );
+}
+
+export { Badge, badgeVariants };

@@ -1,47 +1,25 @@
-'use client';
+import * as React from 'react';
 
-import React from 'react';
-import { TextField, TextFieldProps } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { cn } from '@/lib/utils';
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  '& .MuiOutlinedInput-root': {
-    borderRadius: '8px',
-    '& fieldset': {
-      borderColor: theme.palette.mode === 'dark' ? '#4b5563' : '#d1d5db',
-    },
-    '&:hover fieldset': {
-      borderColor: theme.palette.mode === 'dark' ? '#6b7280' : '#9ca3af',
-    },
-    '&.Mui-focused fieldset': {
-      borderColor: '#0077ED',
-      borderWidth: '2px',
-    },
-  },
-  '& .MuiInputBase-input': {
-    padding: '12px 14px',
-    fontSize: '14px',
-  },
-}));
-
-export interface InputProps extends Omit<TextFieldProps, 'variant'> {
-  className?: string;
-}
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, type, ...props }, ref) => {
     return (
-      <StyledTextField
-        inputRef={ref}
-        variant="outlined"
-        fullWidth
-        size="small"
+      <input
+        type={type}
+        className={cn(
+          'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-gray-900 dark:text-white',
+          className
+        )}
+        ref={ref}
         {...props}
       />
     );
   }
 );
-
 Input.displayName = 'Input';
 
 export { Input };

@@ -22,7 +22,13 @@ import OrganizationCreateDialog from '@/components/organizations/OrganizationCre
 import OrganizationDetailView from '@/components/organizations/OrganizationDetailView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
 interface Organization {
@@ -499,12 +505,10 @@ const OrganizationsPage: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              <Select 
-                value={statusFilter} 
-                onValueChange={setStatusFilter}
-                placeholder="Filter by status"
-                style={{ width: '160px' }}
-              >
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
@@ -515,12 +519,10 @@ const OrganizationsPage: React.FC = () => {
               </Select>
             </div>
             <div className="flex items-center space-x-2">
-              <Select 
-                value={categoryFilter} 
-                onValueChange={setCategoryFilter}
-                placeholder="Filter by category"
-                style={{ width: '160px' }}
-              >
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="organization">Organization</SelectItem>

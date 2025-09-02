@@ -139,14 +139,24 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
               <Select
                 value={formData.category}
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
-                placeholder="Select category"
                 required
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                }}
               >
-                <SelectContent>
+                <SelectTrigger
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
                   <SelectItem value="organization">
                     <div className="flex items-center">
                       <Building2 className="w-4 h-4 mr-2" />
@@ -189,12 +199,23 @@ const OrganizationCreateDialog: React.FC<OrganizationCreateDialogProps> = ({
               <Select
                 value={formData.subscription_status}
                 onValueChange={(value) => setFormData({ ...formData, subscription_status: value })}
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                }}
               >
-                <SelectContent>
+                <SelectTrigger
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>

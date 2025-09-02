@@ -12,7 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Save, X, Mail, Eye } from 'lucide-react';
 
 interface EmailTemplateCreateDialogProps {
@@ -176,14 +182,24 @@ const EmailTemplateCreateDialog: React.FC<EmailTemplateCreateDialogProps> = ({
                   <Select
                     value={formData.template_type}
                     onValueChange={(value) => setFormData({ ...formData, template_type: value })}
-                    placeholder="Select template type"
                     required
-                    style={{
-                      backgroundColor: darkMode ? '#374151' : '#ffffff',
-                      color: darkMode ? '#ffffff' : '#000000',
-                    }}
                   >
-                    <SelectContent>
+                    <SelectTrigger
+                      style={{
+                        backgroundColor: darkMode ? '#374151' : '#ffffff',
+                        color: darkMode ? '#ffffff' : '#000000',
+                        borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                      }}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      style={{
+                        backgroundColor: darkMode ? '#374151' : '#ffffff',
+                        color: darkMode ? '#ffffff' : '#000000',
+                        borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                      }}
+                    >
                       {templateTypes.map(type => (
                         <SelectItem key={type} value={type}>
                           {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}

@@ -190,12 +190,23 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
                   <Select
                     value={formData.template_type}
                     onValueChange={(value) => setFormData({ ...formData, template_type: value })}
-                    style={{
-                      backgroundColor: darkMode ? '#374151' : '#ffffff',
-                      color: darkMode ? '#ffffff' : '#000000',
-                    }}
                   >
-                    <SelectContent>
+                    <SelectTrigger
+                      style={{
+                        backgroundColor: darkMode ? '#374151' : '#ffffff',
+                        color: darkMode ? '#ffffff' : '#000000',
+                        borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                      }}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      style={{
+                        backgroundColor: darkMode ? '#374151' : '#ffffff',
+                        color: darkMode ? '#ffffff' : '#000000',
+                        borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                      }}
+                    >
                       {templateTypes.map(type => (
                         <SelectItem key={type} value={type}>
                           {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}

@@ -1,122 +1,117 @@
-'use client';
+import * as React from 'react';
 
-import React from 'react';
-import {
-  Table as MuiTable,
-  TableBody as MuiTableBody,
-  TableCell as MuiTableCell,
-  TableContainer,
-  TableHead as MuiTableHead,
-  TableRow as MuiTableRow,
-  Paper,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { cn } from '@/lib/utils';
 
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  borderRadius: '8px',
-  border: `1px solid ${theme.palette.mode === 'dark' ? '#374151' : '#e5e7eb'}`,
-}));
+const Table = React.forwardRef<
+  HTMLTableElement,
+  React.HTMLAttributes<HTMLTableElement>
+>(({ className, ...props }, ref) => (
+  <div className="relative w-full overflow-auto">
+    <table
+      ref={ref}
+      className={cn('w-full caption-bottom text-sm', className)}
+      {...props}
+    />
+  </div>
+));
+Table.displayName = 'Table';
 
-const StyledTableCell = styled(MuiTableCell)(({ theme }) => ({
-  borderBottom: `1px solid ${theme.palette.mode === 'dark' ? '#374151' : '#e5e7eb'}`,
-  padding: '16px',
-}));
+const TableHeader = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <thead ref={ref} className={cn('[&_tr]:border-b', className)} {...props} />
+));
+TableHeader.displayName = 'TableHeader';
 
-const StyledTableHead = styled(MuiTableCell)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#374151' : '#f9fafb',
-  borderBottom: `1px solid ${theme.palette.mode === 'dark' ? '#4b5563' : '#e5e7eb'}`,
-  fontWeight: 500,
-  fontSize: '12px',
-  textTransform: 'uppercase',
-  letterSpacing: '0.05em',
-  color: theme.palette.mode === 'dark' ? '#9ca3af' : '#6b7280',
-  padding: '12px 16px',
-}));
+const TableBody = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tbody
+    ref={ref}
+    className={cn('[&_tr:last-child]:border-0', className)}
+    {...props}
+  />
+));
+TableBody.displayName = 'TableBody';
 
-interface TableProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const TableFooter = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tfoot
+    ref={ref}
+    className={cn(
+      'border-t bg-muted/50 font-medium [&>tr]:last:border-b-0',
+      className
+    )}
+    {...props}
+  />
+));
+TableFooter.displayName = 'TableFooter';
 
-interface TableHeaderProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const TableRow = React.forwardRef<
+  HTMLTableRowElement,
+  React.HTMLAttributes<HTMLTableRowElement>
+>(({ className, ...props }, ref) => (
+  <tr
+    ref={ref}
+    className={cn(
+      'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
+      className
+    )}
+    {...props}
+  />
+));
+TableRow.displayName = 'TableRow';
 
-interface TableBodyProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const TableHead = React.forwardRef<
+  HTMLTableCellElement,
+  React.ThHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <th
+    ref={ref}
+    className={cn(
+      'h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0',
+      className
+    )}
+    {...props}
+  />
+));
+TableHead.displayName = 'TableHead';
 
-interface TableRowProps {
-  children: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
-}
+const TableCell = React.forwardRef<
+  HTMLTableCellElement,
+  React.TdHTMLAttributes<HTMLTableCellElement>
+>(({ className, ...props }, ref) => (
+  <td
+    ref={ref}
+    className={cn('p-4 align-middle [&:has([role=checkbox])]:pr-0', className)}
+    {...props}
+  />
+));
+TableCell.displayName = 'TableCell';
 
-interface TableHeadProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface TableCellProps {
-  children: React.ReactNode;
-  className?: string;
-  onClick?: (e: React.MouseEvent) => void;
-  colSpan?: number;
-}
-
-const Table: React.FC<TableProps> = ({ children, className }) => {
-  return (
-    <StyledTableContainer component={Paper} elevation={0}>
-      <MuiTable>
-        {children}
-      </MuiTable>
-    </StyledTableContainer>
-  );
-};
-
-const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {
-  return <MuiTableHead>{children}</MuiTableHead>;
-};
-
-const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
-  return <MuiTableBody>{children}</MuiTableBody>;
-};
-
-const TableRow: React.FC<TableRowProps> = ({ children, className, onClick }) => {
-  return (
-    <MuiTableRow 
-      onClick={onClick}
-      sx={{ 
-        cursor: onClick ? 'pointer' : 'default',
-        '&:hover': onClick ? {
-          backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#374151' : '#f9fafb',
-        } : {},
-      }}
-    >
-      {children}
-    </MuiTableRow>
-  );
-};
-
-const TableHead: React.FC<TableHeadProps> = ({ children, className }) => {
-  return <StyledTableHead>{children}</StyledTableHead>;
-};
-
-const TableCell: React.FC<TableCellProps> = ({ children, className, onClick, colSpan }) => {
-  return (
-    <StyledTableCell onClick={onClick} colSpan={colSpan}>
-      {children}
-    </StyledTableCell>
-  );
-};
+const TableCaption = React.forwardRef<
+  HTMLTableCaptionElement,
+  React.HTMLAttributes<HTMLTableCaptionElement>
+>(({ className, ...props }, ref) => (
+  <caption
+    ref={ref}
+    className={cn('mt-4 text-sm text-muted-foreground', className)}
+    {...props}
+  />
+));
+TableCaption.displayName = 'TableCaption';
 
 export {
   Table,
   TableHeader,
   TableBody,
-  TableRow,
+  TableFooter,
   TableHead,
+  TableRow,
   TableCell,
+  TableCaption,
 };
