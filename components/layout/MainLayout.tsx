@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { useAppContext } from '@/contexts/AppContext';
@@ -11,42 +11,39 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const { darkMode } = useAppContext();
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  const handleSidebarToggle = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        variant={isDesktop ? 'permanent' : 'temporary'}
-      />
+      {/* Permanent Sidebar for desktop */}
+      <div className="hidden lg:flex lg:flex-shrink-0">
+        <Sidebar open={true} onClose={() => {}} variant="permanent" />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 w-80 z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} variant="temporary" />
+      </div>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <Topbar onMenuClick={handleSidebarToggle} />
-        
+        <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+
         {/* Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
-          <div className="p-6">
-            {children}
-          </div>
+          <div className="p-6">{children}</div>
         </main>
       </div>
     </div>

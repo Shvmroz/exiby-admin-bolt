@@ -100,7 +100,6 @@ const menuItems = [
       },
     ],
   },
-
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -127,7 +126,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         : [...prev, itemText]
     );
   };
-
 
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl border-r border-gray-200 dark:border-gray-700">
@@ -255,8 +253,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             );
           }
 
-     
-
           return (
             <Link
               key={item.text}
@@ -289,8 +285,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </div>
-
-   
     </div>
   );
 
@@ -311,8 +305,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Sidebar */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 w-80 z-50 transform transition-transform duration-300 ease-in-out lg:hidden",
-          open ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 w-80 z-50 lg:hidden",
+          open ? "block" : "hidden"
         )}
       >
         {sidebarContent}
