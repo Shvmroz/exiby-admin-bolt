@@ -220,6 +220,51 @@ const OrganizationRow: React.FC<{
 const DashboardPage: React.FC = () => {
   const router = useRouter();
   const { data } = dashboardData;
+
+  // Recent activities data
+  const recentActivities = [
+    {
+      title: "New Organization Registered",
+      description: "TechCorp Events joined the platform",
+      time: "2 minutes ago",
+      icon: Building2,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20"
+    },
+    {
+      title: "Event Created",
+      description: "Annual Tech Summit 2024 was created",
+      time: "15 minutes ago",
+      icon: Calendar,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50 dark:bg-purple-900/20"
+    },
+    {
+      title: "Payment Received",
+      description: "$299 payment for event registration",
+      time: "1 hour ago",
+      icon: DollarSign,
+      color: "text-green-600",
+      bgColor: "bg-green-50 dark:bg-green-900/20"
+    },
+    {
+      title: "New User Registration",
+      description: "John Doe registered for an event",
+      time: "2 hours ago",
+      icon: User,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50 dark:bg-orange-900/20"
+    },
+    {
+      title: "Subscription Renewed",
+      description: "Innovation Labs renewed their subscription",
+      time: "3 hours ago",
+      icon: CreditCard,
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50 dark:bg-indigo-900/20"
+    }
+  ];
+
   const maxRevenue = Math.max(
     ...data.top_organizations.map((org) => org.total_revenue)
   );
@@ -322,9 +367,9 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 gap-8">
-        {/* Top Organizations - Takes up more space */}
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Top Organizations */}
+        <div className="lg:col-span-1">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -377,6 +422,43 @@ const DashboardPage: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activities */}
+        <div className="lg:col-span-1">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Recent Activities
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Latest platform activities and updates
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {recentActivities.map((activity, index) => (
+                <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <div className={`p-2 rounded-lg ${activity.bgColor} flex-shrink-0`}>
+                    <activity.icon className={`w-4 h-4 ${activity.color}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {activity.title}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {activity.description}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      {activity.time}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

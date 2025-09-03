@@ -7,6 +7,7 @@ import {
   Search,
   Filter,
   Plus,
+  Download,
   Edit,
   Trash2,
   DollarSign,
@@ -24,6 +25,7 @@ import PaymentPlanEditDialog from '@/components/payment-plans/PaymentPlanEditDia
 import PaymentPlanCreateDialog from '@/components/payment-plans/PaymentPlanCreateDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import CsvExportDialog from '@/components/ui/csv-export-dialog';
 import {
   Select,
   SelectContent,
@@ -177,6 +179,9 @@ const PaymentPlansPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+
+  // CSV Export state
+  const [exportDialog, setExportDialog] = useState(false);
 
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -468,6 +473,14 @@ const PaymentPlansPage: React.FC = () => {
             <Plus className="w-4 h-4 mr-2" />
             Add Payment Plan
           </Button>
+          <Button
+            onClick={() => setExportDialog(true)}
+            variant="outline"
+            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
         </div>
       </div>
 
@@ -564,6 +577,14 @@ const PaymentPlansPage: React.FC = () => {
         onOpenChange={setCreateDialog}
         onSave={handleCreate}
         loading={createLoading}
+      />
+
+      {/* CSV Export Dialog */}
+      <CsvExportDialog
+        open={exportDialog}
+        onOpenChange={setExportDialog}
+        exportType="payment_plans"
+        title="Payment Plans"
       />
     </div>
   );

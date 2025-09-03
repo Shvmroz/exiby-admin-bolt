@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import {
   BarChart3,
+  Download,
   TrendingUp,
   Calendar,
   Users,
@@ -25,6 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import CsvExportDialog from '@/components/ui/csv-export-dialog';
 import {
   BarChart,
   Bar,
@@ -159,6 +161,9 @@ const COLORS = ['#0077ED', '#4A9AFF', '#8CC0FF', '#B8D4FF', '#E1EFFF'];
 const AnalyticsPage: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState('2025-08');
 
+  // CSV Export state
+  const [exportDialog, setExportDialog] = useState(false);
+
   // Get available months from the data
   const availableMonths = monthlyData.map(item => item.month).sort().reverse();
 
@@ -217,6 +222,14 @@ const AnalyticsPage: React.FC = () => {
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <Filter className="w-4 h-4 text-gray-500" />
+            <Button
+              onClick={() => setExportDialog(true)}
+              variant="outline"
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
               <SelectTrigger className="w-48">
                 <SelectValue />
@@ -905,6 +918,14 @@ const AnalyticsPage: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* CSV Export Dialog */}
+      <CsvExportDialog
+        open={exportDialog}
+        onOpenChange={setExportDialog}
+        exportType="analytics"
+        title="Analytics Data"
+      />
     </div>
   );
 };

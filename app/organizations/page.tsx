@@ -7,6 +7,7 @@ import {
   Search,
   Filter,
   Plus,
+  Download,
   Edit,
   Trash2,
   ExternalLink,
@@ -22,6 +23,7 @@ import OrganizationCreateDialog from '@/components/organizations/OrganizationCre
 import OrganizationDetailView from '@/components/organizations/OrganizationDetailView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import CsvExportDialog from '@/components/ui/csv-export-dialog';
 import {
   Select,
   SelectContent,
@@ -175,6 +177,9 @@ const OrganizationsPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+
+  // CSV Export state
+  const [exportDialog, setExportDialog] = useState(false);
 
   // Pagination state
   const [pagination, setPagination] = useState({
@@ -469,6 +474,14 @@ const OrganizationsPage: React.FC = () => {
             <Plus className="w-4 h-4 mr-2" />
             Add Organization
           </Button>
+          <Button
+            onClick={() => setExportDialog(true)}
+            variant="outline"
+            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
         </div>
       </div>
 
@@ -578,6 +591,14 @@ const OrganizationsPage: React.FC = () => {
       
         />
       )}
+
+      {/* CSV Export Dialog */}
+      <CsvExportDialog
+        open={exportDialog}
+        onOpenChange={setExportDialog}
+        exportType="organizations"
+        title="Organizations"
+      />
     </div>
   );
 };
