@@ -159,15 +159,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl border-r border-gray-200 dark:border-gray-700">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700 ">
-        <div className="flex items-center space-x-3">
-          <div>
-            <h1 className="text-[#0077ED] dark:text-white text-3xl font-extrabold ">
-              ExiBy
-            </h1>
-
-            <p className="text-gray-500 text-sm">Event Management</p>
-          </div>
+      <div className="h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex items-center">
+        <div>
+          <h1 className="text-blue-500 dark:text-white text-2xl font-bold leading-tight">
+            ExiBy
+          </h1>
+          <p className="text-gray-500 text-xs">Event Management</p>
         </div>
       </div>
 
