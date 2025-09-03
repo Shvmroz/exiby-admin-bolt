@@ -114,7 +114,7 @@ const OrganizationRow: React.FC<{
     total_revenue: number;
   };
   rank: number;
-  maxRevenue: number;
+  maxRevenue: number; // Make sure maxRevenue is received as a prop
 }> = ({ organization, rank, maxRevenue }) => {
   const router = useRouter();
 
@@ -122,90 +122,98 @@ const OrganizationRow: React.FC<{
     router.push(`/organizations`);
   };
 
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return `#${rank}`;
+  const getRankBarColor = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return "bg-[#0077ED]"; // Darkest blue
+      case 2:
+        return "bg-[#2B8AFF]"; // Medium-dark blue
+      case 3:
+        return "bg-[#4A9AFF]"; // Medium blue
+      case 4:
+        return "bg-[#6BADFF]"; // Medium-light blue
+      default:
+        return "bg-[#8CC0FF]"; // Lightest blue
+    }
   };
 
+  const rankBadgeColorHash: { [key: number]: string } = {
+    1: "bg-gradient-to-r from-yellow-600 to-yellow-500 text-yellow-900",
+    2: "bg-gradient-to-r from-yellow-500 to-yellow-400 text-yellow-900",
+    3: "bg-gradient-to-r from-yellow-300 to-yellow-200 text-yellow-900",
+    4: "bg-gradient-to-r from-yellow-200 to-yellow-100 text-yellow-800",
+    5: "bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700",
+  };
+
+  const getRankBadgeColor = (rank: number) => {
+    return (
+      rankBadgeColorHash[rank] ??
+      "bg-gradient-to-r from-yellow-50 to-yellow-50 text-yellow-700" // Fallback = softest yellow
+    );
+  };
+
+  // Correctly calculate the revenue percentage using the maxRevenue prop
   const revenuePercentage = (organization.total_revenue / maxRevenue) * 100;
 
   return (
-    <div
+    <tr
       onClick={handleClick}
-      className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group"
     >
-      <div className="flex items-center space-x-4 flex-1">
-        <div className="w-10 h-10 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md">
-          {getRankIcon(rank)}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-base text-gray-900 dark:text-white group-hover:text-[#0077ED] transition-colors truncate">
-            {organization.name}
-          </h3>
-          <div className="flex items-center space-x-4 mt-1">
-            <div className="flex items-center space-x-1">
-              <Calendar className="w-4 h-4 text-purple-500" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                {organization.total_events} events
-              </span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <DollarSign className="w-4 h-4 text-green-500" />
-              <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                ${organization.total_revenue.toLocaleString()}
-              </span>
-            </div>
+      {/* Rank */}
+      <td className="px-6 py-4">
+        <div className="flex items-center justify-center">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankBadgeColor(
+              rank
+            )}`}
+          >
+            {rank <= 3 && rank === 1 && <span>{rank}</span>}
+            {rank <= 3 && rank !== 1 && <span>{rank}</span>}
+            {rank > 3 && <span>{rank}</span>}
           </div>
         </div>
-      </div>
-      <div className="flex flex-col items-end space-y-2">
-        <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] transition-all duration-500 rounded-full"
-            style={{ width: `${Math.max(revenuePercentage, 8)}%` }}
-          />
-        </div>
-        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          {Math.round(revenuePercentage)}%
-        </span>
-      </div>
-    </div>
-  );
-};
+      </td>
 
-const ActivityItem: React.FC<{
-  activity: {
-    title: string;
-    description: string;
-    time: string;
-    icon: React.ComponentType<any>;
-    color: string;
-    bgColor: string;
-  };
-}> = ({ activity }) => {
-  const Icon = activity.icon;
-  
-  return (
-    <div className="flex items-start space-x-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-      <div className={`p-3 rounded-xl ${activity.bgColor} flex-shrink-0 shadow-sm`}>
-        <Icon className={`w-5 h-5 ${activity.color}`} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-          {activity.title}
-        </h4>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-          {activity.description}
-        </p>
-        <div className="flex items-center mt-2">
-          <span className="text-xs text-gray-500 dark:text-gray-500 font-medium">
-            {activity.time}
+      {/* Organization Name */}
+      <td className="px-6 py-4">
+        <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#0077ED] transition-colors">
+          {organization.name}
+        </div>
+      </td>
+
+      {/* Events */}
+      <td className="px-6 py-4">
+        <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
+          <Calendar className="w-4 h-4 text-blue-500" />
+          <span>{organization.total_events}</span>
+        </div>
+      </td>
+
+      {/* Revenue */}
+      <td className="px-6 py-4">
+        <div className="text-green-500 dark:text-green-500 font-medium">
+          ${organization.total_revenue.toLocaleString()}
+        </div>
+      </td>
+
+      {/* Performance Bar */}
+      <td className="px-6 py-4">
+        <div className="flex items-center space-x-3">
+          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div
+              className={`h-full ${getRankBarColor(
+                rank
+              )} transition-all duration-500`}
+              style={{ width: `${Math.max(revenuePercentage, 5)}%` }}
+            />
+          </div>
+          <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right">
+            {Math.round(revenuePercentage)}%
           </span>
         </div>
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 };
 
@@ -362,13 +370,13 @@ const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top Organizations */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 h-[500px] flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                   Top Organizations
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Organizations ranked by revenue and activity
                 </p>
               </div>
@@ -381,43 +389,75 @@ const DashboardPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-              {data.top_organizations.map((org, index) => (
-                <OrganizationRow
-                  key={org._id}
-                  organization={org}
-                  rank={index + 1}
-                  maxRevenue={maxRevenue}
-                />
-              ))}
+            <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700/50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Rank
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Organization
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Events
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Revenue
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Performance
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"></th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {data.top_organizations.map((org, index) => (
+                    <OrganizationRow
+                      key={org._id}
+                      organization={org}
+                      rank={index + 1}
+                      maxRevenue={maxRevenue}
+                    />
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
         {/* Recent Activities */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 h-[500px] flex flex-col">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                   Recent Activities
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Latest platform activities and updates
                 </p>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+            <div className="space-y-4">
               {recentActivities.map((activity, index) => (
-                <ActivityItem key={index} activity={activity} />
-              ))}
-              {/* Add more activities for demonstration of scroll */}
-              {recentActivities.map((activity, index) => (
-                <ActivityItem key={`extra-${index}`} activity={{
-                  ...activity,
-                  time: `${index + 6} hours ago`
-                }} />
+                <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                  <div className={`p-2 rounded-lg ${activity.bgColor} flex-shrink-0`}>
+                    <activity.icon className={`w-4 h-4 ${activity.color}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {activity.title}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      {activity.description}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      {activity.time}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
