@@ -41,6 +41,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import { Button } from '@/components/ui/button';
 
 // Data sets
 const platformStats = {
@@ -221,7 +222,6 @@ const AnalyticsPage: React.FC = () => {
         </div>
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-gray-500" />
             <Button
               onClick={() => setExportDialog(true)}
               variant="outline"
