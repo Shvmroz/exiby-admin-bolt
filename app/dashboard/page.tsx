@@ -213,11 +213,6 @@ const OrganizationRow: React.FC<{
           </span>
         </div>
       </td>
-
-      {/* Action */}
-      <td className="px-6 py-4">
-        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#0077ED] transition-colors" />
-      </td>
     </tr>
   );
 };

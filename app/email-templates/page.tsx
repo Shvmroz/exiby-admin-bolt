@@ -380,16 +380,6 @@ const EmailTemplatesPage: React.FC = () => {
     );
   };
 
-  const getTypeColor = (type: string) => {
-    const typeColors = {
-      user_registration: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-      event_registration: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-      password_reset: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-      event_reminder: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
-      payment_confirmation: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400',
-    };
-    return typeColors[type as keyof typeof typeColors] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -445,7 +435,7 @@ const EmailTemplatesPage: React.FC = () => {
 
       case 'template_type':
         return (
-          <Badge className={getTypeColor(template.template_type)}>
+          <Badge className={template.template_type}>
             {template.template_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
           </Badge>
         );

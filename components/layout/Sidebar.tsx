@@ -17,7 +17,6 @@ import {
   Cog,
   CreditCard,
   Mail,
-  LogOut,
   Receipt,
 } from "lucide-react";
 
@@ -101,20 +100,7 @@ const menuItems = [
       },
     ],
   },
-  {
-    text: "Settings",
-    icon: Settings,
-    path: "/settings",
-    color: "text-gray-400",
-    bgColor: "bg-gray-100",
-  },
-  {
-    text: "Logout",
-    icon: LogOut,
-    path: "/",
-    color: "text-red-400",
-    bgColor: "bg-red-50",
-  },
+
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -123,9 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   variant = "temporary",
 }) => {
   const pathname = usePathname();
-  const { logout } = useAppContext();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
-  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
 
   // Auto-expand configuration menu if on a config page
   React.useEffect(() => {
@@ -144,24 +128,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  const handleLogoutClick = () => {
-    setShowLogoutDialog(true);
-  };
-
-  const confirmLogout = () => {
-    logout();
-    setShowLogoutDialog(false);
-    if (variant === "temporary") {
-      onClose();
-    }
-  };
 
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl border-r border-gray-200 dark:border-gray-700">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex items-center">
+      <div className="h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-center">
         <div>
-          <h1 className="text-blue-500 dark:text-white text-2xl font-bold leading-tight">
+          <h1 className="text-blue-500 dark:text-white text-3xl font-extrabold leading-tight">
             ExiBy
           </h1>
           <p className="text-gray-500 text-xs">Event Management</p>
@@ -282,23 +255,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             );
           }
 
-          // For logout item, use button instead of Link
-          if (item.text === "Logout") {
-            return (
-              <button
-                key={item.text}
-                onClick={handleLogoutClick}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200
-                group text-red-600 dark:text-red-400
-                hover:bg-red-50 dark:hover:bg-red-900/20"
-              >
-                <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 transition-colors duration-200">
-                  <Icon className="w-5 h-5 transition-colors duration-200" />
-                </div>
-                <span className="font-medium">{item.text}</span>
-              </button>
-            );
-          }
+     
 
           return (
             <Link
@@ -333,16 +290,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
-      {/* Logout Confirmation Dialog */}
-      <ConfirmDeleteDialog
-        open={showLogoutDialog}
-        onOpenChange={setShowLogoutDialog}
-        title="Confirm Logout"
-        content="Are you sure you want to logout? You will need to sign in again to access your account."
-        confirmButtonText="Logout"
-        cancelButtonText="Cancel"
-        onConfirm={confirmLogout}
-      />
+   
     </div>
   );
 

@@ -29,7 +29,7 @@ interface GeneralSettings {
   site_name: string;
   site_logo: string;
   contact_email: string;
-  admin_settings: object;
+  // admin_settings: object;
   time_zone: string;
   updated_at: string;
 }
@@ -42,7 +42,7 @@ const ConfigurationPage: React.FC = () => {
     site_name: "Event Management Platform",
     site_logo: "https://images.pexels.com/photos/1181467/pexels-photo-1181467.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&dpr=1",
     contact_email: "support@platform.com",
-    admin_settings: {},
+    // admin_settings: {},
     time_zone: "Europe/Dublin",
     updated_at: "2025-08-20T09:45:12.000Z"
   });
@@ -254,27 +254,6 @@ const ConfigurationPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Admin Settings */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Admin Settings (JSON)
-            </label>
-            <Textarea
-              value={JSON.stringify(formData.admin_settings, null, 2)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value);
-                  setFormData({ ...formData, admin_settings: parsed });
-                } catch {
-                  // Invalid JSON, keep the text but don't update state
-                }
-              }}
-              disabled={!isEditing}
-              rows={4}
-              placeholder="Enter admin settings as JSON"
-              className="font-mono text-sm"
-            />
-          </div>
 
           {/* Updated At (Read-only) */}
           <div>
