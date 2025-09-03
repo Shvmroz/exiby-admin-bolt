@@ -89,15 +89,21 @@ const OrganizationRow: React.FC<{
   rank: number;
   maxRevenue: number;
 }> = ({ organization, rank }) => (
-  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200">
+  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all duration-200">
     <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">#{rank}</td>
-    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">{organization.name}</td>
-    <td className="px-6 py-4 flex items-center space-x-1 text-gray-600 dark:text-gray-400">
+    <td className="px-6 py-4">
+      <div className="font-semibold text-gray-900 dark:text-white">{organization.name}</div>
+    </td>
+    <td className="px-6 py-4">
+      <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
       <Calendar className="w-4 h-4 text-blue-500" />
       <span>{organization.total_events}</span>
+      </div>
     </td>
-    <td className="px-6 py-4 text-green-500 dark:text-green-400 font-medium">
+    <td className="px-6 py-4">
+      <div className="text-green-600 dark:text-green-400 font-semibold">
       ${organization.total_revenue.toLocaleString()}
+      </div>
     </td>
   </tr>
 );
@@ -160,19 +166,21 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Main */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[600px]">
         {/* Top Orgs */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full">
           <div className="flex items-center justify-between mb-4">
+            <div className="px-6 pt-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Top Organizations</h2>
             <button onClick={() => router.push("/organizations")} className="flex items-center space-x-1 text-[#0077ED] hover:text-[#0066CC] text-sm font-medium">
               <span>View All</span>
               <ChevronRight className="w-4 h-4" />
             </button>
+            </div>
           </div>
-          <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 flex-1">
+          <div className="flex-1 overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
+              <thead className="bg-gray-50 dark:bg-gray-700/50 sticky top-0">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rank</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Organization</th>
@@ -180,7 +188,7 @@ const DashboardPage: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Revenue</th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {data.top_organizations.map((org, i) => (
                   <OrganizationRow key={org._id} organization={org} rank={i + 1} maxRevenue={maxRevenue} />
                 ))}
@@ -190,20 +198,22 @@ const DashboardPage: React.FC = () => {
         </div>
 
         {/* Recent Activities */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col h-full">
+          <div className="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Activities</h2>
-          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+          </div>
+          <div className="flex-1 overflow-y-auto p-6 pt-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
             {recentActivities.map((activity, i) => {
               const style = activityStyles[activity.type];
               return (
-                <div key={i} className="flex items-start space-x-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                  <div className={`p-2 rounded-md ${style.bg}`}>
+                <div key={i} className={`flex items-start space-x-3 p-4 rounded-lg transition-all duration-200 hover:shadow-sm ${style.bg} border border-transparent hover:border-gray-200 dark:hover:border-gray-600`}>
+                  <div className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
                     <style.icon className={`w-4 h-4 ${style.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.title}</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{activity.description}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{timeAgo(activity.time)}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">{activity.description}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-2 font-medium">{timeAgo(activity.time)}</p>
                   </div>
                 </div>
               );
