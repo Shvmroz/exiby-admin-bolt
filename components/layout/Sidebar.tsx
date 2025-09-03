@@ -132,7 +132,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl border-r border-gray-200 dark:border-gray-700">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-center">
+      <div className="h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex items-center ">
         <div>
           <h1 className="text-blue-500 dark:text-white text-3xl font-extrabold leading-tight">
             ExiBy
