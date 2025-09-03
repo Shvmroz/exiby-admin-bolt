@@ -14,7 +14,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Filter,
+  Download,
 } from 'lucide-react';
+import ExportCsvButton from '@/components/ui/export-csv-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -215,6 +217,8 @@ const AnalyticsPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
+          <ExportCsvButton exportType="revenue" />
+          <ExportCsvButton exportType="analytics" />
           <div className="flex items-center space-x-2">
             <Filter className="w-4 h-4 text-gray-500" />
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>

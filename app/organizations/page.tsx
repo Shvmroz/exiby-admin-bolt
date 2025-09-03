@@ -20,6 +20,7 @@ import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import OrganizationEditDialog from '@/components/organizations/OrganizationEditDialog';
 import OrganizationCreateDialog from '@/components/organizations/OrganizationCreateDialog';
 import OrganizationDetailView from '@/components/organizations/OrganizationDetailView';
+import ExportCsvButton from '@/components/ui/export-csv-button';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -462,6 +463,7 @@ const OrganizationsPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
+          <ExportCsvButton exportType="organizations" />
           <Button
             onClick={() => setCreateDialog(true)}
             className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
