@@ -14,8 +14,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -166,7 +164,7 @@ const StripeConfigurationPage: React.FC = () => {
       {/* Current Mode Display */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-[#0077ED]/10 rounded-lg">
                 <Shield className="w-5 h-5 text-[#0077ED]" />
@@ -184,43 +182,6 @@ const StripeConfigurationPage: React.FC = () => {
               {formData.mode.toUpperCase()}
             </Badge>
           </div>
-          
-          {/* Mode Toggle */}
-          {isEditing && (
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                    Switch Mode
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Toggle between live and sandbox environments
-                  </p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <span className={cn(
-                    "text-sm font-medium",
-                    formData.mode === 'sandbox' ? 'text-[#0077ED]' : 'text-gray-500'
-                  )}>
-                    Sandbox
-                  </span>
-                  <Switch
-                    checked={formData.mode === 'live'}
-                    onCheckedChange={(checked) => 
-                      setFormData({ ...formData, mode: checked ? 'live' : 'sandbox' })
-                    }
-                    className="data-[state=checked]:bg-[#0077ED] data-[state=unchecked]:bg-yellow-500"
-                  />
-                  <span className={cn(
-                    "text-sm font-medium",
-                    formData.mode === 'live' ? 'text-[#0077ED]' : 'text-gray-500'
-                  )}>
-                    Live
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 

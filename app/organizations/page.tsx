@@ -20,7 +20,6 @@ import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import OrganizationEditDialog from '@/components/organizations/OrganizationEditDialog';
 import OrganizationCreateDialog from '@/components/organizations/OrganizationCreateDialog';
 import OrganizationDetailView from '@/components/organizations/OrganizationDetailView';
-import ExportCsvButton from '@/components/ui/export-csv-button';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -303,6 +302,22 @@ const OrganizationsPage: React.FC = () => {
     setDetailView({ open: true, organization });
   };
 
+  const handleDetailEdit = (updatedOrganization: Organization) => {
+    // Update local state
+    setOrganizations(prev =>
+      prev.map(org => org._id === updatedOrganization._id ? updatedOrganization : org)
+    );
+  };
+
+  const handleDetailDelete = (deletedOrganization: Organization) => {
+    // Remove from local state
+    setOrganizations(prev => 
+      prev.filter(org => org._id !== deletedOrganization._id)
+    );
+    
+    // Update pagination total
+    setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+  };
 
   const MENU_OPTIONS: MenuOption[] = [
     {
@@ -463,7 +478,6 @@ const OrganizationsPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <ExportCsvButton exportType="organizations" />
           <Button
             onClick={() => setCreateDialog(true)}
             className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
@@ -577,7 +591,8 @@ const OrganizationsPage: React.FC = () => {
         <OrganizationDetailView
           organization={detailView.organization}
           onClose={() => setDetailView({ open: false, organization: null })}
-      
+          onEdit={handleDetailEdit}
+          onDelete={handleDetailDelete}
         />
       )}
     </div>

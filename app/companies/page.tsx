@@ -22,7 +22,6 @@ import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import CompanyEditDialog from '@/components/companies/CompanyEditDialog';
 import CompanyCreateDialog from '@/components/companies/CompanyCreateDialog';
 import CompanyDetailView from '@/components/companies/CompanyDetailView';
-import ExportCsvButton from '@/components/ui/export-csv-button';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -540,7 +539,6 @@ const CompaniesPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <ExportCsvButton exportType="companies" />
           <Button
             onClick={() => setCreateDialog(true)}
             className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
