@@ -302,22 +302,6 @@ const OrganizationsPage: React.FC = () => {
     setDetailView({ open: true, organization });
   };
 
-  const handleDetailEdit = (updatedOrganization: Organization) => {
-    // Update local state
-    setOrganizations(prev =>
-      prev.map(org => org._id === updatedOrganization._id ? updatedOrganization : org)
-    );
-  };
-
-  const handleDetailDelete = (deletedOrganization: Organization) => {
-    // Remove from local state
-    setOrganizations(prev => 
-      prev.filter(org => org._id !== deletedOrganization._id)
-    );
-    
-    // Update pagination total
-    setPagination(prev => ({ ...prev, total: prev.total - 1 }));
-  };
 
   const MENU_OPTIONS: MenuOption[] = [
     {
@@ -591,8 +575,7 @@ const OrganizationsPage: React.FC = () => {
         <OrganizationDetailView
           organization={detailView.organization}
           onClose={() => setDetailView({ open: false, organization: null })}
-          onEdit={handleDetailEdit}
-          onDelete={handleDetailDelete}
+      
         />
       )}
     </div>
