@@ -9,9 +9,7 @@ import {
   DollarSign,
   CreditCard,
   ArrowUpRight,
-  Star,
   ChevronRight,
-  Trophy,
   Building,
   User,
 } from "lucide-react";
@@ -27,39 +25,28 @@ const dashboardData = {
     total_users: 300,
     active_subscriptions: 145,
     top_organizations: [
-      {
-        _id: "org_456",
-        name: "TechCorp Events",
-        total_events: 25,
-        total_revenue: 50000,
-      },
-      {
-        _id: "org_789",
-        name: "Innovation Labs",
-        total_events: 18,
-        total_revenue: 35000,
-      },
-      {
-        _id: "org_123",
-        name: "StartupHub",
-        total_events: 15,
-        total_revenue: 28000,
-      },
-      {
-        _id: "org_321",
-        name: "Digital Summit Co",
-        total_events: 12,
-        total_revenue: 22000,
-      },
-      {
-        _id: "org_654",
-        name: "Event Masters",
-        total_events: 10,
-        total_revenue: 18000,
-      },
+      { _id: "org_456", name: "TechCorp Events", total_events: 25, total_revenue: 50000 },
+      { _id: "org_789", name: "Innovation Labs", total_events: 18, total_revenue: 35000 },
+      { _id: "org_123", name: "StartupHub", total_events: 15, total_revenue: 28000 },
+      { _id: "org_321", name: "Digital Summit Co", total_events: 12, total_revenue: 22000 },
+      { _id: "org_654", name: "Event Masters", total_events: 10, total_revenue: 18000 },
     ],
   },
 };
+
+// format ISO → "2m ago"
+function timeAgo(isoDate: string) {
+  const date = new Date(isoDate);
+  const now = new Date();
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+
+  return date.toLocaleDateString();
+}
 
 const MetricCard: React.FC<{
   title: string;
@@ -72,20 +59,14 @@ const MetricCard: React.FC<{
 }> = ({ title, value, icon, trend, color, bgColor, onClick }) => (
   <div
     onClick={onClick}
-    // className="dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer group"
     className={`${bgColor} dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer group`}
   >
     <div className="flex items-start justify-between">
       <div className="flex-1">
         <div className="flex items-center space-x-3 mb-4">
           <div className={color}>{icon}</div>
-          <div>
-            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">
-              {title}
-            </p>
-          </div>
+          <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">{title}</p>
         </div>
-
         <div className="space-y-2">
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {typeof value === "number" ? value.toLocaleString() : value}
@@ -93,373 +74,140 @@ const MetricCard: React.FC<{
           {trend && (
             <div className="flex items-center">
               <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-green-500 text-sm font-medium">
-                {trend}
-              </span>
+              <span className="text-green-500 text-sm font-medium">{trend}</span>
             </div>
           )}
         </div>
       </div>
-
       <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#0077ED] transition-colors" />
     </div>
   </div>
 );
 
 const OrganizationRow: React.FC<{
-  organization: {
-    _id: string;
-    name: string;
-    total_events: number;
-    total_revenue: number;
-  };
+  organization: { _id: string; name: string; total_events: number; total_revenue: number };
   rank: number;
-  maxRevenue: number; // Make sure maxRevenue is received as a prop
-}> = ({ organization, rank, maxRevenue }) => {
-  const router = useRouter();
-
-  const handleClick = () => {
-    router.push(`/organizations`);
-  };
-
-  const getRankBarColor = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return "bg-[#0077ED]"; // Darkest blue
-      case 2:
-        return "bg-[#2B8AFF]"; // Medium-dark blue
-      case 3:
-        return "bg-[#4A9AFF]"; // Medium blue
-      case 4:
-        return "bg-[#6BADFF]"; // Medium-light blue
-      default:
-        return "bg-[#8CC0FF]"; // Lightest blue
-    }
-  };
-
-  const rankBadgeColorHash: { [key: number]: string } = {
-    1: "bg-gradient-to-r from-yellow-600 to-yellow-500 text-yellow-900",
-    2: "bg-gradient-to-r from-yellow-500 to-yellow-400 text-yellow-900",
-    3: "bg-gradient-to-r from-yellow-300 to-yellow-200 text-yellow-900",
-    4: "bg-gradient-to-r from-yellow-200 to-yellow-100 text-yellow-800",
-    5: "bg-gradient-to-r from-yellow-100 to-yellow-50 text-yellow-700",
-  };
-
-  const getRankBadgeColor = (rank: number) => {
-    return (
-      rankBadgeColorHash[rank] ??
-      "bg-gradient-to-r from-yellow-50 to-yellow-50 text-yellow-700" // Fallback = softest yellow
-    );
-  };
-
-  // Correctly calculate the revenue percentage using the maxRevenue prop
-  const revenuePercentage = (organization.total_revenue / maxRevenue) * 100;
-
-  return (
-    <tr
-      onClick={handleClick}
-      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200 cursor-pointer group"
-    >
-      {/* Rank */}
-      <td className="px-6 py-4">
-        <div className="flex items-center justify-center">
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${getRankBadgeColor(
-              rank
-            )}`}
-          >
-            {rank <= 3 && rank === 1 && <span>{rank}</span>}
-            {rank <= 3 && rank !== 1 && <span>{rank}</span>}
-            {rank > 3 && <span>{rank}</span>}
-          </div>
-        </div>
-      </td>
-
-      {/* Organization Name */}
-      <td className="px-6 py-4">
-        <div className="font-semibold text-gray-900 dark:text-white group-hover:text-[#0077ED] transition-colors">
-          {organization.name}
-        </div>
-      </td>
-
-      {/* Events */}
-      <td className="px-6 py-4">
-        <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-          <Calendar className="w-4 h-4 text-blue-500" />
-          <span>{organization.total_events}</span>
-        </div>
-      </td>
-
-      {/* Revenue */}
-      <td className="px-6 py-4">
-        <div className="text-green-500 dark:text-green-500 font-medium">
-          ${organization.total_revenue.toLocaleString()}
-        </div>
-      </td>
-
-      {/* Performance Bar */}
-      <td className="px-6 py-4">
-        <div className="flex items-center space-x-3">
-          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-            <div
-              className={`h-full ${getRankBarColor(
-                rank
-              )} transition-all duration-500`}
-              style={{ width: `${Math.max(revenuePercentage, 5)}%` }}
-            />
-          </div>
-          <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-right">
-            {Math.round(revenuePercentage)}%
-          </span>
-        </div>
-      </td>
-    </tr>
-  );
-};
+  maxRevenue: number;
+}> = ({ organization, rank }) => (
+  <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200">
+    <td className="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">#{rank}</td>
+    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">{organization.name}</td>
+    <td className="px-6 py-4 flex items-center space-x-1 text-gray-600 dark:text-gray-400">
+      <Calendar className="w-4 h-4 text-blue-500" />
+      <span>{organization.total_events}</span>
+    </td>
+    <td className="px-6 py-4 text-green-500 dark:text-green-400 font-medium">
+      ${organization.total_revenue.toLocaleString()}
+    </td>
+  </tr>
+);
 
 const DashboardPage: React.FC = () => {
   const router = useRouter();
   const { data } = dashboardData;
 
-  // Recent activities data
+  // Recent activities ISO dataset
   const recentActivities = [
-    {
-      title: "New Organization Registered",
-      description: "TechCorp Events joined the platform",
-      time: "2 minutes ago",
-      icon: Building2,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50 dark:bg-blue-900/20"
-    },
-    {
-      title: "Event Created",
-      description: "Annual Tech Summit 2024 was created",
-      time: "15 minutes ago",
-      icon: Calendar,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50 dark:bg-purple-900/20"
-    },
-    {
-      title: "Payment Received",
-      description: "$299 payment for event registration",
-      time: "1 hour ago",
-      icon: DollarSign,
-      color: "text-green-600",
-      bgColor: "bg-green-50 dark:bg-green-900/20"
-    },
-    {
-      title: "New User Registration",
-      description: "John Doe registered for an event",
-      time: "2 hours ago",
-      icon: User,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50 dark:bg-orange-900/20"
-    },
-    {
-      title: "Subscription Renewed",
-      description: "Innovation Labs renewed their subscription",
-      time: "3 hours ago",
-      icon: CreditCard,
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50 dark:bg-indigo-900/20"
-    }
+    { type: "organization", title: "New Organization Registered", description: "TechCorp Events joined the platform", time: "2025-09-03T10:25:00Z" },
+    { type: "event", title: "Event Created", description: "Annual Tech Summit 2024 was created", time: "2025-09-03T10:12:00Z" },
+    { type: "payment", title: "Payment Received", description: "$299 payment for event registration", time: "2025-09-03T09:30:00Z" },
+    { type: "user", title: "New User Registration", description: "John Doe registered for an event", time: "2025-09-03T08:45:00Z" },
+    { type: "subscription", title: "Subscription Renewed", description: "Innovation Labs renewed their subscription", time: "2025-09-03T08:00:00Z" },
   ];
 
-  const maxRevenue = Math.max(
-    ...data.top_organizations.map((org) => org.total_revenue)
-  );
+  // Map type → style
+  const activityStyles: Record<string, { icon: any; color: string; bg: string }> = {
+    organization: { icon: Building2, color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/30" },
+    event: { icon: Calendar, color: "text-purple-600", bg: "bg-purple-100 dark:bg-purple-900/30" },
+    payment: { icon: DollarSign, color: "text-green-600", bg: "bg-green-100 dark:bg-green-900/30" },
+    user: { icon: User, color: "text-orange-600", bg: "bg-orange-100 dark:bg-orange-900/30" },
+    subscription: { icon: CreditCard, color: "text-indigo-600", bg: "bg-indigo-100 dark:bg-indigo-900/30" },
+  };
+
+  const maxRevenue = Math.max(...data.top_organizations.map((org) => org.total_revenue));
 
   const metrics = [
-    {
-      title: "Total Organizations",
-      value: data.total_organizations,
-      icon: <Building2 className="w-5 h-5" />,
-      trend: "+8% this month",
-      color: "text-sky-600",
-      bgColor: "bg-sky-50 dark:bg-sky-900/20", 
-      path: "/organizations",
-    },
-    {
-      title: "Total Companies",
-      value: data.total_companies,
-      icon: <Building className="w-5 h-5" />,
-      trend: "+15% this month",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50 dark:bg-purple-900/20",
-      path: "/companies",
-    },
-    {
-      title: "Total Users",
-      value: data.total_users,
-      icon: <User className="w-5 h-5" />,
-      trend: "+12% this month",
-      color: "text-red-600",
-      bgColor: "bg-red-50 dark:bg-red-900/20",
-      path: "/analytics",
-    },
-
-    {
-      title: "Active Subscriptions",
-      value: data.active_subscriptions,
-      icon: <CreditCard className="w-5 h-5" />,
-      trend: "+5% this month",
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
-      path: "/analytics",
-    },
-    {
-      title: "Monthly Revenue",
-      value: `$${data.monthly_revenue.toLocaleString()}`,
-      icon: <TrendingUp className="w-5 h-5" />,
-      trend: "+18% vs last month",
-      color: "text-orange-600",
-      bgColor: "bg-orange-50 dark:bg-orange-900/20",
-      path: "/analytics",
-    },
-    {
-      title: "Total Revenue",
-      value: `$${data.total_revenue.toLocaleString()}`,
-      icon: <DollarSign className="w-5 h-5" />,
-      trend: "+15% this month",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50 dark:bg-emerald-900/20",
-      path: "/analytics",
-    },
+    { title: "Total Organizations", value: data.total_organizations, icon: <Building2 className="w-5 h-5" />, trend: "+8% this month", color: "text-sky-600", bgColor: "bg-sky-50 dark:bg-sky-900/20", path: "/organizations" },
+    { title: "Total Companies", value: data.total_companies, icon: <Building className="w-5 h-5" />, trend: "+15% this month", color: "text-purple-600", bgColor: "bg-purple-50 dark:bg-purple-900/20", path: "/companies" },
+    { title: "Total Users", value: data.total_users, icon: <User className="w-5 h-5" />, trend: "+12% this month", color: "text-red-600", bgColor: "bg-red-50 dark:bg-red-900/20", path: "/analytics" },
+    { title: "Active Subscriptions", value: data.active_subscriptions, icon: <CreditCard className="w-5 h-5" />, trend: "+5% this month", color: "text-indigo-600", bgColor: "bg-indigo-50 dark:bg-indigo-900/20", path: "/analytics" },
+    { title: "Monthly Revenue", value: `$${data.monthly_revenue.toLocaleString()}`, icon: <TrendingUp className="w-5 h-5" />, trend: "+18% vs last month", color: "text-orange-600", bgColor: "bg-orange-50 dark:bg-orange-900/20", path: "/analytics" },
+    { title: "Total Revenue", value: `$${data.total_revenue.toLocaleString()}`, icon: <DollarSign className="w-5 h-5" />, trend: "+15% this month", color: "text-emerald-600", bgColor: "bg-emerald-50 dark:bg-emerald-900/20", path: "/analytics" },
   ];
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Dashboard Overview
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Monitor your platform performance and key metrics
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">Monitor your platform performance and key metrics</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => router.push("/analytics")}
-            className="flex items-center space-x-2 px-4 py-2 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors shadow-sm"
-          >
-            <TrendingUp className="w-4 h-4" />
-            <span>View Analytics</span>
-          </button>
-        </div>
+        <button
+          onClick={() => router.push("/analytics")}
+          className="flex items-center space-x-2 px-4 py-2 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors shadow-sm"
+        >
+          <TrendingUp className="w-4 h-4" />
+          <span>View Analytics</span>
+        </button>
       </div>
 
-      {/* Key Metrics Grid */}
+      {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {metrics.map((metric, index) => (
-          <MetricCard
-            key={index}
-            title={metric.title}
-            value={metric.value}
-            icon={metric.icon}
-            trend={metric.trend}
-            color={metric.color}
-            bgColor={metric.bgColor}
-            onClick={() => router.push(metric.path)}
-          />
+        {metrics.map((metric, i) => (
+          <MetricCard key={i} {...metric} onClick={() => router.push(metric.path)} />
         ))}
       </div>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Top Organizations */}
-        <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Top Organizations
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Organizations ranked by revenue and activity
-                </p>
-              </div>
-              <button
-                onClick={() => router.push("/organizations")}
-                className="flex items-center space-x-1 text-[#0077ED] hover:text-[#0066CC] font-medium text-sm transition-colors"
-              >
-                <span>View All</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700/50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Rank
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Organization
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Events
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Revenue
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Performance
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"></th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {data.top_organizations.map((org, index) => (
-                    <OrganizationRow
-                      key={org._id}
-                      organization={org}
-                      rank={index + 1}
-                      maxRevenue={maxRevenue}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        {/* Top Orgs */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Top Organizations</h2>
+            <button onClick={() => router.push("/organizations")} className="flex items-center space-x-1 text-[#0077ED] hover:text-[#0066CC] text-sm font-medium">
+              <span>View All</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 flex-1">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rank</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Organization</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Events</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Revenue</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {data.top_organizations.map((org, i) => (
+                  <OrganizationRow key={org._id} organization={org} rank={i + 1} maxRevenue={maxRevenue} />
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
         {/* Recent Activities */}
-        <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Recent Activities
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Latest platform activities and updates
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <div className={`p-2 rounded-lg ${activity.bgColor} flex-shrink-0`}>
-                    <activity.icon className={`w-4 h-4 ${activity.color}`} />
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Activities</h2>
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+            {recentActivities.map((activity, i) => {
+              const style = activityStyles[activity.type];
+              return (
+                <div key={i} className="flex items-start space-x-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                  <div className={`p-2 rounded-md ${style.bg}`}>
+                    <style.icon className={`w-4 h-4 ${style.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {activity.title}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                      {activity.time}
-                    </p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.title}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{activity.description}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{timeAgo(activity.time)}</p>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>
