@@ -478,14 +478,7 @@ const EmailTemplatesPage: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <Button
-            onClick={() => setCreateDialog(true)}
-            className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Template
-          </Button>
-          <Button
+        <Button
             onClick={() => setExportDialog(true)}
             variant="outline"
             className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -493,6 +486,14 @@ const EmailTemplatesPage: React.FC = () => {
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
+          <Button
+            onClick={() => setCreateDialog(true)}
+            className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Template
+          </Button>
+       
         </div>
       </div>
 
