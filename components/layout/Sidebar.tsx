@@ -16,6 +16,7 @@ import {
   Mail,
   Receipt,
   Wrench,
+  Calendar,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -98,23 +99,29 @@ const menuItems = [
   },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ open, onClose, variant = "temporary" }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  open,
+  onClose,
+  variant = "temporary",
+}) => {
   const pathname = usePathname();
 
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl border-r border-gray-200 dark:border-gray-700">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex items-center">
-        <div>
-          <h1 className="text-blue-500 dark:text-white text-3xl font-extrabold leading-tight">
-            ExiBy
-          </h1>
-          <p className="text-gray-500 text-xs">Event Management</p>
+      <Link href="/dashboard">
+        <div className="cursor-pointer h-16 pl-8 border-b border-gray-200 dark:border-gray-700 flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-8 h-8 text-blue-500 dark:text-white" />
+            <h1 className="text-blue-500 dark:text-white text-3xl font-extrabold leading-tight">
+              ExiBy
+            </h1>
+          </div>
         </div>
-      </div>
+      </Link>
 
       {/* Navigation */}
-      <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      <div className="flex-1 py-4 px-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {menuItems.map((item) => {
           const isActive = pathname === item.path;
           const Icon = item.icon;
@@ -125,10 +132,10 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, variant = "temporary" 
               href={item.path}
               onClick={variant === "temporary" ? onClose : undefined}
               className={cn(
-                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+                "flex items-center space-x-3 px-4 py-2 rounded-xl transition-all duration-200 group",
                 isActive
-                  ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:scale-102"
+                  ? "bg-blue-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:scale-102"
               )}
             >
               <div
@@ -139,7 +146,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, variant = "temporary" 
                     : `${item.bgColor} dark:bg-gray-700 group-hover:${item.bgColor}`
                 )}
               >
-                <Icon className={cn("w-5 h-5 transition-colors duration-200", item.color)} />
+                <Icon
+                  className={cn(
+                    "w-5 h-5 transition-colors duration-200",
+                    item.color
+                  )}
+                />
               </div>
               <span className="font-medium">{item.text}</span>
             </Link>
@@ -156,10 +168,20 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose, variant = "temporary" 
   return (
     <>
       {/* Mobile Overlay */}
-      {open && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={onClose} />}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
 
       {/* Mobile Sidebar */}
-      <div className={cn("fixed inset-y-0 left-0 w-80 z-50 lg:hidden", open ? "block" : "hidden")}>
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 w-80 z-50 lg:hidden",
+          open ? "block" : "hidden"
+        )}
+      >
         {sidebarContent}
       </div>
     </>

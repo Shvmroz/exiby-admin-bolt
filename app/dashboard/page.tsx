@@ -76,16 +76,23 @@ const MetricCard: React.FC<{
   title: string;
   value: string | number;
   icon: React.ReactNode;
-  trend?: string;
   color: string;
   bgColor: string;
   onClick: () => void;
-}> = ({ title, value, icon, trend, color, bgColor, onClick }) => (
+}> = ({ title, value, icon, color, bgColor, onClick }) => (
   <div
     onClick={onClick}
-    className={`${bgColor} dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer group`}
+    className={`${bgColor} dark:bg-gray-800 rounded-xl px-6 py-3 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer relative overflow-hidden group`}
   >
-    <div className="flex items-start justify-between">
+    {/* Background Icon */}
+    <div className="absolute top-1 right-1 w-20 h-20 opacity-10 transform rotate-12">
+      {/* use this to set size of icon */}
+      {React.cloneElement(icon as React.ReactElement, {
+        className: `w-full h-full ${color}`,
+      })}
+    </div>
+
+    <div className="flex items-start justify-between relative z-10">
       <div className="flex-1">
         <div className="flex items-center space-x-3 mb-4">
           <div className={color}>{icon}</div>
@@ -97,16 +104,8 @@ const MetricCard: React.FC<{
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {typeof value === "number" ? value.toLocaleString() : value}
           </p>
-          {trend && (
-            <div className="flex items-center">
-              <span className="text-green-500 text-sm font-medium">
-                {trend}
-              </span>
-            </div>
-          )}
         </div>
       </div>
-      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#0077ED] transition-colors" />
     </div>
   </div>
 );
@@ -223,7 +222,6 @@ const DashboardPage: React.FC = () => {
       title: "Total Organizations",
       value: data.total_organizations,
       icon: <Building2 className="w-5 h-5" />,
-      trend: "+8% this month",
       color: "text-sky-600",
       bgColor: "bg-sky-50 dark:bg-sky-900/20",
       path: "/organizations",
@@ -232,7 +230,6 @@ const DashboardPage: React.FC = () => {
       title: "Total Companies",
       value: data.total_companies,
       icon: <Building className="w-5 h-5" />,
-      trend: "+15% this month",
       color: "text-purple-600",
       bgColor: "bg-purple-50 dark:bg-purple-900/20",
       path: "/companies",
@@ -241,7 +238,6 @@ const DashboardPage: React.FC = () => {
       title: "Total Users",
       value: data.total_users,
       icon: <User className="w-5 h-5" />,
-      trend: "+12% this month",
       color: "text-red-600",
       bgColor: "bg-red-50 dark:bg-red-900/20",
       path: "/analytics",
@@ -250,7 +246,6 @@ const DashboardPage: React.FC = () => {
       title: "Active Subscriptions",
       value: data.active_subscriptions,
       icon: <CreditCard className="w-5 h-5" />,
-      trend: "+5% this month",
       color: "text-indigo-600",
       bgColor: "bg-indigo-50 dark:bg-indigo-900/20",
       path: "/analytics",
@@ -259,7 +254,6 @@ const DashboardPage: React.FC = () => {
       title: "Monthly Revenue",
       value: `$${data.monthly_revenue.toLocaleString()}`,
       icon: <TrendingUp className="w-5 h-5" />,
-      trend: "+18% vs last month",
       color: "text-orange-600",
       bgColor: "bg-orange-50 dark:bg-orange-900/20",
       path: "/analytics",
@@ -268,7 +262,6 @@ const DashboardPage: React.FC = () => {
       title: "Total Revenue",
       value: `$${data.total_revenue.toLocaleString()}`,
       icon: <DollarSign className="w-5 h-5" />,
-      trend: "+15% this month",
       color: "text-emerald-600",
       bgColor: "bg-emerald-50 dark:bg-emerald-900/20",
       path: "/analytics",
