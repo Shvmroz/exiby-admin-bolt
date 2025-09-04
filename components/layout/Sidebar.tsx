@@ -112,10 +112,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Link href="/dashboard">
         <div className="cursor-pointer h-16 pl-8 border-b border-gray-200 dark:border-gray-700 flex items-center space-x-2">
           <div className="flex items-center space-x-2">
-            <Calendar className="w-8 h-8 text-blue-500 dark:text-white" />
             <h1 className="text-blue-500 dark:text-white text-3xl font-extrabold leading-tight">
-              ExiBy
+             | EXIBY
             </h1>
+           
           </div>
         </div>
       </Link>
