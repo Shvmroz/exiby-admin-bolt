@@ -156,7 +156,7 @@ const LegalSettingsPage: React.FC = () => {
             Legal Settings
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage your privacy policy and terms & conditions
+            Configure your privacy policy and terms & conditions
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -166,7 +166,7 @@ const LegalSettingsPage: React.FC = () => {
               className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
             >
               <Edit className="w-4 h-4 mr-2" />
-              Edit Legal Documents
+              Edit Configuration
             </Button>
           ) : (
             <div className="flex space-x-2">
@@ -218,49 +218,40 @@ const LegalSettingsPage: React.FC = () => {
         <CardContent>
           <div className={`grid ${showPreview && isEditing ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'} gap-6`}>
             {/* Editor Section */}
-            <div>
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="privacy" className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4" />
-                    <span>Privacy Policy</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="terms" className="flex items-center space-x-2">
-                    <Scale className="w-4 h-4" />
-                    <span>Terms & Conditions</span>
-                  </TabsTrigger>
-                </TabsList>
+            <div className="space-y-6">
+              {/* Privacy Policy */}
+              <div>
+                <div className="flex items-center space-x-2 mb-4">
+                  <FileText className="w-5 h-5 text-[#0077ED]" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Privacy Policy
+                  </h3>
+                </div>
+                <QuillEditor
+                  value={formData.privacy_policy}
+                  onChange={(value) => setFormData({ ...formData, privacy_policy: value })}
+                  placeholder="Enter your privacy policy content..."
+                  disabled={!isEditing}
+                  rows={12}
+                />
+              </div>
 
-                <TabsContent value="privacy" className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Privacy Policy Content
-                    </label>
-                    <QuillEditor
-                      value={formData.privacy_policy}
-                      onChange={(value) => setFormData({ ...formData, privacy_policy: value })}
-                      placeholder="Enter your privacy policy content..."
-                      disabled={!isEditing}
-                      rows={12}
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="terms" className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Terms & Conditions Content
-                    </label>
-                    <QuillEditor
-                      value={formData.terms_conditions}
-                      onChange={(value) => setFormData({ ...formData, terms_conditions: value })}
-                      placeholder="Enter your terms & conditions content..."
-                      disabled={!isEditing}
-                      rows={12}
-                    />
-                  </div>
-                </TabsContent>
-              </Tabs>
+              {/* Terms & Conditions */}
+              <div>
+                <div className="flex items-center space-x-2 mb-4">
+                  <Scale className="w-5 h-5 text-[#0077ED]" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Terms & Conditions
+                  </h3>
+                </div>
+                <QuillEditor
+                  value={formData.terms_conditions}
+                  onChange={(value) => setFormData({ ...formData, terms_conditions: value })}
+                  placeholder="Enter your terms & conditions content..."
+                  disabled={!isEditing}
+                  rows={12}
+                />
+              </div>
             </div>
 
             {/* Preview Section */}
@@ -268,10 +259,21 @@ const LegalSettingsPage: React.FC = () => {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                   <Eye className="w-5 h-5 mr-2 text-[#0077ED]" />
-                  Live Preview - {activeTab === 'privacy' ? 'Privacy Policy' : 'Terms & Conditions'}
+                  Live Preview
                 </h3>
-                <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-white dark:bg-gray-800 max-h-96 overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
-                  <div dangerouslySetInnerHTML={{ __html: getCurrentContent() }} />
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-md font-medium text-gray-900 dark:text-white mb-2">Privacy Policy</h4>
+                    <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800 max-h-48 overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
+                      <div dangerouslySetInnerHTML={{ __html: formData.privacy_policy }} />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-md font-medium text-gray-900 dark:text-white mb-2">Terms & Conditions</h4>
+                    <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800 max-h-48 overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
+                      <div dangerouslySetInnerHTML={{ __html: formData.terms_conditions }} />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
