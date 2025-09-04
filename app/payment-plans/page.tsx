@@ -222,23 +222,27 @@ const PaymentPlansPage: React.FC = () => {
     } else {
       setLoading(true);
     }
-    
+
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-  
-      let filteredData = includeDeleted 
-        ? deletedPlans   // ✅ keep state
+
+      let filteredData = includeDeleted
+        ? deletedPlans // ✅ keep state
         : dummyData.data.payment_plans;
-  
+
       if (searchQuery) {
         filteredData = filteredData.filter(
           (plan) =>
             plan.plan_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            plan.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            plan.target_audience?.toLowerCase().includes(searchQuery.toLowerCase())
+            plan.description
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            plan.target_audience
+              ?.toLowerCase()
+              .includes(searchQuery.toLowerCase())
         );
       }
-  
+
       if (includeDeleted) {
         setDeletedPlans(filteredData);
       } else {
@@ -246,7 +250,10 @@ const PaymentPlansPage: React.FC = () => {
         setPagination((prev) => ({ ...prev, total: filteredData.length }));
       }
     } catch (error) {
-      console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} payment plans:`, error);
+      console.error(
+        `Error loading ${includeDeleted ? "deleted" : "active"} payment plans:`,
+        error
+      );
     } finally {
       if (includeDeleted) {
         setDeletedLoading(false);
@@ -255,7 +262,6 @@ const PaymentPlansPage: React.FC = () => {
       }
     }
   };
-  
 
   useEffect(() => {
     if (activeTab === "all") {
@@ -283,27 +289,27 @@ const PaymentPlansPage: React.FC = () => {
 
   const confirmDelete = async () => {
     if (!deleteDialog.plan) return;
-  
+
     setDeleteLoading(true);
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
-  
+
       // Move to deleted plans (soft delete)
       const deletedPlan = {
         ...deleteDialog.plan,
         deleted_at: new Date().toISOString(),
         is_deleted: true,
       };
-      
-      setDeletedPlans((prev) => [deletedPlan, ...prev]);   // ✅ adds in real-time
+
+      setDeletedPlans((prev) => [deletedPlan, ...prev]); // ✅ adds in real-time
       setPaymentPlans((prev) =>
         prev.filter((plan) => plan._id !== deleteDialog.plan!._id)
       );
-  
+
       // Update pagination total
       setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
-  
+
       setDeleteDialog({ open: false, plan: null });
     } catch (error) {
       console.error("Error deleting payment plan:", error);
@@ -311,7 +317,6 @@ const PaymentPlansPage: React.FC = () => {
       setDeleteLoading(false);
     }
   };
-  
 
   const handleRestore = async (plan: PaymentPlan) => {
     setRestoreLoading(true);
@@ -697,7 +702,10 @@ const PaymentPlansPage: React.FC = () => {
           <TabsTrigger value="all">
             All Plans ({paymentPlans.length})
           </TabsTrigger>
-          <TabsTrigger value="deleted">
+          <TabsTrigger
+            className="data-[state=active]:text-red-500"
+            value="deleted"
+          >
             Deleted Plans ({deletedPlans.length})
           </TabsTrigger>
         </TabsList>
