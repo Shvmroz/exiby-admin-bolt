@@ -106,7 +106,7 @@ const ConfigurationPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            General Settings
+            General Configurations
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Configure your platform's basic settings and preferences
@@ -155,7 +155,7 @@ const ConfigurationPage: React.FC = () => {
       {/* Configuration Form */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center text-lg">
             <Settings className="w-5 h-5 mr-2 text-[#0077ED]" />
             Platform Configuration
           </CardTitle>

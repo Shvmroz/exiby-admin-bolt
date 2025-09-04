@@ -69,7 +69,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     {
       id: '2',
       title: 'New Event Registration',
-      message: 'John Doe has registered for your "Tech Conference 2024" event.',
+      message: 'Shamroz Khan has registered for your "Tech Conference 2024" event.',
       notification_type: 'event',
       read: false,
       created_at: new Date(Date.now() - 3600000).toISOString(),
@@ -130,9 +130,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       
       const mockUser: User = {
         id: '1',
-        name: 'John Doe',
+        name: 'Shamroz Khan',
         email: email,
-        role: 'Event Manager',
+        role: 'Admin',
       };
 
       localStorage.setItem('authToken', 'mock-token');

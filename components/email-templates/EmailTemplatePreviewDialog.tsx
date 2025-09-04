@@ -40,7 +40,7 @@ const EmailTemplatePreviewDialog: React.FC<EmailTemplatePreviewDialogProps> = ({
   const getSampleValue = (variable: string) => {
     const sampleValues: { [key: string]: string } = {
       platform_name: "ExiBy Platform",
-      user_name: "John Doe",
+      user_name: "Shamroz Khan",
       event_name: "Tech Conference 2024",
       event_date: "March 15, 2024",
       event_time: "10:00 AM",

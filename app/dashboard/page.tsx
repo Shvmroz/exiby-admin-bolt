@@ -171,7 +171,7 @@ const DashboardPage: React.FC = () => {
     {
       type: "user",
       title: "New User",
-      description: "John Doe registered",
+      description: "Shamroz khan registered",
       time: "2025-09-03T08:45:00Z",
     },
     {
