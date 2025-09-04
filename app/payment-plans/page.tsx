@@ -23,6 +23,8 @@ import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-tab
 import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import PaymentPlanEditDialog from '@/components/payment-plans/PaymentPlanEditDialog';
 import PaymentPlanCreateDialog from '@/components/payment-plans/PaymentPlanCreateDialog';
+import CustomDrawer from '@/components/ui/custom-drawer';
+import PaymentFilters from '@/components/payment-plans/PaymentFilters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
@@ -167,6 +169,14 @@ const PaymentPlansPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [billingCycleFilter, setBillingCycleFilter] = useState('all');
+  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [popularOnly, setPopularOnly] = useState(false);
+  const [activeOnly, setActiveOnly] = useState(false);
+  const [maxEventsRange, setMaxEventsRange] = useState([0, 100]);
+  const [maxAttendeesRange, setMaxAttendeesRange] = useState([0, 20000]);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filterLoading, setFilterLoading] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     plan: PaymentPlan | null;
@@ -217,6 +227,32 @@ const PaymentPlansPage: React.FC = () => {
         filteredData = filteredData.filter(plan => plan.plan_type === typeFilter);
       }
 
+      if (billingCycleFilter !== 'all') {
+        filteredData = filteredData.filter(plan => plan.billing_cycle === billingCycleFilter);
+      }
+
+      if (popularOnly) {
+        filteredData = filteredData.filter(plan => plan.is_popular);
+      }
+
+      if (activeOnly) {
+        filteredData = filteredData.filter(plan => plan.is_active);
+      }
+
+      // Price range filter
+      filteredData = filteredData.filter(plan => 
+        plan.price >= priceRange[0] && plan.price <= priceRange[1]
+      );
+
+      // Max events range filter
+      filteredData = filteredData.filter(plan => 
+        plan.max_events >= maxEventsRange[0] && plan.max_events <= maxEventsRange[1]
+      );
+
+      // Max attendees range filter
+      filteredData = filteredData.filter(plan => 
+        plan.max_attendees >= maxAttendeesRange[0] && plan.max_attendees <= maxAttendeesRange[1]
+      );
       setPaymentPlans(filteredData);
       setPagination(prev => ({ ...prev, total: filteredData.length }));
     } catch (error) {
@@ -228,7 +264,19 @@ const PaymentPlansPage: React.FC = () => {
 
   useEffect(() => {
     loadPaymentPlans();
-  }, [searchQuery, statusFilter, typeFilter, pagination.page, pagination.limit]);
+  }, [
+    searchQuery, 
+    statusFilter, 
+    typeFilter, 
+    billingCycleFilter,
+    priceRange,
+    popularOnly,
+    activeOnly,
+    maxEventsRange,
+    maxAttendeesRange,
+    pagination.page, 
+    pagination.limit
+  ]);
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -307,6 +355,30 @@ const PaymentPlansPage: React.FC = () => {
     }
   };
 
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('all');
+    setTypeFilter('all');
+    setBillingCycleFilter('all');
+    setPriceRange([0, 500]);
+    setPopularOnly(false);
+    setActiveOnly(false);
+    setMaxEventsRange([0, 100]);
+    setMaxAttendeesRange([0, 20000]);
+  };
+
+  const handleApplyFilters = async () => {
+    setFilterLoading(true);
+    try {
+      // Simulate filter application
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setFilterDrawerOpen(false);
+    } catch (error) {
+      console.error('Error applying filters:', error);
+    } finally {
+      setFilterLoading(false);
+    }
+  };
   const MENU_OPTIONS: MenuOption[] = [
     {
       label: 'Edit',
@@ -475,6 +547,14 @@ const PaymentPlansPage: React.FC = () => {
             Export CSV
           </Button>
           <Button
+            onClick={() => setFilterDrawerOpen(true)}
+            variant="outline"
+            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            Advanced Filters
+          </Button>
+          <Button
             onClick={() => setCreateDialog(true)}
             className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
           >
@@ -587,6 +667,37 @@ const PaymentPlansPage: React.FC = () => {
         exportType="payment_plans"
         title="Payment Plans"
       />
+
+      {/* Filter Drawer */}
+      <CustomDrawer
+        open={filterDrawerOpen}
+        onOpenChange={setFilterDrawerOpen}
+        title="Filter Payment Plans"
+        onClear={handleClearFilters}
+        onFilter={handleApplyFilters}
+        loading={filterLoading}
+      >
+        <PaymentFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          billingCycleFilter={billingCycleFilter}
+          setBillingCycleFilter={setBillingCycleFilter}
+          popularOnly={popularOnly}
+          setPopularOnly={setPopularOnly}
+          activeOnly={activeOnly}
+          setActiveOnly={setActiveOnly}
+          maxEventsRange={maxEventsRange}
+          setMaxEventsRange={setMaxEventsRange}
+          maxAttendeesRange={maxAttendeesRange}
+          setMaxAttendeesRange={setMaxAttendeesRange}
+        />
+      </CustomDrawer>
     </div>
   );
 };
