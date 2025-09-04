@@ -155,46 +155,7 @@ const dummyData = {
         created_at: "2025-07-20T11:30:00.000Z",
       },
     ],
-    deleted_plans: [
-      {
-        _id: "plan_128",
-        plan_name: "Legacy Basic Plan",
-        description: "Old basic plan that was discontinued",
-        plan_type: "recurring",
-        billing_cycle: "monthly",
-        price: 19,
-        currency: "USD",
-        max_events: 3,
-        max_attendees: 200,
-        max_companies: 8,
-        is_active: false,
-        is_popular: false,
-        trial_days: 7,
-        target_audience: "Small Teams",
-        created_at: "2025-06-15T10:30:00.000Z",
-        deleted_at: "2025-08-15T14:20:00.000Z",
-        is_deleted: true,
-      },
-      {
-        _id: "plan_129",
-        plan_name: "Premium Plan",
-        description: "Premium plan with advanced features",
-        plan_type: "recurring",
-        billing_cycle: "yearly",
-        price: 599,
-        currency: "USD",
-        max_events: 100,
-        max_attendees: 20000,
-        max_companies: 1000,
-        is_active: false,
-        is_popular: false,
-        trial_days: 30,
-        target_audience: "Enterprise",
-        created_at: "2025-07-01T09:15:00.000Z",
-        deleted_at: "2025-08-10T11:45:00.000Z",
-        is_deleted: true,
-      },
-    ],
+    deleted_plans: [],
     total: 5,
   },
 };
@@ -263,26 +224,21 @@ const PaymentPlansPage: React.FC = () => {
     }
     
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
+  
       let filteredData = includeDeleted 
-        ? dummyData.data.deleted_plans 
+        ? deletedPlans   // ✅ keep state
         : dummyData.data.payment_plans;
-
+  
       if (searchQuery) {
         filteredData = filteredData.filter(
           (plan) =>
             plan.plan_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            plan.description
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase()) ||
-            plan.target_audience
-              ?.toLowerCase()
-              .includes(searchQuery.toLowerCase())
+            plan.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            plan.target_audience?.toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
-
+  
       if (includeDeleted) {
         setDeletedPlans(filteredData);
       } else {
@@ -299,6 +255,7 @@ const PaymentPlansPage: React.FC = () => {
       }
     }
   };
+  
 
   useEffect(() => {
     if (activeTab === "all") {
@@ -326,12 +283,12 @@ const PaymentPlansPage: React.FC = () => {
 
   const confirmDelete = async () => {
     if (!deleteDialog.plan) return;
-
+  
     setDeleteLoading(true);
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
+  
       // Move to deleted plans (soft delete)
       const deletedPlan = {
         ...deleteDialog.plan,
@@ -339,14 +296,14 @@ const PaymentPlansPage: React.FC = () => {
         is_deleted: true,
       };
       
-      setDeletedPlans((prev) => [deletedPlan, ...prev]);
+      setDeletedPlans((prev) => [deletedPlan, ...prev]);   // ✅ adds in real-time
       setPaymentPlans((prev) =>
         prev.filter((plan) => plan._id !== deleteDialog.plan!._id)
       );
-
+  
       // Update pagination total
       setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
-
+  
       setDeleteDialog({ open: false, plan: null });
     } catch (error) {
       console.error("Error deleting payment plan:", error);
@@ -354,21 +311,20 @@ const PaymentPlansPage: React.FC = () => {
       setDeleteLoading(false);
     }
   };
+  
 
   const handleRestore = async (plan: PaymentPlan) => {
     setRestoreLoading(true);
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      
+
       // Remove deleted_at and is_deleted properties
       const { deleted_at, is_deleted, ...restoredPlan } = plan;
-      
+
       // Move back to active plans
       setPaymentPlans((prev) => [restoredPlan, ...prev]);
-      setDeletedPlans((prev) =>
-        prev.filter((p) => p._id !== plan._id)
-      );
+      setDeletedPlans((prev) => prev.filter((p) => p._id !== plan._id));
     } catch (error) {
       console.error("Error restoring payment plan:", error);
     } finally {
@@ -381,11 +337,9 @@ const PaymentPlansPage: React.FC = () => {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      
+
       // Remove from deleted plans permanently
-      setDeletedPlans((prev) =>
-        prev.filter((p) => p._id !== plan._id)
-      );
+      setDeletedPlans((prev) => prev.filter((p) => p._id !== plan._id));
     } catch (error) {
       console.error("Error permanently deleting payment plan:", error);
     } finally {
@@ -457,27 +411,31 @@ const PaymentPlansPage: React.FC = () => {
 
   // Helper functions for soft delete table
   const getItemName = (plan: PaymentPlan) => plan.plan_name;
-  
-  const getDeletedAt = (plan: PaymentPlan) => plan.deleted_at || '';
-  
+
+  const getDeletedAt = (plan: PaymentPlan) => plan.deleted_at || "";
+
   const getDaysUntilPermanentDelete = (plan: PaymentPlan) => {
     if (!plan.deleted_at) return 30;
-    
+
     const deletedDate = new Date(plan.deleted_at);
-    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const permanentDeleteDate = new Date(
+      deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000
+    ); // 30 days
     const now = new Date();
-    const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
-    
+    const daysLeft = Math.ceil(
+      (permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+    );
+
     return Math.max(0, daysLeft);
   };
 
   // Pagination for deleted plans
   const deletedPagination = {
     total_count: deletedPlans.length,
-    rows_per_page: pagination.rows_per_page,
+    rows_per_page: pagination.limit,
     page: pagination.page,
-    handleChangePage: pagination.handleChangePage,
-    onRowsPerPageChange: pagination.onRowsPerPageChange,
+    handleChangePage,
+    onRowsPerPageChange,
   };
 
   const handleApplyFilters = async () => {
@@ -730,10 +688,18 @@ const PaymentPlansPage: React.FC = () => {
       </div>
 
       {/* Payment Plans Table */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="all">All Plans ({paymentPlans.length})</TabsTrigger>
-          <TabsTrigger value="deleted">Deleted Plans ({deletedPlans.length})</TabsTrigger>
+          <TabsTrigger value="all">
+            All Plans ({paymentPlans.length})
+          </TabsTrigger>
+          <TabsTrigger value="deleted">
+            Deleted Plans ({deletedPlans.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-6">
