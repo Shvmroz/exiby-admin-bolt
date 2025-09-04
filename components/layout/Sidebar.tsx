@@ -88,6 +88,13 @@ const menuItems = [
     color: "text-blue-500",
     bgColor: "bg-blue-50",
   },
+  {
+    text: "Legal Settings",
+    icon: Settings,
+    path: "/configuration/legal",
+    color: "text-purple-500",
+    bgColor: "bg-purple-50",
+  },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose, variant = "temporary" }) => {
