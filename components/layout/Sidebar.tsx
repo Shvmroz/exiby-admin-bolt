@@ -15,6 +15,7 @@ import {
   CreditCard,
   Mail,
   Receipt,
+  Wrench,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -89,11 +90,11 @@ const menuItems = [
     bgColor: "bg-blue-50",
   },
   {
-    text: "Legal Settings",
-    icon: Settings,
+    text: "Settings",
+    icon: Wrench,
     path: "/settings",
-    color: "text-purple-500",
-    bgColor: "bg-purple-50",
+    color: "text-gray-500",
+    bgColor: "bg-gray-50",
   },
 ];
 

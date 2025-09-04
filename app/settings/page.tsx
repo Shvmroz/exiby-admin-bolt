@@ -1,18 +1,11 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import {
-  Shield,
-  Save,
-  Edit,
-  FileText,
-  Scale,
-  Calendar,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import QuillEditor from '@/components/ui/quill-editor';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from "react";
+import { Shield, Save, Edit, FileText, Scale, Calendar } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import QuillEditor from "@/components/ui/quill-editor";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface LegalSettings {
   privacy_policy: string;
@@ -23,8 +16,8 @@ interface LegalSettings {
 const SettingsPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('privacy');
-  
+  const [activeTab, setActiveTab] = useState("privacy");
+
   const [originalData] = useState<LegalSettings>({
     privacy_policy: `
       <h2>Privacy Policy</h2>
@@ -84,7 +77,7 @@ const SettingsPage: React.FC = () => {
       <h3>6. Contact Information</h3>
       <p>For questions regarding these terms, please contact us at legal@platform.com</p>
     `,
-    updated_at: "2025-08-20T09:45:12.000Z"
+    updated_at: "2025-08-20T09:45:12.000Z",
   });
 
   const [formData, setFormData] = useState<LegalSettings>(originalData);
@@ -102,31 +95,31 @@ const SettingsPage: React.FC = () => {
     setIsSaving(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // Update the updated_at timestamp
       const updatedData = {
         ...formData,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
-      
+
       setFormData(updatedData);
       setIsEditing(false);
     } catch (error) {
-      console.error('Error saving legal settings:', error);
+      console.error("Error saving legal settings:", error);
     } finally {
       setIsSaving(false);
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZoneName: 'short'
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
     });
   };
 
@@ -191,13 +184,23 @@ const SettingsPage: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="privacy" className="flex items-center space-x-2">
+              <TabsTrigger
+                value="privacy"
+                className="flex items-center space-x-2"
+              >
                 <FileText className="w-4 h-4" />
                 <span>Privacy Policy</span>
               </TabsTrigger>
-              <TabsTrigger value="terms" className="flex items-center space-x-2">
+              <TabsTrigger
+                value="terms"
+                className="flex items-center space-x-2"
+              >
                 <Scale className="w-4 h-4" />
                 <span>Terms & Conditions</span>
               </TabsTrigger>
@@ -210,7 +213,9 @@ const SettingsPage: React.FC = () => {
                 </label>
                 <QuillEditor
                   value={formData.privacy_policy}
-                  onChange={(value) => setFormData({ ...formData, privacy_policy: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, privacy_policy: value })
+                  }
                   placeholder="Enter your privacy policy content..."
                   disabled={!isEditing}
                   rows={16}
@@ -225,7 +230,9 @@ const SettingsPage: React.FC = () => {
                 </label>
                 <QuillEditor
                   value={formData.terms_conditions}
-                  onChange={(value) => setFormData({ ...formData, terms_conditions: value })}
+                  onChange={(value) =>
+                    setFormData({ ...formData, terms_conditions: value })
+                  }
                   placeholder="Enter your terms & conditions content..."
                   disabled={!isEditing}
                   rows={16}
@@ -239,73 +246,6 @@ const SettingsPage: React.FC = () => {
             <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
               <Calendar className="w-4 h-4" />
               <span>Last updated: {formatDate(formData.updated_at)}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Information Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <FileText className="w-5 h-5 mr-2 text-[#0077ED]" />
-              Privacy Policy
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Your privacy policy explains how you collect, use, and protect user data. 
-                This is legally required in many jurisdictions.
-              </p>
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">
-                  Word count: {formData.privacy_policy.replace(/<[^>]*>/g, '').split(' ').length} words
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <Scale className="w-5 h-5 mr-2 text-[#0077ED]" />
-              Terms & Conditions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Your terms and conditions outline the rules and guidelines for using your platform. 
-                These are binding agreements with your users.
-              </p>
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-gray-700 dark:text-gray-300">
-                  Word count: {formData.terms_conditions.replace(/<[^>]*>/g, '').split(' ').length} words
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Legal Notice */}
-      <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
-        <CardContent className="p-6">
-          <div className="flex items-start space-x-3">
-            <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
-            <div>
-              <h4 className="font-medium text-blue-800 dark:text-blue-200">
-                Legal Compliance Notice
-              </h4>
-              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                Ensure your privacy policy and terms & conditions comply with applicable laws in your jurisdiction. 
-                Consider consulting with legal professionals for comprehensive coverage.
-              </p>
             </div>
           </div>
         </CardContent>
