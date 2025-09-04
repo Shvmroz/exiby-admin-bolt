@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { CircularProgress, Box } from '@mui/material';
 
-export default function LegalSettingsLayout({
+export default function SettingsLayout({
   children,
 }: {
   children: React.ReactNode;

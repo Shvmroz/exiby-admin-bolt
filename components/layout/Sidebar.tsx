@@ -91,7 +91,7 @@ const menuItems = [
   {
     text: "Legal Settings",
     icon: Settings,
-    path: "/configuration/legal",
+    path: "/settings",
     color: "text-purple-500",
     bgColor: "bg-purple-50",
   },

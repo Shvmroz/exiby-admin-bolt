@@ -8,8 +8,6 @@ import {
   FileText,
   Scale,
   Calendar,
-  Eye,
-  EyeOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import QuillEditor from '@/components/ui/quill-editor';
@@ -22,11 +20,10 @@ interface LegalSettings {
   updated_at: string;
 }
 
-const LegalSettingsPage: React.FC = () => {
+const SettingsPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('privacy');
-  const [showPreview, setShowPreview] = useState(false);
   
   const [originalData] = useState<LegalSettings>({
     privacy_policy: `
@@ -99,7 +96,6 @@ const LegalSettingsPage: React.FC = () => {
   const handleCancel = () => {
     setFormData(originalData);
     setIsEditing(false);
-    setShowPreview(false);
   };
 
   const handleSave = async () => {
@@ -116,7 +112,6 @@ const LegalSettingsPage: React.FC = () => {
       
       setFormData(updatedData);
       setIsEditing(false);
-      setShowPreview(false);
     } catch (error) {
       console.error('Error saving legal settings:', error);
     } finally {
@@ -135,25 +130,13 @@ const LegalSettingsPage: React.FC = () => {
     });
   };
 
-  const getCurrentContent = () => {
-    return activeTab === 'privacy' ? formData.privacy_policy : formData.terms_conditions;
-  };
-
-  const updateCurrentContent = (content: string) => {
-    if (activeTab === 'privacy') {
-      setFormData({ ...formData, privacy_policy: content });
-    } else {
-      setFormData({ ...formData, terms_conditions: content });
-    }
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Legal Settings
+            Settings
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Configure your privacy policy and terms & conditions
@@ -166,18 +149,10 @@ const LegalSettingsPage: React.FC = () => {
               className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
             >
               <Edit className="w-4 h-4 mr-2" />
-              Edit Configuration
+              Edit Settings
             </Button>
           ) : (
             <div className="flex space-x-2">
-              <Button
-                onClick={() => setShowPreview(!showPreview)}
-                variant="outline"
-                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                {showPreview ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-                {showPreview ? 'Hide Preview' : 'Show Preview'}
-              </Button>
               <Button
                 variant="outline"
                 onClick={handleCancel}
@@ -216,68 +191,48 @@ const LegalSettingsPage: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className={`grid ${showPreview && isEditing ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'} gap-6`}>
-            {/* Editor Section */}
-            <div className="space-y-6">
-              {/* Privacy Policy */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="privacy" className="flex items-center space-x-2">
+                <FileText className="w-4 h-4" />
+                <span>Privacy Policy</span>
+              </TabsTrigger>
+              <TabsTrigger value="terms" className="flex items-center space-x-2">
+                <Scale className="w-4 h-4" />
+                <span>Terms & Conditions</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="privacy" className="space-y-4">
               <div>
-                <div className="flex items-center space-x-2 mb-4">
-                  <FileText className="w-5 h-5 text-[#0077ED]" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Privacy Policy
-                  </h3>
-                </div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Privacy Policy Content
+                </label>
                 <QuillEditor
                   value={formData.privacy_policy}
                   onChange={(value) => setFormData({ ...formData, privacy_policy: value })}
                   placeholder="Enter your privacy policy content..."
                   disabled={!isEditing}
-                  rows={12}
+                  rows={16}
                 />
               </div>
+            </TabsContent>
 
-              {/* Terms & Conditions */}
+            <TabsContent value="terms" className="space-y-4">
               <div>
-                <div className="flex items-center space-x-2 mb-4">
-                  <Scale className="w-5 h-5 text-[#0077ED]" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Terms & Conditions
-                  </h3>
-                </div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Terms & Conditions Content
+                </label>
                 <QuillEditor
                   value={formData.terms_conditions}
                   onChange={(value) => setFormData({ ...formData, terms_conditions: value })}
                   placeholder="Enter your terms & conditions content..."
                   disabled={!isEditing}
-                  rows={12}
+                  rows={16}
                 />
               </div>
-            </div>
-
-            {/* Preview Section */}
-            {showPreview && isEditing && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                  <Eye className="w-5 h-5 mr-2 text-[#0077ED]" />
-                  Live Preview
-                </h3>
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-md font-medium text-gray-900 dark:text-white mb-2">Privacy Policy</h4>
-                    <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800 max-h-48 overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
-                      <div dangerouslySetInnerHTML={{ __html: formData.privacy_policy }} />
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-md font-medium text-gray-900 dark:text-white mb-2">Terms & Conditions</h4>
-                    <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800 max-h-48 overflow-y-auto prose prose-sm max-w-none dark:prose-invert">
-                      <div dangerouslySetInnerHTML={{ __html: formData.terms_conditions }} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
 
           {/* Last Updated Info */}
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -359,4 +314,4 @@ const LegalSettingsPage: React.FC = () => {
   );
 };
 
-export default LegalSettingsPage;
+export default SettingsPage;
