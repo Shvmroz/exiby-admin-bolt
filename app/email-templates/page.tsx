@@ -21,6 +21,8 @@ import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import EmailTemplateEditDialog from '@/components/email-templates/EmailTemplateEditDialog';
 import EmailTemplateCreateDialog from '@/components/email-templates/EmailTemplateCreateDialog';
 import EmailTemplatePreviewDialog from '@/components/email-templates/EmailTemplatePreviewDialog';
+import CustomDrawer from '@/components/ui/custom-drawer';
+import EmailTemplateFilters from '@/components/email-templates/EmailTemplateFilters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
@@ -209,8 +211,6 @@ const EmailTemplatesPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     template: EmailTemplate | null;
@@ -227,6 +227,13 @@ const EmailTemplatesPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [activeOnly, setActiveOnly] = useState(false);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filterLoading, setFilterLoading] = useState(false);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
@@ -276,7 +283,7 @@ const EmailTemplatesPage: React.FC = () => {
 
   useEffect(() => {
     loadEmailTemplates();
-  }, [searchQuery, statusFilter, typeFilter, pagination.page, pagination.limit]);
+  }, [searchQuery, pagination.page, pagination.limit]);
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -356,6 +363,67 @@ const EmailTemplatesPage: React.FC = () => {
       console.error('Error creating email template:', error);
     } finally {
       setCreateLoading(false);
+    }
+  };
+
+  // Helper to count active filters
+  const getAppliedFiltersCount = () => {
+    let count = 0;
+    if (statusFilter !== 'all') count++;
+    if (typeFilter !== 'all') count++;
+    if (activeOnly) count++;
+    return count;
+  };
+
+  const handleClearFilters = () => {
+    // Reset all filters
+    setStatusFilter('all');
+    setTypeFilter('all');
+    setActiveOnly(false);
+    setEmailTemplates(dummyData.data.email_templates);
+    setPagination(prev => ({
+      ...prev,
+      total: dummyData.data.email_templates.length,
+    }));
+    setFilterDrawerOpen(false);
+    setFilterLoading(false);
+  };
+
+  const handleApplyFilters = async () => {
+    setFilterLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      let filteredData = dummyData.data.email_templates;
+
+      if (statusFilter !== 'all') {
+        const isActive = statusFilter === 'active';
+        filteredData = filteredData.filter(template => template.is_active === isActive);
+      }
+
+      if (typeFilter !== 'all') {
+        filteredData = filteredData.filter(template => template.template_type === typeFilter);
+      }
+
+      if (activeOnly) {
+        filteredData = filteredData.filter(template => template.is_active);
+      }
+
+      // Apply search query if exists
+      if (searchQuery) {
+        filteredData = filteredData.filter(template =>
+          template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          template.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          template.template_type.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      setEmailTemplates(filteredData);
+      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      setFilterDrawerOpen(false);
+    } catch (error) {
+      console.error('Error applying filters:', error);
+    } finally {
+      setFilterLoading(false);
     }
   };
 
@@ -462,9 +530,6 @@ const EmailTemplatesPage: React.FC = () => {
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
-  // Get unique template types for filter
-  const templateTypes = Array.from(new Set(dummyData.data.email_templates.map(template => template.template_type)));
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -513,32 +578,19 @@ const EmailTemplatesPage: React.FC = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  {templateTypes.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Button
+                onClick={() => setFilterDrawerOpen(true)}
+                variant="outline"
+                className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+                {getAppliedFiltersCount() > 0 && (
+                  <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
+                    {getAppliedFiltersCount()}
+                  </Badge>
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -609,6 +661,25 @@ const EmailTemplatesPage: React.FC = () => {
         exportType="email_templates"
         title="Email Templates"
       />
+
+      {/* Filter Drawer */}
+      <CustomDrawer
+        open={filterDrawerOpen}
+        onOpenChange={setFilterDrawerOpen}
+        title="Filter Email Templates"
+        onClear={handleClearFilters}
+        onFilter={handleApplyFilters}
+        loading={filterLoading}
+      >
+        <EmailTemplateFilters
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          activeOnly={activeOnly}
+          setActiveOnly={setActiveOnly}
+        />
+      </CustomDrawer>
     </div>
   );
 };

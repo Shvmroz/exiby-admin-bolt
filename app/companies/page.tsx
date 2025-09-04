@@ -23,6 +23,8 @@ import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import CompanyEditDialog from '@/components/companies/CompanyEditDialog';
 import CompanyCreateDialog from '@/components/companies/CompanyCreateDialog';
 import CompanyDetailView from '@/components/companies/CompanyDetailView';
+import CustomDrawer from '@/components/ui/custom-drawer';
+import CompanyFilters from '@/components/companies/CompanyFilters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
@@ -232,8 +234,6 @@ const CompaniesPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [industryFilter, setIndustryFilter] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     company: Company | null;
@@ -250,6 +250,13 @@ const CompaniesPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [industryFilter, setIndustryFilter] = useState('all');
+  const [activeOnly, setActiveOnly] = useState(false);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filterLoading, setFilterLoading] = useState(false);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
@@ -299,7 +306,7 @@ const CompaniesPage: React.FC = () => {
 
   useEffect(() => {
     loadCompanies();
-  }, [searchQuery, statusFilter, industryFilter, pagination.page, pagination.limit]);
+  }, [searchQuery, pagination.page, pagination.limit]);
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -380,6 +387,67 @@ const CompaniesPage: React.FC = () => {
 
   const handleRowClick = (company: Company) => {
     setDetailView({ open: true, company });
+  };
+
+  // Helper to count active filters
+  const getAppliedFiltersCount = () => {
+    let count = 0;
+    if (statusFilter !== 'all') count++;
+    if (industryFilter !== 'all') count++;
+    if (activeOnly) count++;
+    return count;
+  };
+
+  const handleClearFilters = () => {
+    // Reset all filters
+    setStatusFilter('all');
+    setIndustryFilter('all');
+    setActiveOnly(false);
+    setCompanies(dummyData.data.companies);
+    setPagination(prev => ({
+      ...prev,
+      total: dummyData.data.companies.length,
+    }));
+    setFilterDrawerOpen(false);
+    setFilterLoading(false);
+  };
+
+  const handleApplyFilters = async () => {
+    setFilterLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      let filteredData = dummyData.data.companies;
+
+      if (statusFilter !== 'all') {
+        const isActive = statusFilter === 'active';
+        filteredData = filteredData.filter(company => company.status === isActive);
+      }
+
+      if (industryFilter !== 'all') {
+        filteredData = filteredData.filter(company => company.bio.industry === industryFilter);
+      }
+
+      if (activeOnly) {
+        filteredData = filteredData.filter(company => company.status);
+      }
+
+      // Apply search query if exists
+      if (searchQuery) {
+        filteredData = filteredData.filter(company =>
+          company.orgn_user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          company.bio.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          company.bio.industry.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      setCompanies(filteredData);
+      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      setFilterDrawerOpen(false);
+    } catch (error) {
+      console.error('Error applying filters:', error);
+    } finally {
+      setFilterLoading(false);
+    }
   };
 
   const handleDetailEdit = (updatedCompany: Company) => {
@@ -528,9 +596,6 @@ const CompaniesPage: React.FC = () => {
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
-  // Get unique industries for filter
-  const industries = Array.from(new Set(dummyData.data.companies.map(company => company.bio.industry)));
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -579,30 +644,19 @@ const CompaniesPage: React.FC = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Select value={industryFilter} onValueChange={setIndustryFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by industry" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Industries</SelectItem>
-                  {industries.map(industry => (
-                    <SelectItem key={industry} value={industry}>{industry}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Button
+                onClick={() => setFilterDrawerOpen(true)}
+                variant="outline"
+                className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+                {getAppliedFiltersCount() > 0 && (
+                  <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
+                    {getAppliedFiltersCount()}
+                  </Badge>
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -677,6 +731,25 @@ const CompaniesPage: React.FC = () => {
         exportType="companies"
         title="Companies"
       />
+
+      {/* Filter Drawer */}
+      <CustomDrawer
+        open={filterDrawerOpen}
+        onOpenChange={setFilterDrawerOpen}
+        title="Filter Companies"
+        onClear={handleClearFilters}
+        onFilter={handleApplyFilters}
+        loading={filterLoading}
+      >
+        <CompanyFilters
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          industryFilter={industryFilter}
+          setIndustryFilter={setIndustryFilter}
+          activeOnly={activeOnly}
+          setActiveOnly={setActiveOnly}
+        />
+      </CustomDrawer>
     </div>
   );
 };

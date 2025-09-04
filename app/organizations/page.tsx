@@ -21,6 +21,8 @@ import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import OrganizationEditDialog from '@/components/organizations/OrganizationEditDialog';
 import OrganizationCreateDialog from '@/components/organizations/OrganizationCreateDialog';
 import OrganizationDetailView from '@/components/organizations/OrganizationDetailView';
+import CustomDrawer from '@/components/ui/custom-drawer';
+import OrganizationFilters from '@/components/organizations/OrganizationFilters';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
@@ -159,8 +161,6 @@ const OrganizationsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     organization: Organization | null;
@@ -177,6 +177,14 @@ const OrganizationsPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [activeOnly, setActiveOnly] = useState(false);
+  const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState('all');
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filterLoading, setFilterLoading] = useState(false);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
@@ -224,7 +232,7 @@ const OrganizationsPage: React.FC = () => {
 
   useEffect(() => {
     loadOrganizations();
-  }, [searchQuery, statusFilter, categoryFilter, pagination.page, pagination.limit]);
+  }, [searchQuery, pagination.page, pagination.limit]);
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -307,6 +315,71 @@ const OrganizationsPage: React.FC = () => {
     setDetailView({ open: true, organization });
   };
 
+  // Helper to count active filters
+  const getAppliedFiltersCount = () => {
+    let count = 0;
+    if (statusFilter !== 'all') count++;
+    if (categoryFilter !== 'all') count++;
+    if (subscriptionStatusFilter !== 'all') count++;
+    if (activeOnly) count++;
+    return count;
+  };
+
+  const handleClearFilters = () => {
+    // Reset all filters
+    setStatusFilter('all');
+    setCategoryFilter('all');
+    setSubscriptionStatusFilter('all');
+    setActiveOnly(false);
+    setOrganizations(dummyData.data.organizations);
+    setPagination(prev => ({
+      ...prev,
+      total: dummyData.data.organizations.length,
+    }));
+    setFilterDrawerOpen(false);
+    setFilterLoading(false);
+  };
+
+  const handleApplyFilters = async () => {
+    setFilterLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      let filteredData = dummyData.data.organizations;
+
+      if (statusFilter !== 'all') {
+        const isActive = statusFilter === 'active';
+        filteredData = filteredData.filter(org => org.status === isActive);
+      }
+
+      if (categoryFilter !== 'all') {
+        filteredData = filteredData.filter(org => org.category === categoryFilter);
+      }
+
+      if (subscriptionStatusFilter !== 'all') {
+        filteredData = filteredData.filter(org => org.subscription_status === subscriptionStatusFilter);
+      }
+
+      if (activeOnly) {
+        filteredData = filteredData.filter(org => org.status);
+      }
+
+      // Apply search query if exists
+      if (searchQuery) {
+        filteredData = filteredData.filter(org =>
+          org.orgn_user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          org.bio.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      setOrganizations(filteredData);
+      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      setFilterDrawerOpen(false);
+    } catch (error) {
+      console.error('Error applying filters:', error);
+    } finally {
+      setFilterLoading(false);
+    }
+  };
 
   const MENU_OPTIONS: MenuOption[] = [
     {
@@ -502,31 +575,19 @@ const OrganizationsPage: React.FC = () => {
           </div>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="expired">Expired</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="organization">Organization</SelectItem>
-                  <SelectItem value="company">Company</SelectItem>
-                </SelectContent>
-              </Select>
+              <Button
+                onClick={() => setFilterDrawerOpen(true)}
+                variant="outline"
+                className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+                {getAppliedFiltersCount() > 0 && (
+                  <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
+                    {getAppliedFiltersCount()}
+                  </Badge>
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -600,6 +661,27 @@ const OrganizationsPage: React.FC = () => {
         exportType="organizations"
         title="Organizations"
       />
+
+      {/* Filter Drawer */}
+      <CustomDrawer
+        open={filterDrawerOpen}
+        onOpenChange={setFilterDrawerOpen}
+        title="Filter Organizations"
+        onClear={handleClearFilters}
+        onFilter={handleApplyFilters}
+        loading={filterLoading}
+      >
+        <OrganizationFilters
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          activeOnly={activeOnly}
+          setActiveOnly={setActiveOnly}
+          subscriptionStatusFilter={subscriptionStatusFilter}
+          setSubscriptionStatusFilter={setSubscriptionStatusFilter}
+        />
+      </CustomDrawer>
     </div>
   );
 };
