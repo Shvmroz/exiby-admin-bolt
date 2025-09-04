@@ -23,6 +23,7 @@ import EmailTemplateCreateDialog from '@/components/email-templates/EmailTemplat
 import EmailTemplatePreviewDialog from '@/components/email-templates/EmailTemplatePreviewDialog';
 import CustomDrawer from '@/components/ui/custom-drawer';
 import EmailTemplateFilters from '@/components/email-templates/EmailTemplateFilters';
+import SoftDeleteTable from '@/components/ui/soft-delete-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
@@ -34,6 +35,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface EmailTemplate {
   _id: string;
@@ -44,6 +46,8 @@ interface EmailTemplate {
   variables: string[];
   is_active: boolean;
   created_at: string;
+  deleted_at?: string;
+  is_deleted?: boolean;
 }
 
 // Dummy data
@@ -208,9 +212,12 @@ const TABLE_HEAD: TableHeader[] = [
 const EmailTemplatesPage: React.FC = () => {
   const router = useRouter();
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [deletedTemplates, setDeletedTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletedLoading, setDeletedLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     template: EmailTemplate | null;
@@ -227,6 +234,8 @@ const EmailTemplatesPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -246,14 +255,21 @@ const EmailTemplatesPage: React.FC = () => {
   });
 
   // Load email templates
-  const loadEmailTemplates = async () => {
-    setLoading(true);
+  const loadEmailTemplates = async (includeDeleted = false) => {
+    if (includeDeleted) {
+      setDeletedLoading(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Filter data based on search and status
-      let filteredData = dummyData.data.email_templates;
+      let filteredData = includeDeleted
+        ? deletedTemplates
+        : dummyData.data.email_templates;
       
       if (searchQuery) {
         filteredData = filteredData.filter(template =>
@@ -272,18 +288,30 @@ const EmailTemplatesPage: React.FC = () => {
         filteredData = filteredData.filter(template => template.template_type === typeFilter);
       }
 
-      setEmailTemplates(filteredData);
-      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      if (includeDeleted) {
+        setDeletedTemplates(filteredData);
+      } else {
+        setEmailTemplates(filteredData);
+        setPagination(prev => ({ ...prev, total: filteredData.length }));
+      }
     } catch (error) {
-      console.error('Error loading email templates:', error);
+      console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} email templates:`, error);
     } finally {
-      setLoading(false);
+      if (includeDeleted) {
+        setDeletedLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadEmailTemplates();
-  }, [searchQuery, pagination.page, pagination.limit]);
+    if (activeTab === 'all') {
+      loadEmailTemplates(false);
+    } else if (activeTab === 'deleted') {
+      loadEmailTemplates(true);
+    }
+  }, [searchQuery, pagination.page, pagination.limit, activeTab]);
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -313,7 +341,14 @@ const EmailTemplatesPage: React.FC = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Remove from local state
+      // Move to deleted templates (soft delete)
+      const deletedTemplate = {
+        ...deleteDialog.template,
+        deleted_at: new Date().toISOString(),
+        is_deleted: true,
+      };
+
+      setDeletedTemplates(prev => [deletedTemplate, ...prev]);
       setEmailTemplates(prev => 
         prev.filter(template => template._id !== deleteDialog.template!._id)
       );
@@ -326,6 +361,40 @@ const EmailTemplatesPage: React.FC = () => {
       console.error('Error deleting email template:', error);
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleRestore = async (template: EmailTemplate) => {
+    setRestoreLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Remove deleted_at and is_deleted properties
+      const { deleted_at, is_deleted, ...restoredTemplate } = template;
+
+      // Move back to active templates
+      setEmailTemplates(prev => [restoredTemplate, ...prev]);
+      setDeletedTemplates(prev => prev.filter(t => t._id !== template._id));
+    } catch (error) {
+      console.error('Error restoring email template:', error);
+    } finally {
+      setRestoreLoading(false);
+    }
+  };
+
+  const handlePermanentDelete = async (template: EmailTemplate) => {
+    setPermanentDeleteLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Remove from deleted templates permanently
+      setDeletedTemplates(prev => prev.filter(t => t._id !== template._id));
+    } catch (error) {
+      console.error('Error permanently deleting email template:', error);
+    } finally {
+      setPermanentDeleteLoading(false);
     }
   };
 
@@ -387,6 +456,29 @@ const EmailTemplatesPage: React.FC = () => {
     }));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
+  };
+
+  // Helper functions for soft delete table
+  const getItemName = (template: EmailTemplate) => template.name;
+  const getDeletedAt = (template: EmailTemplate) => template.deleted_at || '';
+  const getDaysUntilPermanentDelete = (template: EmailTemplate) => {
+    if (!template.deleted_at) return 30;
+    
+    const deletedDate = new Date(template.deleted_at);
+    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const now = new Date();
+    const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+    
+    return Math.max(0, daysLeft);
+  };
+
+  // Pagination for deleted templates
+  const deletedPagination = {
+    total_count: deletedTemplates.length,
+    rows_per_page: pagination.limit,
+    page: pagination.page,
+    handleChangePage,
+    onRowsPerPageChange,
   };
 
   const handleApplyFilters = async () => {
@@ -597,35 +689,66 @@ const EmailTemplatesPage: React.FC = () => {
       </div>
 
       {/* Email Templates Table */}
-      <CustomTable
-        data={emailTemplates}
-        TABLE_HEAD={TABLE_HEAD}
-        MENU_OPTIONS={MENU_OPTIONS}
-        custom_pagination={{
-          total_count: pagination.total,
-          rows_per_page: pagination.limit,
-          page: pagination.page,
-          handleChangePage,
-          onRowsPerPageChange,
-        }}
-        pageCount={pagination.limit}
-        totalPages={totalPages}
-        handleChangePages={handleChangePage}
-        selected={selected}
-        setSelected={setSelected}
-        checkbox_selection={true}
-        renderCell={renderCell}
-        loading={loading}
-        emptyMessage="No email templates found"
-      />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="all">
+            All Templates ({emailTemplates.length})
+          </TabsTrigger>
+          <TabsTrigger className="data-[state=active]:text-red-500" value="deleted">
+            Deleted Templates ({deletedTemplates.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-6">
+          <CustomTable
+            data={emailTemplates}
+            TABLE_HEAD={TABLE_HEAD}
+            MENU_OPTIONS={MENU_OPTIONS}
+            custom_pagination={{
+              total_count: pagination.total,
+              rows_per_page: pagination.limit,
+              page: pagination.page,
+              handleChangePage,
+              onRowsPerPageChange,
+            }}
+            pageCount={pagination.limit}
+            totalPages={totalPages}
+            handleChangePages={handleChangePage}
+            selected={selected}
+            setSelected={setSelected}
+            checkbox_selection={true}
+            renderCell={renderCell}
+            loading={loading}
+            emptyMessage="No email templates found"
+          />
+        </TabsContent>
+
+        <TabsContent value="deleted" className="space-y-6">
+          <SoftDeleteTable
+            data={deletedTemplates}
+            TABLE_HEAD={TABLE_HEAD}
+            loading={deletedLoading}
+            emptyMessage="No deleted email templates found"
+            onRestore={handleRestore}
+            onPermanentDelete={handlePermanentDelete}
+            renderCell={renderCell}
+            getItemName={getItemName}
+            getDeletedAt={getDeletedAt}
+            getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}
+            restoreLoading={restoreLoading}
+            deleteLoading={permanentDeleteLoading}
+            pagination={deletedPagination}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ open, template: null })}
-        title="Delete Email Template"
-        content={`Are you sure you want to delete "${deleteDialog.template?.name}"? This action cannot be undone.`}
-        confirmButtonText="Delete Template"
+        title="Move to Deleted Templates"
+        content={`Are you sure you want to move "${deleteDialog.template?.name}" to deleted templates? You can restore it within 30 days before it's permanently deleted.`}
+        confirmButtonText="Move to Deleted"
         onConfirm={confirmDelete}
         loading={deleteLoading}
       />

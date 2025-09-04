@@ -23,6 +23,7 @@ import OrganizationCreateDialog from '@/components/organizations/OrganizationCre
 import OrganizationDetailView from '@/components/organizations/OrganizationDetailView';
 import CustomDrawer from '@/components/ui/custom-drawer';
 import OrganizationFilters from '@/components/organizations/OrganizationFilters';
+import SoftDeleteTable from '@/components/ui/soft-delete-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
@@ -34,6 +35,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Organization {
   _id: string;
@@ -55,6 +57,8 @@ interface Organization {
   total_revenue: number;
   total_attendees: number;
   created_at: string;
+  deleted_at?: string;
+  is_deleted?: boolean;
 }
 
 // Dummy data
@@ -158,9 +162,12 @@ const TABLE_HEAD: TableHeader[] = [
 const OrganizationsPage: React.FC = () => {
   const router = useRouter();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [deletedOrganizations, setDeletedOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletedLoading, setDeletedLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     organization: Organization | null;
@@ -177,6 +184,8 @@ const OrganizationsPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -197,14 +206,21 @@ const OrganizationsPage: React.FC = () => {
   });
 
   // Load organizations
-  const loadOrganizations = async () => {
-    setLoading(true);
+  const loadOrganizations = async (includeDeleted = false) => {
+    if (includeDeleted) {
+      setDeletedLoading(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Filter data based on search and status
-      let filteredData = dummyData.data.organizations;
+      let filteredData = includeDeleted
+        ? deletedOrganizations
+        : dummyData.data.organizations;
       
       if (searchQuery) {
         filteredData = filteredData.filter(org =>
@@ -221,18 +237,30 @@ const OrganizationsPage: React.FC = () => {
         filteredData = filteredData.filter(org => org.category === categoryFilter);
       }
 
-      setOrganizations(filteredData);
-      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      if (includeDeleted) {
+        setDeletedOrganizations(filteredData);
+      } else {
+        setOrganizations(filteredData);
+        setPagination(prev => ({ ...prev, total: filteredData.length }));
+      }
     } catch (error) {
-      console.error('Error loading organizations:', error);
+      console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} organizations:`, error);
     } finally {
-      setLoading(false);
+      if (includeDeleted) {
+        setDeletedLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadOrganizations();
-  }, [searchQuery, pagination.page, pagination.limit]);
+    if (activeTab === 'all') {
+      loadOrganizations(false);
+    } else if (activeTab === 'deleted') {
+      loadOrganizations(true);
+    }
+  }, [searchQuery, pagination.page, pagination.limit, activeTab]);
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -258,7 +286,14 @@ const OrganizationsPage: React.FC = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Remove from local state
+      // Move to deleted organizations (soft delete)
+      const deletedOrganization = {
+        ...deleteDialog.organization,
+        deleted_at: new Date().toISOString(),
+        is_deleted: true,
+      };
+
+      setDeletedOrganizations(prev => [deletedOrganization, ...prev]);
       setOrganizations(prev => 
         prev.filter(org => org._id !== deleteDialog.organization!._id)
       );
@@ -271,6 +306,40 @@ const OrganizationsPage: React.FC = () => {
       console.error('Error deleting organization:', error);
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleRestore = async (organization: Organization) => {
+    setRestoreLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Remove deleted_at and is_deleted properties
+      const { deleted_at, is_deleted, ...restoredOrganization } = organization;
+
+      // Move back to active organizations
+      setOrganizations(prev => [restoredOrganization, ...prev]);
+      setDeletedOrganizations(prev => prev.filter(org => org._id !== organization._id));
+    } catch (error) {
+      console.error('Error restoring organization:', error);
+    } finally {
+      setRestoreLoading(false);
+    }
+  };
+
+  const handlePermanentDelete = async (organization: Organization) => {
+    setPermanentDeleteLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Remove from deleted organizations permanently
+      setDeletedOrganizations(prev => prev.filter(org => org._id !== organization._id));
+    } catch (error) {
+      console.error('Error permanently deleting organization:', error);
+    } finally {
+      setPermanentDeleteLoading(false);
     }
   };
 
@@ -338,6 +407,29 @@ const OrganizationsPage: React.FC = () => {
     }));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
+  };
+
+  // Helper functions for soft delete table
+  const getItemName = (org: Organization) => org.orgn_user.name;
+  const getDeletedAt = (org: Organization) => org.deleted_at || '';
+  const getDaysUntilPermanentDelete = (org: Organization) => {
+    if (!org.deleted_at) return 30;
+    
+    const deletedDate = new Date(org.deleted_at);
+    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const now = new Date();
+    const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+    
+    return Math.max(0, daysLeft);
+  };
+
+  // Pagination for deleted organizations
+  const deletedPagination = {
+    total_count: deletedOrganizations.length,
+    rows_per_page: pagination.limit,
+    page: pagination.page,
+    handleChangePage,
+    onRowsPerPageChange,
   };
 
   const handleApplyFilters = async () => {
@@ -594,36 +686,67 @@ const OrganizationsPage: React.FC = () => {
       </div>
 
       {/* Organizations Table */}
-      <CustomTable
-        data={organizations}
-        TABLE_HEAD={TABLE_HEAD}
-        MENU_OPTIONS={MENU_OPTIONS}
-        custom_pagination={{
-          total_count: pagination.total,
-          rows_per_page: pagination.limit,
-          page: pagination.page,
-          handleChangePage,
-          onRowsPerPageChange,
-        }}
-        pageCount={pagination.limit}
-        totalPages={totalPages}
-        handleChangePages={handleChangePage}
-        selected={selected}
-        setSelected={setSelected}
-        checkbox_selection={true}
-        onRowClick={handleRowClick}
-        renderCell={renderCell}
-        loading={loading}
-        emptyMessage="No organizations found"
-      />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="all">
+            All Organizations ({organizations.length})
+          </TabsTrigger>
+          <TabsTrigger className="data-[state=active]:text-red-500" value="deleted">
+            Deleted Organizations ({deletedOrganizations.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-6">
+          <CustomTable
+            data={organizations}
+            TABLE_HEAD={TABLE_HEAD}
+            MENU_OPTIONS={MENU_OPTIONS}
+            custom_pagination={{
+              total_count: pagination.total,
+              rows_per_page: pagination.limit,
+              page: pagination.page,
+              handleChangePage,
+              onRowsPerPageChange,
+            }}
+            pageCount={pagination.limit}
+            totalPages={totalPages}
+            handleChangePages={handleChangePage}
+            selected={selected}
+            setSelected={setSelected}
+            checkbox_selection={true}
+            onRowClick={handleRowClick}
+            renderCell={renderCell}
+            loading={loading}
+            emptyMessage="No organizations found"
+          />
+        </TabsContent>
+
+        <TabsContent value="deleted" className="space-y-6">
+          <SoftDeleteTable
+            data={deletedOrganizations}
+            TABLE_HEAD={TABLE_HEAD}
+            loading={deletedLoading}
+            emptyMessage="No deleted organizations found"
+            onRestore={handleRestore}
+            onPermanentDelete={handlePermanentDelete}
+            renderCell={renderCell}
+            getItemName={getItemName}
+            getDeletedAt={getDeletedAt}
+            getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}
+            restoreLoading={restoreLoading}
+            deleteLoading={permanentDeleteLoading}
+            pagination={deletedPagination}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ open, organization: null })}
-        title="Delete Organization"
-        content={`Are you sure you want to delete "${deleteDialog.organization?.orgn_user.name}"? This action cannot be undone and will remove all associated data.`}
-        confirmButtonText="Delete Organization"
+        title="Move to Deleted Organizations"
+        content={`Are you sure you want to move "${deleteDialog.organization?.orgn_user.name}" to deleted organizations? You can restore it within 30 days before it's permanently deleted.`}
+        confirmButtonText="Move to Deleted"
         onConfirm={confirmDelete}
         loading={deleteLoading}
       />

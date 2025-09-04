@@ -25,6 +25,7 @@ import CompanyCreateDialog from '@/components/companies/CompanyCreateDialog';
 import CompanyDetailView from '@/components/companies/CompanyDetailView';
 import CustomDrawer from '@/components/ui/custom-drawer';
 import CompanyFilters from '@/components/companies/CompanyFilters';
+import SoftDeleteTable from '@/components/ui/soft-delete-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
@@ -36,6 +37,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Company {
   _id: string;
@@ -60,6 +62,8 @@ interface Company {
   total_events: number;
   total_payments: number;
   created_at: string;
+  deleted_at?: string;
+  is_deleted?: boolean;
 }
 
 // Dummy data
@@ -231,9 +235,12 @@ const TABLE_HEAD: TableHeader[] = [
 const CompaniesPage: React.FC = () => {
   const router = useRouter();
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [deletedCompanies, setDeletedCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletedLoading, setDeletedLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     company: Company | null;
@@ -250,6 +257,8 @@ const CompaniesPage: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
@@ -269,14 +278,21 @@ const CompaniesPage: React.FC = () => {
   });
 
   // Load companies
-  const loadCompanies = async () => {
-    setLoading(true);
+  const loadCompanies = async (includeDeleted = false) => {
+    if (includeDeleted) {
+      setDeletedLoading(true);
+    } else {
+      setLoading(true);
+    }
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Filter data based on search and status
-      let filteredData = dummyData.data.companies;
+      let filteredData = includeDeleted
+        ? deletedCompanies
+        : dummyData.data.companies;
       
       if (searchQuery) {
         filteredData = filteredData.filter(company =>
@@ -295,18 +311,30 @@ const CompaniesPage: React.FC = () => {
         filteredData = filteredData.filter(company => company.bio.industry === industryFilter);
       }
 
-      setCompanies(filteredData);
-      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      if (includeDeleted) {
+        setDeletedCompanies(filteredData);
+      } else {
+        setCompanies(filteredData);
+        setPagination(prev => ({ ...prev, total: filteredData.length }));
+      }
     } catch (error) {
-      console.error('Error loading companies:', error);
+      console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} companies:`, error);
     } finally {
-      setLoading(false);
+      if (includeDeleted) {
+        setDeletedLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadCompanies();
-  }, [searchQuery, pagination.page, pagination.limit]);
+    if (activeTab === 'all') {
+      loadCompanies(false);
+    } else if (activeTab === 'deleted') {
+      loadCompanies(true);
+    }
+  }, [searchQuery, pagination.page, pagination.limit, activeTab]);
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));
@@ -332,7 +360,14 @@ const CompaniesPage: React.FC = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Remove from local state
+      // Move to deleted companies (soft delete)
+      const deletedCompany = {
+        ...deleteDialog.company,
+        deleted_at: new Date().toISOString(),
+        is_deleted: true,
+      };
+
+      setDeletedCompanies(prev => [deletedCompany, ...prev]);
       setCompanies(prev => 
         prev.filter(company => company._id !== deleteDialog.company!._id)
       );
@@ -345,6 +380,40 @@ const CompaniesPage: React.FC = () => {
       console.error('Error deleting company:', error);
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleRestore = async (company: Company) => {
+    setRestoreLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Remove deleted_at and is_deleted properties
+      const { deleted_at, is_deleted, ...restoredCompany } = company;
+
+      // Move back to active companies
+      setCompanies(prev => [restoredCompany, ...prev]);
+      setDeletedCompanies(prev => prev.filter(c => c._id !== company._id));
+    } catch (error) {
+      console.error('Error restoring company:', error);
+    } finally {
+      setRestoreLoading(false);
+    }
+  };
+
+  const handlePermanentDelete = async (company: Company) => {
+    setPermanentDeleteLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Remove from deleted companies permanently
+      setDeletedCompanies(prev => prev.filter(c => c._id !== company._id));
+    } catch (error) {
+      console.error('Error permanently deleting company:', error);
+    } finally {
+      setPermanentDeleteLoading(false);
     }
   };
 
@@ -465,6 +534,29 @@ const CompaniesPage: React.FC = () => {
     
     // Update pagination total
     setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+  };
+
+  // Helper functions for soft delete table
+  const getItemName = (company: Company) => company.orgn_user.name;
+  const getDeletedAt = (company: Company) => company.deleted_at || '';
+  const getDaysUntilPermanentDelete = (company: Company) => {
+    if (!company.deleted_at) return 30;
+    
+    const deletedDate = new Date(company.deleted_at);
+    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const now = new Date();
+    const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+    
+    return Math.max(0, daysLeft);
+  };
+
+  // Pagination for deleted companies
+  const deletedPagination = {
+    total_count: deletedCompanies.length,
+    rows_per_page: pagination.limit,
+    page: pagination.page,
+    handleChangePage,
+    onRowsPerPageChange,
   };
 
   const MENU_OPTIONS: MenuOption[] = [
@@ -663,36 +755,67 @@ const CompaniesPage: React.FC = () => {
       </div>
 
       {/* Companies Table */}
-      <CustomTable
-        data={companies}
-        TABLE_HEAD={TABLE_HEAD}
-        MENU_OPTIONS={MENU_OPTIONS}
-        custom_pagination={{
-          total_count: pagination.total,
-          rows_per_page: pagination.limit,
-          page: pagination.page,
-          handleChangePage,
-          onRowsPerPageChange,
-        }}
-        pageCount={pagination.limit}
-        totalPages={totalPages}
-        handleChangePages={handleChangePage}
-        selected={selected}
-        setSelected={setSelected}
-        checkbox_selection={true}
-        onRowClick={handleRowClick}
-        renderCell={renderCell}
-        loading={loading}
-        emptyMessage="No companies found"
-      />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="all">
+            All Companies ({companies.length})
+          </TabsTrigger>
+          <TabsTrigger className="data-[state=active]:text-red-500" value="deleted">
+            Deleted Companies ({deletedCompanies.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-6">
+          <CustomTable
+            data={companies}
+            TABLE_HEAD={TABLE_HEAD}
+            MENU_OPTIONS={MENU_OPTIONS}
+            custom_pagination={{
+              total_count: pagination.total,
+              rows_per_page: pagination.limit,
+              page: pagination.page,
+              handleChangePage,
+              onRowsPerPageChange,
+            }}
+            pageCount={pagination.limit}
+            totalPages={totalPages}
+            handleChangePages={handleChangePage}
+            selected={selected}
+            setSelected={setSelected}
+            checkbox_selection={true}
+            onRowClick={handleRowClick}
+            renderCell={renderCell}
+            loading={loading}
+            emptyMessage="No companies found"
+          />
+        </TabsContent>
+
+        <TabsContent value="deleted" className="space-y-6">
+          <SoftDeleteTable
+            data={deletedCompanies}
+            TABLE_HEAD={TABLE_HEAD}
+            loading={deletedLoading}
+            emptyMessage="No deleted companies found"
+            onRestore={handleRestore}
+            onPermanentDelete={handlePermanentDelete}
+            renderCell={renderCell}
+            getItemName={getItemName}
+            getDeletedAt={getDeletedAt}
+            getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}
+            restoreLoading={restoreLoading}
+            deleteLoading={permanentDeleteLoading}
+            pagination={deletedPagination}
+          />
+        </TabsContent>
+      </Tabs>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ open, company: null })}
-        title="Delete Company"
-        content={`Are you sure you want to delete "${deleteDialog.company?.orgn_user.name}"? This action cannot be undone and will remove all associated data.`}
-        confirmButtonText="Delete Company"
+        title="Move to Deleted Companies"
+        content={`Are you sure you want to move "${deleteDialog.company?.orgn_user.name}" to deleted companies? You can restore it within 30 days before it's permanently deleted.`}
+        confirmButtonText="Move to Deleted"
         onConfirm={confirmDelete}
         loading={deleteLoading}
       />
