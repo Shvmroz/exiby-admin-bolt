@@ -218,10 +218,15 @@ const OrganizationsPage: React.FC = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Get active organizations (exclude deleted ones)
+      const activeOrganizations = dummyData.data.organizations.filter(org => 
+        !deletedOrganizations.some(deleted => deleted._id === org._id)
+      );
+      
       // Filter data based on search and status
       let filteredData = includeDeleted
         ? deletedOrganizations
-        : dummyData.data.organizations;
+        : activeOrganizations;
       
       if (searchQuery) {
         filteredData = filteredData.filter(org =>
@@ -405,10 +410,15 @@ const OrganizationsPage: React.FC = () => {
     setCategoryFilter('all');
     setSubscriptionStatusFilter('all');
     setActiveOnly(false);
-    setOrganizations(dummyData.data.organizations);
+    
+    // Get active organizations (exclude deleted ones)
+    const activeOrganizations = dummyData.data.organizations.filter(org => 
+      !deletedOrganizations.some(deleted => deleted._id === org._id)
+    );
+    setOrganizations(activeOrganizations);
     setPagination(prev => ({
       ...prev,
-      total: dummyData.data.organizations.length,
+      total: activeOrganizations.length,
     }));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
@@ -441,7 +451,12 @@ const OrganizationsPage: React.FC = () => {
     setFilterLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-      let filteredData = dummyData.data.organizations;
+      
+      // Get active organizations (exclude deleted ones)
+      const activeOrganizations = dummyData.data.organizations.filter(org => 
+        !deletedOrganizations.some(deleted => deleted._id === org._id)
+      );
+      let filteredData = activeOrganizations;
 
       if (statusFilter !== 'all') {
         const isActive = statusFilter === 'active';

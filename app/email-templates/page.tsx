@@ -266,10 +266,15 @@ const EmailTemplatesPage: React.FC = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Get active email templates (exclude deleted ones)
+      const activeTemplates = dummyData.data.email_templates.filter(template => 
+        !deletedTemplates.some(deleted => deleted._id === template._id)
+      );
+      
       // Filter data based on search and status
       let filteredData = includeDeleted
         ? deletedTemplates
-        : dummyData.data.email_templates;
+        : activeTemplates;
       
       if (searchQuery) {
         filteredData = filteredData.filter(template =>
@@ -453,10 +458,15 @@ const EmailTemplatesPage: React.FC = () => {
     setStatusFilter('all');
     setTypeFilter('all');
     setActiveOnly(false);
-    setEmailTemplates(dummyData.data.email_templates);
+    
+    // Get active email templates (exclude deleted ones)
+    const activeTemplates = dummyData.data.email_templates.filter(template => 
+      !deletedTemplates.some(deleted => deleted._id === template._id)
+    );
+    setEmailTemplates(activeTemplates);
     setPagination(prev => ({
       ...prev,
-      total: dummyData.data.email_templates.length,
+      total: activeTemplates.length,
     }));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
@@ -489,7 +499,12 @@ const EmailTemplatesPage: React.FC = () => {
     setFilterLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-      let filteredData = dummyData.data.email_templates;
+      
+      // Get active email templates (exclude deleted ones)
+      const activeTemplates = dummyData.data.email_templates.filter(template => 
+        !deletedTemplates.some(deleted => deleted._id === template._id)
+      );
+      let filteredData = activeTemplates;
 
       if (statusFilter !== 'all') {
         const isActive = statusFilter === 'active';

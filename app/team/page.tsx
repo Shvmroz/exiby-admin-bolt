@@ -238,9 +238,14 @@ const TeamPage: React.FC = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Get active team members (exclude deleted ones)
+      const activeMembers = dummyData.data.team_members.filter(member => 
+        !deletedMembers.some(deleted => deleted._id === member._id)
+      );
+      
       let filteredData = includeDeleted
         ? deletedMembers
-        : dummyData.data.team_members;
+        : activeMembers;
       
       if (searchQuery) {
         filteredData = filteredData.filter(member =>
@@ -440,10 +445,15 @@ const TeamPage: React.FC = () => {
     setRoleFilter('all');
     setStatusFilter('all');
     setActiveOnly(false);
-    setTeamMembers(dummyData.data.team_members);
+    
+    // Get active team members (exclude deleted ones)
+    const activeMembers = dummyData.data.team_members.filter(member => 
+      !deletedMembers.some(deleted => deleted._id === member._id)
+    );
+    setTeamMembers(activeMembers);
     setPagination(prev => ({
       ...prev,
-      total: dummyData.data.team_members.length,
+      total: activeMembers.length,
     }));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
@@ -453,7 +463,12 @@ const TeamPage: React.FC = () => {
     setFilterLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-      let filteredData = dummyData.data.team_members;
+      
+      // Get active team members (exclude deleted ones)
+      const activeMembers = dummyData.data.team_members.filter(member => 
+        !deletedMembers.some(deleted => deleted._id === member._id)
+      );
+      let filteredData = activeMembers;
 
       if (roleFilter !== 'all') {
         filteredData = filteredData.filter(member => member.role === roleFilter);

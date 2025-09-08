@@ -227,9 +227,14 @@ const PaymentPlansPage: React.FC = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      // Get active payment plans (exclude deleted ones)
+      const activePlans = dummyData.data.payment_plans.filter(plan => 
+        !deletedPlans.some(deleted => deleted._id === plan._id)
+      );
+      
       let filteredData = includeDeleted
-        ? deletedPlans // ✅ keep state
-        : dummyData.data.payment_plans;
+        ? deletedPlans
+        : activePlans;
 
       if (searchQuery) {
         filteredData = filteredData.filter(
@@ -410,10 +415,15 @@ const PaymentPlansPage: React.FC = () => {
     setTypeFilter("all");
     setBillingCycleFilter("all");
     setPopularOnly(false);
-    setPaymentPlans(dummyData.data.payment_plans);
+    
+    // Get active payment plans (exclude deleted ones)
+    const activePlans = dummyData.data.payment_plans.filter(plan => 
+      !deletedPlans.some(deleted => deleted._id === plan._id)
+    );
+    setPaymentPlans(activePlans);
     setPagination((prev) => ({
       ...prev,
-      total: dummyData.data.payment_plans.length,
+      total: activePlans.length,
     }));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
@@ -452,7 +462,12 @@ const PaymentPlansPage: React.FC = () => {
     setFilterLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      let filteredData = dummyData.data.payment_plans;
+      
+      // Get active payment plans (exclude deleted ones)
+      const activePlans = dummyData.data.payment_plans.filter(plan => 
+        !deletedPlans.some(deleted => deleted._id === plan._id)
+      );
+      let filteredData = activePlans;
 
       if (statusFilter !== "all") {
         const isActive = statusFilter === "active";

@@ -290,10 +290,15 @@ const CompaniesPage: React.FC = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Get active companies (exclude deleted ones)
+      const activeCompanies = dummyData.data.companies.filter(company => 
+        !deletedCompanies.some(deleted => deleted._id === company._id)
+      );
+      
       // Filter data based on search and status
       let filteredData = includeDeleted
         ? deletedCompanies
-        : dummyData.data.companies;
+        : activeCompanies;
       
       if (searchQuery) {
         filteredData = filteredData.filter(company =>
@@ -477,10 +482,15 @@ const CompaniesPage: React.FC = () => {
     setStatusFilter('all');
     setIndustryFilter('all');
     setActiveOnly(false);
-    setCompanies(dummyData.data.companies);
+    
+    // Get active companies (exclude deleted ones)
+    const activeCompanies = dummyData.data.companies.filter(company => 
+      !deletedCompanies.some(deleted => deleted._id === company._id)
+    );
+    setCompanies(activeCompanies);
     setPagination(prev => ({
       ...prev,
-      total: dummyData.data.companies.length,
+      total: activeCompanies.length,
     }));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
@@ -490,7 +500,12 @@ const CompaniesPage: React.FC = () => {
     setFilterLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-      let filteredData = dummyData.data.companies;
+      
+      // Get active companies (exclude deleted ones)
+      const activeCompanies = dummyData.data.companies.filter(company => 
+        !deletedCompanies.some(deleted => deleted._id === company._id)
+      );
+      let filteredData = activeCompanies;
 
       if (statusFilter !== 'all') {
         const isActive = statusFilter === 'active';
