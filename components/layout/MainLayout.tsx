@@ -7,9 +7,14 @@ import { useAppContext } from '@/contexts/AppContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import PageSkeleton from '@/components/ui/skeleton/page-skeleton';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import PageSkeleton from '@/components/ui/skeleton/page-skeleton';
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  requireAuth?: boolean;
+  skeletonType?: 'dashboard' | 'table' | 'form' | 'analytics' | 'profile' | 'settings';
   requireAuth?: boolean;
   skeletonType?: 'dashboard' | 'table' | 'form' | 'analytics' | 'profile' | 'settings';
 }
@@ -19,7 +24,31 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   requireAuth = true,
   skeletonType = 'dashboard'
 }) => {
+  children, 
+  requireAuth = true,
+  skeletonType = 'dashboard'
+}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isAuthenticated, loading } = useAppContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (requireAuth && !loading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, loading, router, requireAuth]);
+
+  if (requireAuth && loading) {
+    return (
+      <div className="p-6">
+        <PageSkeleton type={skeletonType} />
+      </div>
+    );
+  }
+
+  if (requireAuth && !isAuthenticated) {
+    return null;
+  }
   const { isAuthenticated, loading } = useAppContext();
   const router = useRouter();
 
