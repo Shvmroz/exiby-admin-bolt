@@ -4,13 +4,39 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { useAppContext } from '@/contexts/AppContext';
+import PageSkeleton from '@/components/ui/skeleton/page-skeleton';
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  requireAuth?: boolean;
+  skeletonType?: 'dashboard' | 'table' | 'form' | 'analytics' | 'profile' | 'settings';
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ 
+  children, 
+  requireAuth = false, 
+  skeletonType = 'table' 
+}) => {
+  const { isAuthenticated, loading } = useAppContext();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Show loading skeleton while checking authentication
+  if (loading) {
+    return (
+      <div className="p-6">
+        <PageSkeleton type={skeletonType} />
+      </div>
+    );
+  }
+
+  // Redirect to login if authentication is required but user is not authenticated
+  if (requireAuth && !isAuthenticated) {
+    return (
+      <div className="p-6">
+        <PageSkeleton type={skeletonType} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
