@@ -304,8 +304,8 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
       <DialogActions sx={{ borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
         <Button
           type="button"
-          variant="outline"
           onClick={() => setShowPreview(!showPreview)}
+          variant="outline"
           style={{
             backgroundColor: darkMode ? '#374151' : '#f9fafb',
             color: darkMode ? '#f3f4f6' : '#374151',
@@ -313,7 +313,7 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
           }}
         >
           <Eye className="w-4 h-4 mr-2" />
-          {showPreview ? 'Hide Preview' : 'Show Preview'}
+          {showPreview ? 'Edit Template' : 'Preview Template'}
         </Button>
         <Button
           type="button"
@@ -329,24 +329,26 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
           <X className="w-4 h-4 mr-2" />
           Cancel
         </Button>
-        <Button
-          form="template-edit-form"
-          type="submit"
-          disabled={loading}
-          className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
-        >
-          {loading ? (
-            <div className="flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-2 border-t-white mr-2"></div>
-              Saving...
-            </div>
-          ) : (
-            <>
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </>
-          )}
-        </Button>
+        {!showPreview && (
+          <Button
+            form="template-edit-form"
+            type="submit"
+            disabled={loading}
+            className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
+          >
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-2 border-t-white mr-2"></div>
+                Saving...
+              </div>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
