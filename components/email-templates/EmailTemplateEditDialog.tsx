@@ -1,22 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useAppContext } from '@/contexts/AppContext';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useState, useEffect } from "react";
+import { useAppContext } from "@/contexts/AppContext";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Save, X, Eye } from 'lucide-react';
+} from "@/components/ui/select";
+import { Save, X, Eye } from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 interface EmailTemplate {
   _id: string;
@@ -46,21 +48,21 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
 }) => {
   const { darkMode } = useAppContext();
   const [formData, setFormData] = useState({
-    name: '',
-    subject: '',
-    template_type: 'user_registration',
-    content: '',
+    name: "",
+    subject: "",
+    template_type: "user_registration",
+    content: "",
     variables: [] as string[],
     is_active: true,
   });
   const [showPreview, setShowPreview] = useState(false);
 
   const templateTypes = [
-    'user_registration',
-    'event_registration',
-    'password_reset',
-    'event_reminder',
-    'payment_confirmation',
+    "user_registration",
+    "event_registration",
+    "password_reset",
+    "event_reminder",
+    "payment_confirmation",
   ];
 
   useEffect(() => {
@@ -90,15 +92,16 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
   const extractVariables = (content: string): string[] => {
     const regex = /\{\{([^}]+)\}\}/g;
     const matches: RegExpMatchArray | null = content.match(regex);
-  
+
     if (matches) {
-      const cleaned = matches.map((match: string) => match.replace(/[{}]/g, ''));
+      const cleaned = matches.map((match: string) =>
+        match.replace(/[{}]/g, "")
+      );
       return Array.from(new Set(cleaned));
     }
-  
+
     return [];
   };
-  
 
   const handleContentChange = (content: string) => {
     setFormData({
@@ -110,149 +113,192 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
 
   const renderPreview = () => {
     let previewContent = formData.content;
-    formData.variables.forEach(variable => {
+    formData.variables.forEach((variable) => {
       const sampleValue = getSampleValue(variable);
-      previewContent = previewContent.replace(new RegExp(`{{${variable}}}`, 'g'), sampleValue);
+      previewContent = previewContent.replace(
+        new RegExp(`{{${variable}}}`, "g"),
+        sampleValue
+      );
     });
     return previewContent;
   };
 
   const getSampleValue = (variable: string) => {
     const sampleValues: { [key: string]: string } = {
-      platform_name: 'ExiBy Platform',
-      user_name: 'Shamroz khan',
-      event_name: 'Tech Conference 2024',
-      event_date: 'March 15, 2024',
-      event_time: '10:00 AM',
-      event_location: 'Convention Center',
-      event_details: 'A comprehensive tech conference featuring industry leaders',
-      login_url: 'https://platform.com/login',
-      reset_url: 'https://platform.com/reset-password',
-      payment_amount: '$299.00',
-      transaction_id: 'TXN123456789',
-      payment_date: 'January 20, 2024',
+      platform_name: "ExiBy Platform",
+      user_name: "Shamroz khan",
+      event_name: "Tech Conference 2024",
+      event_date: "March 15, 2024",
+      event_time: "10:00 AM",
+      event_location: "Convention Center",
+      event_details:
+        "A comprehensive tech conference featuring industry leaders",
+      login_url: "https://platform.com/login",
+      reset_url: "https://platform.com/reset-password",
+      payment_amount: "$299.00",
+      transaction_id: "TXN123456789",
+      payment_date: "January 20, 2024",
     };
     return sampleValues[variable] || `[${variable}]`;
   };
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={() => onOpenChange(false)}
-      maxWidth="lg"
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#000000',
-          borderRadius: '12px',
-          maxHeight: '90vh',
-        }
+          backgroundColor: darkMode ? "#1f2937" : "#ffffff",
+          color: darkMode ? "#ffffff" : "#000000",
+          borderRadius: "12px",
+          maxHeight: "90vh",
+        },
       }}
     >
-      <DialogTitle style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+      <DialogTitle style={{ color: darkMode ? "#ffffff" : "#000000" }}>
         Edit Email Template
       </DialogTitle>
 
-      <DialogContent 
-        sx={{ paddingTop: 2, paddingBottom: 2, overflow: 'visible' }}
-        style={{ 
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#000000'
+      <DialogContent
+        sx={{
+          paddingTop: 2,
+          paddingBottom: 2,
+          display: "flex",
+          flexDirection: "column",
+          maxHeight: "70vh", // or whatever max height you want
+          overflowY: "auto",
+        }}
+        style={{
+          backgroundColor: darkMode ? "#1f2937" : "#ffffff",
+          color: darkMode ? "#ffffff" : "#000000",
         }}
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Form */}
-          <div>
-            <form onSubmit={handleSubmit} className="space-y-6" id="template-edit-form">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                    Template Name
-                  </label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter template name"
-                    style={{
-                      backgroundColor: darkMode ? '#374151' : '#ffffff',
-                      color: darkMode ? '#ffffff' : '#000000',
-                      borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                    }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                    Template Type
-                  </label>
-                  <Select
-                    value={formData.template_type}
-                    onValueChange={(value) => setFormData({ ...formData, template_type: value })}
-                  >
-                    <SelectTrigger
-                      style={{
-                        backgroundColor: darkMode ? '#374151' : '#ffffff',
-                        color: darkMode ? '#ffffff' : '#000000',
-                        borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                      }}
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent
-                      style={{
-                        backgroundColor: darkMode ? '#374151' : '#ffffff',
-                        color: darkMode ? '#ffffff' : '#000000',
-                        borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                      }}
-                    >
-                      {templateTypes.map(type => (
-                        <SelectItem key={type} value={type}>
-                          {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+        {showPreview ? (
+          <div className="sticky top-0">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Live Preview
+            </h3>
+            <div
+              className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800 max-h-[70vh] overflow-y-auto"
+              dangerouslySetInnerHTML={{ __html: renderPreview() }}
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6">
+            {/* Form */}
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+              id="template-edit-form"
+            >
+              {/* Template Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                  Template Name
+                </label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  placeholder="Enter template name"
+                  style={{
+                    backgroundColor: darkMode ? "#374151" : "#ffffff",
+                    color: darkMode ? "#ffffff" : "#000000",
+                    borderColor: darkMode ? "#4b5563" : "#d1d5db",
+                  }}
+                  required
+                />
               </div>
 
+              {/* Template Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                  Template Type
+                </label>
+                <Select
+                  value={formData.template_type}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, template_type: value })
+                  }
+                >
+                  <SelectTrigger
+                    style={{
+                      backgroundColor: darkMode ? "#374151" : "#ffffff",
+                      color: darkMode ? "#ffffff" : "#000000",
+                      borderColor: darkMode ? "#4b5563" : "#d1d5db",
+                    }}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent
+                    style={{
+                      backgroundColor: darkMode ? "#374151" : "#ffffff",
+                      color: darkMode ? "#ffffff" : "#000000",
+                      borderColor: darkMode ? "#4b5563" : "#d1d5db",
+                    }}
+                  >
+                    {templateTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type
+                          .replace("_", " ")
+                          .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Subject */}
               <div>
                 <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                   Subject Line
                 </label>
                 <Input
                   value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, subject: e.target.value })
+                  }
                   placeholder="Enter email subject"
                   style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                    backgroundColor: darkMode ? "#374151" : "#ffffff",
+                    color: darkMode ? "#ffffff" : "#000000",
+                    borderColor: darkMode ? "#4b5563" : "#d1d5db",
                   }}
                   required
                 />
               </div>
 
+              {/* Content */}
               <div>
                 <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                   Email Content (HTML)
                 </label>
-                <Textarea
+                <ReactQuill
                   value={formData.content}
-                  onChange={(e) => handleContentChange(e.target.value)}
-                  placeholder="Enter HTML content with variables like {{variable_name}}"
-                  rows={12}
+                  onChange={handleContentChange}
+                  theme="snow"
                   style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                    backgroundColor: darkMode ? "#374151" : "#ffffff",
+                    color: darkMode ? "#ffffff" : "#000000",
+                    borderRadius: "8px",
                   }}
-                  className="font-mono text-sm"
-                  required
+                  modules={{
+                    toolbar: [
+                      [{ header: [1, 2, 3, false] }],
+                      ["bold", "italic", "underline", "strike"],
+                      [{ color: [] }, { background: [] }],
+                      [{ list: "ordered" }, { list: "bullet" }],
+                      ["link", "image"],
+                      ["clean"],
+                    ],
+                  }}
                 />
               </div>
 
+              {/* Variables */}
               <div>
                 <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                   Variables ({formData.variables.length})
@@ -263,57 +309,50 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
                       key={index}
                       className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 rounded text-sm font-mono"
                     >
-                      {`{{${variable}}}`}
+                      {`${variable}`}
                     </span>
                   ))}
                 </div>
               </div>
 
+              {/* Active Checkbox */}
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="is_active"
                   checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, is_active: e.target.checked })
+                  }
                   className="w-4 h-4 text-[#0077ED] bg-gray-100 border-gray-300 rounded focus:ring-[#0077ED] dark:focus:ring-[#0077ED] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                 />
-                <label htmlFor="is_active" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                <label
+                  htmlFor="is_active"
+                  className="text-sm font-medium text-gray-800 dark:text-gray-200"
+                >
                   Active Template
                 </label>
               </div>
             </form>
           </div>
-
-          {/* Preview */}
-          {showPreview && (
-            <div>
-              <div className="sticky top-0">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Live Preview
-                </h3>
-                <div 
-                  className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-white dark:bg-gray-800 max-h-96 overflow-y-auto"
-                  dangerouslySetInnerHTML={{ __html: renderPreview() }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </DialogContent>
 
-      <DialogActions sx={{ borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+      <DialogActions
+        sx={{ borderTop: `1px solid ${darkMode ? "#374151" : "#e5e7eb"}` }}
+      >
         <Button
           type="button"
           onClick={() => setShowPreview(!showPreview)}
           variant="outline"
           style={{
-            backgroundColor: darkMode ? '#374151' : '#f9fafb',
-            color: darkMode ? '#f3f4f6' : '#374151',
-            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+            backgroundColor: darkMode ? "#374151" : "#f9fafb",
+            color: darkMode ? "#f3f4f6" : "#374151",
+            borderColor: darkMode ? "#4b5563" : "#d1d5db",
           }}
         >
           <Eye className="w-4 h-4 mr-2" />
-          {showPreview ? 'Edit Template' : 'Preview Template'}
+          {showPreview ? "Hide Preview" : "Show Preview"}
         </Button>
         <Button
           type="button"
@@ -321,9 +360,9 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
           onClick={() => onOpenChange(false)}
           disabled={loading}
           style={{
-            backgroundColor: darkMode ? '#374151' : '#f9fafb',
-            color: darkMode ? '#f3f4f6' : '#374151',
-            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+            backgroundColor: darkMode ? "#374151" : "#f9fafb",
+            color: darkMode ? "#f3f4f6" : "#374151",
+            borderColor: darkMode ? "#4b5563" : "#d1d5db",
           }}
         >
           <X className="w-4 h-4 mr-2" />
