@@ -8,7 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import QuillEditor from '@/components/ui/quill-editor';
 import {
   Select,
   SelectContent,
@@ -88,15 +88,10 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
   };
 
   const extractVariables = (content: string): string[] => {
-    const regex = /\{\{([^}]+)\}\}/g;
-    const matches: RegExpMatchArray | null = content.match(regex);
-  
-    if (matches) {
-      const cleaned = matches.map((match: string) => match.replace(/[{}]/g, ''));
-      return Array.from(new Set(cleaned));
-    }
-  
-    return [];
+    // Extract variables that are standalone words (not in HTML tags or attributes)
+    const regex = /\b(user_name|platform_name|event_name|event_date|event_time|event_location|event_details|login_url|reset_url|payment_amount|transaction_id|payment_date)\b/g;
+    const matches = content.match(regex);
+    return matches ? Array.from(new Set(matches)) : [];
   };
   
 
@@ -112,7 +107,7 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
     let previewContent = formData.content;
     formData.variables.forEach(variable => {
       const sampleValue = getSampleValue(variable);
-      previewContent = previewContent.replace(new RegExp(`{{${variable}}}`, 'g'), sampleValue);
+      previewContent = previewContent.replace(new RegExp(`\\b${variable}\\b`, 'g'), sampleValue);
     });
     return previewContent;
   };
@@ -120,7 +115,7 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
   const getSampleValue = (variable: string) => {
     const sampleValues: { [key: string]: string } = {
       platform_name: 'ExiBy Platform',
-      user_name: 'Shamroz khan',
+      user_name: 'John Doe',
       event_name: 'Tech Conference 2024',
       event_date: 'March 15, 2024',
       event_time: '10:00 AM',
@@ -235,21 +230,20 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                  Email Content (HTML)
+                <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">
+                  Email Content
                 </label>
-                <Textarea
+                <QuillEditor
                   value={formData.content}
                   onChange={(e) => handleContentChange(e.target.value)}
-                  placeholder="Enter HTML content with variables like {{variable_name}}"
-                  rows={12}
+                  placeholder="Enter email content with variables like user_name, event_name, etc."
+                  rows={8}
                   style={{
                     backgroundColor: darkMode ? '#374151' : '#ffffff',
                     color: darkMode ? '#ffffff' : '#000000',
                     borderColor: darkMode ? '#4b5563' : '#d1d5db'
                   }}
-                  className="font-mono text-sm"
-                  required
+                  disabled={false}
                 />
               </div>
 
@@ -257,13 +251,16 @@ const EmailTemplateEditDialog: React.FC<EmailTemplateEditDialogProps> = ({
                 <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
                   Variables ({formData.variables.length})
                 </label>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                  Use these variable names in your content (without curly braces)
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {formData.variables.map((variable, index) => (
                     <span
                       key={index}
                       className="px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 rounded text-sm font-mono"
                     >
-                      {`{{${variable}}}`}
+                      {variable}
                     </span>
                   ))}
                 </div>

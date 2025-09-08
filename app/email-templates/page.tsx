@@ -20,7 +20,7 @@ import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-tab
 import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import EmailTemplateEditDialog from '@/components/email-templates/EmailTemplateEditDialog';
 import EmailTemplateCreateDialog from '@/components/email-templates/EmailTemplateCreateDialog';
-import EmailTemplatePreviewDialog from '@/components/email-templates/EmailTemplatePreviewDialog';
+import EmailTemplateDetailDialog from '@/components/email-templates/EmailTemplateDetailDialog';
 import CustomDrawer from '@/components/ui/custom-drawer';
 import EmailTemplateFilters from '@/components/email-templates/EmailTemplateFilters';
 import SoftDeleteTable from '@/components/ui/soft-delete-table';
@@ -58,18 +58,18 @@ const dummyData = {
       {
         _id: "template_123",
         name: "Welcome Email",
-        subject: "Welcome to {{platform_name}}",
+        subject: "Welcome to platform_name",
         template_type: "user_registration",
         content: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-              <h1 style="color: #0077ED; text-align: center; margin-bottom: 20px;">Welcome to {{platform_name}}!</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
+              <h1 style="color: #0077ED; text-align: center; margin-bottom: 20px;">Welcome to platform_name!</h1>
+              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello user_name,</p>
               <p style="color: #333; font-size: 16px; line-height: 1.6;">
                 We're excited to have you join our platform! Your account has been successfully created and you can now start exploring all the amazing features we have to offer.
               </p>
               <div style="text-align: center; margin: 30px 0;">
-                <a href="{{login_url}}" style="background-color: #0077ED; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Get Started</a>
+                <a href="login_url" style="background-color: #0077ED; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Get Started</a>
               </div>
               <p style="color: #666; font-size: 14px;">
                 If you have any questions, feel free to contact our support team.
@@ -84,19 +84,19 @@ const dummyData = {
       {
         _id: "template_124",
         name: "Event Registration Confirmed",
-        subject: "✅ Registration Confirmed for {{event_name}}",
+        subject: "✅ Registration Confirmed for event_name",
         template_type: "event_registration",
         content: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f0f8ff;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; border-left: 5px solid #28a745;">
               <h1 style="color: #28a745; text-align: center; margin-bottom: 20px;">Registration Confirmed!</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
+              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello user_name,</p>
               <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                Your registration for <strong>{{event_name}}</strong> on {{event_date}} has been confirmed.
+                Your registration for <strong>event_name</strong> on event_date has been confirmed.
               </p>
               <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #0077ED; margin-bottom: 10px;">Event Details:</h3>
-                <div style="color: #333;">{{event_details}}</div>
+                <div style="color: #333;">event_details</div>
               </div>
               <p style="color: #333; font-size: 16px; line-height: 1.6;">
                 We look forward to seeing you at the event!
@@ -117,12 +117,12 @@ const dummyData = {
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff5f5;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; border-left: 5px solid #dc3545;">
               <h1 style="color: #dc3545; text-align: center; margin-bottom: 20px;">Password Reset Request</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
+              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello user_name,</p>
               <p style="color: #333; font-size: 16px; line-height: 1.6;">
                 We received a request to reset your password. Click the button below to create a new password:
               </p>
               <div style="text-align: center; margin: 30px 0;">
-                <a href="{{reset_url}}" style="background-color: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
+                <a href="reset_url" style="background-color: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
               </div>
               <p style="color: #666; font-size: 14px;">
                 This link will expire in 24 hours. If you didn't request this, please ignore this email.
@@ -137,21 +137,21 @@ const dummyData = {
       {
         _id: "template_126",
         name: "Event Reminder",
-        subject: "⏰ Reminder: {{event_name}} is Tomorrow",
+        subject: "⏰ Reminder: event_name is Tomorrow",
         template_type: "event_reminder",
         content: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff8e1;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; border-left: 5px solid #ffc107;">
               <h1 style="color: #ffc107; text-align: center; margin-bottom: 20px;">Event Reminder</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
+              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello user_name,</p>
               <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                This is a friendly reminder that <strong>{{event_name}}</strong> is scheduled for tomorrow at {{event_time}}.
+                This is a friendly reminder that <strong>event_name</strong> is scheduled for tomorrow at event_time.
               </p>
               <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffeaa7;">
                 <h3 style="color: #856404; margin-bottom: 10px;">Event Information:</h3>
-                <p style="color: #856404; margin: 5px 0;"><strong>Date:</strong> {{event_date}}</p>
-                <p style="color: #856404; margin: 5px 0;"><strong>Time:</strong> {{event_time}}</p>
-                <p style="color: #856404; margin: 5px 0;"><strong>Location:</strong> {{event_location}}</p>
+                <p style="color: #856404; margin: 5px 0;"><strong>Date:</strong> event_date</p>
+                <p style="color: #856404; margin: 5px 0;"><strong>Time:</strong> event_time</p>
+                <p style="color: #856404; margin: 5px 0;"><strong>Location:</strong> event_location</p>
               </div>
               <p style="color: #333; font-size: 16px; line-height: 1.6;">
                 Don't forget to bring your ticket and arrive 15 minutes early!
@@ -166,23 +166,23 @@ const dummyData = {
       {
         _id: "template_127",
         name: "Payment Receipt",
-        subject: "💳 Payment Receipt for {{event_name}}",
+        subject: "💳 Payment Receipt for event_name",
         template_type: "payment_confirmation",
         content: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f0f8ff;">
             <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; border-left: 5px solid #17a2b8;">
               <h1 style="color: #17a2b8; text-align: center; margin-bottom: 20px;">Payment Received</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
+              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello user_name,</p>
               <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                Thank you for your payment! We have successfully received your payment for {{event_name}}.
+                Thank you for your payment! We have successfully received your payment for event_name.
               </p>
               <div style="background-color: #e7f3ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <h3 style="color: #0c5460; margin-bottom: 15px;">Payment Details:</h3>
                 <table style="width: 100%; color: #0c5460;">
-                  <tr><td><strong>Amount:</strong></td><td>{{payment_amount}}</td></tr>
-                  <tr><td><strong>Transaction ID:</strong></td><td>{{transaction_id}}</td></tr>
-                  <tr><td><strong>Payment Date:</strong></td><td>{{payment_date}}</td></tr>
-                  <tr><td><strong>Event:</strong></td><td>{{event_name}}</td></tr>
+                  <tr><td><strong>Amount:</strong></td><td>payment_amount</td></tr>
+                  <tr><td><strong>Transaction ID:</strong></td><td>transaction_id</td></tr>
+                  <tr><td><strong>Payment Date:</strong></td><td>payment_date</td></tr>
+                  <tr><td><strong>Event:</strong></td><td>event_name</td></tr>
                 </table>
               </div>
               <p style="color: #333; font-size: 16px; line-height: 1.6;">
@@ -201,7 +201,6 @@ const dummyData = {
 };
 
 const TABLE_HEAD: TableHeader[] = [
-  { key: 'preview', label: 'Preview', type: 'custom', width: 'w-20' },
   { key: 'template', label: 'Template', type: 'custom' },
   { key: 'subject', label: 'Subject', type: 'custom' },
   { key: 'template_type', label: 'Type', type: 'custom' },
@@ -228,7 +227,7 @@ const EmailTemplatesPage: React.FC = () => {
     template: EmailTemplate | null;
   }>({ open: false, template: null });
   const [createDialog, setCreateDialog] = useState(false);
-  const [previewDialog, setPreviewDialog] = useState<{
+  const [detailDialog, setDetailDialog] = useState<{
     open: boolean;
     template: EmailTemplate | null;
   }>({ open: false, template: null });
@@ -327,7 +326,7 @@ const EmailTemplatesPage: React.FC = () => {
   };
 
   const handlePreview = (template: EmailTemplate) => {
-    setPreviewDialog({ open: true, template });
+    setDetailDialog({ open: true, template });
   };
 
   const handleEdit = (template: EmailTemplate) => {
@@ -438,6 +437,10 @@ const EmailTemplatesPage: React.FC = () => {
     } finally {
       setCreateLoading(false);
     }
+  };
+
+  const handleRowClick = (template: EmailTemplate) => {
+    setDetailDialog({ open: true, template });
   };
 
   // Helper to count active filters
@@ -561,22 +564,6 @@ const EmailTemplatesPage: React.FC = () => {
 
   const renderCell = (template: EmailTemplate, header: TableHeader) => {
     switch (header.key) {
-      case 'preview':
-        return (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              handlePreview(template);
-            }}
-            className="h-8 px-3"
-          >
-            <Eye className="w-3 h-3 mr-1" />
-            Preview
-          </Button>
-        );
-
       case 'template':
         return (
           <div className="flex items-start space-x-3">
@@ -722,6 +709,7 @@ const EmailTemplatesPage: React.FC = () => {
             selected={selected}
             setSelected={setSelected}
             checkbox_selection={true}
+            onRowClick={handleRowClick}
             renderCell={renderCell}
             loading={loading}
             emptyMessage="No email templates found"
@@ -775,11 +763,15 @@ const EmailTemplatesPage: React.FC = () => {
         loading={createLoading}
       />
 
-      {/* Preview Email Template Dialog */}
-      <EmailTemplatePreviewDialog
-        open={previewDialog.open}
-        onOpenChange={(open) => setPreviewDialog({ open, template: null })}
-        template={previewDialog.template}
+      {/* Detail Email Template Dialog */}
+      <EmailTemplateDetailDialog
+        open={detailDialog.open}
+        onOpenChange={(open) => setDetailDialog({ open, template: null })}
+        template={detailDialog.template}
+        onEdit={(template) => {
+          setDetailDialog({ open: false, template: null });
+          setEditDialog({ open: true, template });
+        }}
       />
 
       {/* CSV Export Dialog */}
