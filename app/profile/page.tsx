@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import ProfileSkeleton from "@/components/ui/skeleton/profile-skeleton";
 import {
   User,
   Mail,
@@ -16,6 +17,7 @@ import { useAppContext } from "@/contexts/AppContext";
 const ProfilePage: React.FC = () => {
   const { user } = useAppContext();
 
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -27,6 +29,16 @@ const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false); // <--- Editing mode toggle
   const [tempProfile, setTempProfile] = useState(profile); // Temp state while editing
   const [tempImage, setTempImage] = useState<File | null>(image);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <ProfileSkeleton />;
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

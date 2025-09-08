@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import ConfigurationSkeleton from '@/components/ui/skeleton/configuration-skeleton';
 import {
   Settings,
   Save,
@@ -37,6 +38,7 @@ interface GeneralSettings {
 const ConfigurationPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const [originalData] = useState<GeneralSettings>({
     site_name: "Event Management Platform",
@@ -48,6 +50,16 @@ const ConfigurationPage: React.FC = () => {
   });
 
   const [formData, setFormData] = useState<GeneralSettings>(originalData);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <ConfigurationSkeleton />;
+  }
 
   const timeZones = [
     'Europe/Dublin',

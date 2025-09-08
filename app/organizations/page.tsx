@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
 
 interface Organization {
   _id: string;
@@ -261,6 +262,10 @@ const OrganizationsPage: React.FC = () => {
       loadOrganizations(true);
     }
   }, [searchQuery, pagination.page, pagination.limit, activeTab]);
+
+  if (loading && organizations.length === 0) {
+    return <TableSkeleton rows={8} columns={8} showFilters={true} />;
+  }
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));

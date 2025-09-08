@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import ConfigurationSkeleton from '@/components/ui/skeleton/configuration-skeleton';
 import {
   Mail,
   Save,
@@ -38,6 +39,7 @@ const EmailConfigurationPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const [originalData] = useState<EmailConfig>({
     mailcub_key: "mc_live_1234567890abcdef",
@@ -55,6 +57,16 @@ const EmailConfigurationPage: React.FC = () => {
   });
 
   const [formData, setFormData] = useState<EmailConfig>(originalData);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <ConfigurationSkeleton />;
+  }
 
   const handleEdit = () => {
     setIsEditing(true);

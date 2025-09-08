@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
 
 interface Company {
   _id: string;
@@ -335,6 +336,10 @@ const CompaniesPage: React.FC = () => {
       loadCompanies(true);
     }
   }, [searchQuery, pagination.page, pagination.limit, activeTab]);
+
+  if (loading && companies.length === 0) {
+    return <TableSkeleton rows={8} columns={7} showFilters={true} />;
+  }
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));

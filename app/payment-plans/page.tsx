@@ -41,6 +41,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SoftDeleteTable from "@/components/ui/soft-delete-table";
+import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
 
 interface PaymentPlan {
   _id: string;
@@ -270,6 +271,10 @@ const PaymentPlansPage: React.FC = () => {
       loadPaymentPlans(true);
     }
   }, [searchQuery, pagination.page, pagination.limit, activeTab]);
+
+  if (loading && paymentPlans.length === 0) {
+    return <TableSkeleton rows={8} columns={8} showFilters={true} />;
+  }
 
   const handleChangePage = (newPage: number) => {
     setPagination((prev) => ({ ...prev, page: newPage }));

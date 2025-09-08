@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import ConfigurationSkeleton from '@/components/ui/skeleton/configuration-skeleton';
 import {
   CreditCard,
   Save,
@@ -38,6 +39,7 @@ interface StripeConfig {
 const StripeConfigurationPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showKeys, setShowKeys] = useState({
     live_pub: false,
     live_private: false,
@@ -55,6 +57,16 @@ const StripeConfigurationPage: React.FC = () => {
   });
 
   const [formData, setFormData] = useState<StripeConfig>(originalData);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <ConfigurationSkeleton />;
+  }
 
   const handleEdit = () => {
     setIsEditing(true);

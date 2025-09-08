@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
 
 interface EmailTemplate {
   _id: string;
@@ -312,6 +313,10 @@ const EmailTemplatesPage: React.FC = () => {
       loadEmailTemplates(true);
     }
   }, [searchQuery, pagination.page, pagination.limit, activeTab]);
+
+  if (loading && emailTemplates.length === 0) {
+    return <TableSkeleton rows={8} columns={6} showFilters={true} />;
+  }
 
   const handleChangePage = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }));

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import SettingsSkeleton from "@/components/ui/skeleton/settings-skeleton";
 import { Shield, Save, Edit, FileText, Scale, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import QuillEditor from "@/components/ui/quill-editor";
@@ -17,6 +18,7 @@ const SettingsPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("privacy");
+  const [loading, setLoading] = useState(true);
 
   const [originalData] = useState<LegalSettings>({
     privacy_policy: `
@@ -81,6 +83,16 @@ const SettingsPage: React.FC = () => {
   });
 
   const [formData, setFormData] = useState<LegalSettings>(originalData);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <SettingsSkeleton />;
+  }
 
   const handleEdit = () => {
     setIsEditing(true);

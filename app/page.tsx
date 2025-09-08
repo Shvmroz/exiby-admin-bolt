@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/contexts/AppContext';
-import Spinner from '@/components/ui/spinner';
+import PageSkeleton from '@/components/ui/skeleton/page-skeleton';
 
 export default function Home() {
   const { isAuthenticated, loading } = useAppContext();
@@ -20,8 +20,8 @@ export default function Home() {
   }, [isAuthenticated, loading, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Spinner size="lg" />
+    <div className="p-6">
+      <PageSkeleton type="dashboard" />
     </div>
   );
 }

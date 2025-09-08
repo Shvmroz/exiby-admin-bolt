@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import DashboardSkeleton from "@/components/ui/skeleton/dashboard-skeleton";
 import {
   Calendar,
   Users,
@@ -146,6 +147,17 @@ const OrganizationRow: React.FC<{
 const DashboardPage: React.FC = () => {
   const router = useRouter();
   const { data } = dashboardData;
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
 
   // Recent activities ISO dataset
   const recentActivities = [

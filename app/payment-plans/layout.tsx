@@ -4,7 +4,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import { useAppContext } from '@/contexts/AppContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import Spinner from '@/components/ui/spinner';
+import PageSkeleton from '@/components/ui/skeleton/page-skeleton';
 
 export default function PaymentPlansLayout({
   children,
@@ -22,8 +22,8 @@ export default function PaymentPlansLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner size="lg" />
+      <div className="p-6">
+        <PageSkeleton type="table" />
       </div>
     );
   }

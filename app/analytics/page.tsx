@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import AnalyticsSkeleton from '@/components/ui/skeleton/analytics-skeleton';
 import {
   BarChart3,
   Download,
@@ -161,12 +162,23 @@ const COLORS = ['#0077ED', '#4A9AFF', '#8CC0FF', '#B8D4FF', '#E1EFFF'];
 
 const AnalyticsPage: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState('2025-08');
+  const [loading, setLoading] = useState(true);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
   // Get available months from the data
   const availableMonths = monthlyData.map(item => item.month).sort().reverse();
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <AnalyticsSkeleton />;
+  }
 
   const formatMonth = (monthString: string) => {
     const [year, month] = monthString.split('-');

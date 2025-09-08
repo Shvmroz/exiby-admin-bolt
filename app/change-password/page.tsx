@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import FormSkeleton from '@/components/ui/skeleton/form-skeleton';
 import {
   Lock,
   Save,
@@ -12,6 +13,7 @@ import { useRouter } from 'next/navigation';
 
 const ChangePasswordPage: React.FC = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -21,6 +23,16 @@ const ChangePasswordPage: React.FC = () => {
     newPassword: '',
     confirmPassword: '',
   });
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <FormSkeleton fields={3} columns={1} />;
+  }
 
   return (
     <div className="space-y-8">
