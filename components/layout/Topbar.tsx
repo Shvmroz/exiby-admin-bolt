@@ -1,5 +1,7 @@
 "use client";
 
+"use client";
+
 import React from "react";
 import { useAppContext } from "@/contexts/AppContext";
 import { useRouter } from "next/navigation";
