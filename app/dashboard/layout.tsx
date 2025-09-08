@@ -4,7 +4,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import { useAppContext } from '@/contexts/AppContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { CircularProgress, Box } from '@mui/material';
+import Spinner from '@/components/ui/spinner';
 
 export default function DashboardLayout({
   children,
@@ -22,9 +22,9 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <Box className="min-h-screen flex items-center justify-center">
-        <CircularProgress size={40} sx={{ color: '#0077ED' }} />
-      </Box>
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner size="lg" />
+      </div>
     );
   }
 
