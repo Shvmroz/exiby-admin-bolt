@@ -201,7 +201,6 @@ const dummyData = {
 };
 
 const TABLE_HEAD: TableHeader[] = [
-  { key: 'preview', label: 'Preview', type: 'custom', width: 'w-20' },
   { key: 'template', label: 'Template', type: 'custom' },
   { key: 'subject', label: 'Subject', type: 'custom' },
   { key: 'template_type', label: 'Type', type: 'custom' },
@@ -561,22 +560,6 @@ const EmailTemplatesPage: React.FC = () => {
 
   const renderCell = (template: EmailTemplate, header: TableHeader) => {
     switch (header.key) {
-      case 'preview':
-        return (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              handlePreview(template);
-            }}
-            className="h-8 px-3"
-          >
-            <Eye className="w-3 h-3 mr-1" />
-            Preview
-          </Button>
-        );
-
       case 'template':
         return (
           <div className="flex items-start space-x-3">
@@ -722,6 +705,7 @@ const EmailTemplatesPage: React.FC = () => {
             selected={selected}
             setSelected={setSelected}
             checkbox_selection={true}
+            onRowClick={(template) => setPreviewDialog({ open: true, template })}
             renderCell={renderCell}
             loading={loading}
             emptyMessage="No email templates found"
