@@ -35,6 +35,13 @@ const menuItems = [
     bgColor: "bg-blue-50",
   },
   {
+    text: "My Team",
+    icon: Users,
+    path: "/team",
+    color: "text-cyan-600",
+    bgColor: "bg-cyan-50",
+  },
+  {
     text: "Payment Plans",
     icon: Receipt,
     path: "/payment-plans",
@@ -69,14 +76,6 @@ const menuItems = [
     color: "text-orange-800",
     bgColor: "bg-orange-50",
   },
-  {
-    text: "My Team",
-    icon: Users,
-    path: "/team",
-    color: "text-cyan-600",
-    bgColor: "bg-cyan-50",
-  },
-  // Configuration items now as top-level
   {
     text: "General Configuration",
     icon: Settings,
@@ -121,9 +120,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="cursor-pointer h-16 pl-8 border-b border-gray-200 dark:border-gray-700 flex items-center space-x-2">
           <div className="flex items-center space-x-2">
             <h1 className="text-blue-500 dark:text-white text-3xl font-extrabold leading-tight">
-             EXIBY
+              EXIBY
             </h1>
-           
           </div>
         </div>
       </Link>
@@ -140,28 +138,28 @@ const Sidebar: React.FC<SidebarProps> = ({
               href={item.path}
               onClick={variant === "temporary" ? onClose : undefined}
               className={cn(
-                "flex items-center space-x-3 px-4 py-2 rounded-xl transition-all duration-200 group",
+                "flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-200 group",
                 isActive
-                  ? "bg-blue-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm"
+                  ? "bg-blue-100 dark:bg-gray-800 text-sky-900 dark:text-sky-200 shadow-sm"
                   : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:scale-102"
               )}
             >
               <div
-                className={cn(
-                  "p-2 rounded-lg transition-colors duration-200",
+                className={`p-1.5 rounded-md transition-colors duration-200 ${
                   isActive
                     ? `${item.bgColor} dark:bg-gray-700`
                     : `${item.bgColor} dark:bg-gray-700 group-hover:${item.bgColor}`
-                )}
+                }`}
               >
-                <Icon
-                  className={cn(
-                    "w-5 h-5 transition-colors duration-200",
-                    item.color
-                  )}
-                />
+                <Icon className={`w-4 h-4 ${item.color}`} />
               </div>
-              <span className="font-medium">{item.text}</span>
+              <span
+                className={`text-sm ${
+                  isActive ? "font-semibold" : "font-normal"
+                }`}
+              >
+                {item.text}
+              </span>
             </Link>
           );
         })}
