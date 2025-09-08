@@ -17,6 +17,7 @@ import {
   Receipt,
   Wrench,
   Calendar,
+  Users,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -67,6 +68,13 @@ const menuItems = [
     path: "/analytics",
     color: "text-orange-800",
     bgColor: "bg-orange-50",
+  },
+  {
+    text: "My Team",
+    icon: Users,
+    path: "/team",
+    color: "text-cyan-600",
+    bgColor: "bg-cyan-50",
   },
   // Configuration items now as top-level
   {
