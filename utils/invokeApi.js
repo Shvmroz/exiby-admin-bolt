@@ -1,5 +1,5 @@
 import axios from "axios";
-// import { baseUrl, secretKey } from "../config/config";
+import { baseUrl } from "../config/config";
 
 axios.defaults.headers.post["Content-Type"] = "application/json";
 
@@ -14,7 +14,7 @@ export async function invokeApi({
     method,
     url: baseUrl + path,
     headers: {
-      "x-sh-key": secretKey,
+    //   "x-sh-key": secretKey,
       ...headers,
     },
   };

@@ -1,46 +1,41 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Sidebar from './Sidebar';
-import Topbar from './Topbar';
-import { useAppContext } from '@/contexts/AppContext';
-import PageSkeleton from '@/components/ui/skeleton/page-skeleton';
-import Spinner from '../ui/spinner';
+import React, { useState } from "react";
+import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
+import { useAppContext } from "@/contexts/AppContext";
+import PageSkeleton from "@/components/ui/skeleton/page-skeleton";
+import Spinner from "../ui/spinner";
 
 interface MainLayoutProps {
   children: React.ReactNode;
   requireAuth?: boolean;
-  skeletonType?: 'dashboard' | 'table' | 'form' | 'analytics' | 'profile' | 'settings';
+  skeletonType?:
+    | "dashboard"
+    | "table"
+    | "form"
+    | "analytics"
+    | "profile"
+    | "settings";
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ 
-  children, 
-  requireAuth = false, 
-  skeletonType = 'table' 
+const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  requireAuth = false,
+  skeletonType = "table",
 }) => {
   const { isAuthenticated, loading } = useAppContext();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Show loading skeleton while checking authentication
-  if (loading) {
+  if (loading || (requireAuth && !isAuthenticated)) {
     return (
-      <div className="p-6">
-        <PageSkeleton type={skeletonType} />
-        {/* <Spinner size="lg" /> */}
+      <div className="flex items-center justify-center min-h-screen">
+        <Spinner size="lg" />
+        {/* <PageSkeleton type={skeletonType} */}
       </div>
     );
   }
-
-  // Redirect to login if authentication is required but user is not authenticated
-  if (requireAuth && !isAuthenticated) {
-    return (
-      <div className="p-6">
-        <PageSkeleton type={skeletonType} />
-        {/* <Spinner size="lg" /> */}
-      </div>
-    );
-  }
-
+  
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {/* Permanent Sidebar for desktop */}
@@ -51,10 +46,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       {/* Mobile Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 w-80 z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} variant="temporary" />
+        <Sidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          variant="temporary"
+        />
       </div>
 
       {/* Mobile overlay */}

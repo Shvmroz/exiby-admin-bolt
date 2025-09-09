@@ -4,7 +4,5 @@ export { default as TableSkeleton } from './table-skeleton';
 export { default as ConfigurationSkeleton } from './configuration-skeleton';
 export { default as SettingsSkeleton } from './settings-skeleton';
 export { default as AnalyticsSkeleton } from './analytics-skeleton';
-export { default as FormSkeleton } from './form-skeleton';
 export { default as CardSkeleton } from './card-skeleton';
-export { default as ProfileSkeleton } from './profile-skeleton';
 export { default as PageSkeleton } from './page-skeleton';

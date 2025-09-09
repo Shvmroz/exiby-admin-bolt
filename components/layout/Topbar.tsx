@@ -1,20 +1,16 @@
 "use client";
 
-"use client";
-
 import React from "react";
 import { useAppContext } from "@/contexts/AppContext";
 import { useRouter } from "next/navigation";
 import {
   Menu,
   Bell,
-  Search,
   Sun,
   Moon,
   User,
   LogOut,
   Lock,
-  Settings,
 } from "lucide-react";
 import NotificationsList from "@/components/notifications/NotificationsList";
 import ConfirmDeleteDialog from "../ui/confirm-delete-dialog";
@@ -24,17 +20,32 @@ interface TopbarProps {
 }
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
-  const { user, logout, darkMode, toggleDarkMode, unreadNotificationsCount } =
-    useAppContext();
+  const {
+    user,
+    logout,
+    darkMode,
+    toggleDarkMode,
+    unreadNotificationsCount,
+  } = useAppContext() as {
+    user: {
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+    } | null;
+    logout: () => void;
+    darkMode: boolean;
+    toggleDarkMode: () => void;
+    unreadNotificationsCount: number;
+  };
+
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [showNotifications, setShowNotifications] = React.useState(false);
-
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
 
   const handleLogoutClick = () => {
     setShowUserMenu(false);
-    setShowLogoutDialog(true); // open confirm dialog
+    setShowLogoutDialog(true);
   };
 
   const confirmLogout = () => {
@@ -76,7 +87,6 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
             )}
           </button>
 
-          {/* Notifications Dropdown */}
           {showNotifications && (
             <>
               <div
@@ -112,20 +122,19 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
           >
             <div className="w-8 h-8 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
-                {user?.name?.charAt(0) || "U"}
+                {user?.first_name?.charAt(0) || "U"}
               </span>
             </div>
             <div className="hidden md:block text-left">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {user?.name}
+                {user?.first_name} {user?.last_name}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                {user?.role}
+                {user?.email}
               </div>
             </div>
           </button>
 
-          {/* Dropdown Menu */}
           {showUserMenu && (
             <>
               <div

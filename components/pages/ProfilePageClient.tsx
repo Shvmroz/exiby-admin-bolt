@@ -1,72 +1,130 @@
 "use client";
 
-import React, { useState } from "react";
-import ProfileSkeleton from "@/components/ui/skeleton/profile-skeleton";
+import React, { useState, useRef, useEffect } from "react";
 import {
   User,
   Mail,
-  Phone,
-  Building,
   Save,
   Pencil,
   Image as ImageIcon,
   Trash,
 } from "lucide-react";
 import { useAppContext } from "@/contexts/AppContext";
+import { _update_admin_profile_api } from "@/DAL/authAPI";
+import { useSnackbar } from "notistack";
+import Spinner from "../ui/spinner";
+import { s3baseUrl } from "@/config/config";
+import { deleteFileFunction, uploadFileFunction } from "@/utils/uploadFile";
 
 const ProfilePageClient: React.FC = () => {
-  const { user } = useAppContext();
+  const { user, setUser } = useAppContext();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState({
-    name: user?.name || "",
+    first_name: user?.first_name || "",
+    last_name: user?.last_name || "",
     email: user?.email || "",
-    phone: "+1 (555) 123-4567",
-    company: "ExiBy Events",
+    image: user?.profile_image || "",
+    previewImage: null as File | null,
   });
 
-  const [image, setImage] = useState<File | null>(null);
-  const [isEditing, setIsEditing] = useState(false); // <--- Editing mode toggle
-  const [tempProfile, setTempProfile] = useState(profile); // Temp state while editing
-  const [tempImage, setTempImage] = useState<File | null>(image);
+  const [isEditing, setIsEditing] = useState(false);
 
-  React.useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (loading) {
-    return <ProfileSkeleton />;
-  }
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setTempImage(e.target.files[0]);
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
+        email: user.email || "",
+        image: user.profile_image || "",
+        previewImage: null,
+      });
     }
+  }, [user]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 1 * 1024 * 1024; // 1MB
+    if (file.size > maxSize) {
+      enqueueSnackbar("Image must be less than or equal to 1MB", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    setProfile((prev) => ({ ...prev, previewImage: file }));
   };
 
-  const removeTempImage = () => {
-    setTempImage(null);
-  };
-
-  const handleEdit = () => {
-    setTempProfile(profile);
-    setTempImage(image);
-    setIsEditing(true);
-  };
-
+  const handleEdit = () => setIsEditing(true);
   const handleCancel = () => {
-    setTempProfile(profile);
-    setTempImage(image);
+    setProfile({
+      first_name: user?.first_name || "",
+      last_name: user?.last_name || "",
+      email: user?.email || "",
+      image: user?.profile_image || "",
+      previewImage: null,
+    });
     setIsEditing(false);
   };
 
-  const handleSave = () => {
-    setProfile(tempProfile);
-    setImage(tempImage);
-    setIsEditing(false);
+  const handleRemoveImage = () => {
+    setProfile((prev) => ({ ...prev, image: "", previewImage: null }));
   };
+
+  // Save handler
+  const handleSave = async () => {
+    setLoading(true);
+
+    // Upload new image only if a file is selected
+    let uploaded_image = profile.image;
+    if (profile.previewImage) {
+      // if (profile.image) await deleteFileFunction(profile.image);
+      uploaded_image = await uploadFileFunction(profile.previewImage);
+    }
+
+    const req_data = {
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      email: profile.email,
+      profile_image: uploaded_image || "",
+    };
+
+    const result = await _update_admin_profile_api(req_data);
+
+    if (result?.code === 200) {
+      enqueueSnackbar(result.message, { variant: "success" });
+      setProfile({
+        first_name: result.admin.first_name || "",
+        last_name: result.admin.last_name || "",
+        email: result.admin.email || profile.email,
+        image: result.admin.profile_image || "",
+        previewImage: null,
+      });
+      // setUser((prev) => ({
+      //   ...prev!,
+      //   first_name: result.admin.first_name || "",
+      //   last_name: result.admin.last_name || "",
+      //   profile_image: result.admin.profile_image || "",
+      // }));
+      setIsEditing(false);
+    } else {
+      enqueueSnackbar(result?.message || "Failed to update profile", {
+        variant: "error",
+      });
+    }
+
+    setLoading(false);
+  };
+
+  const isFormChanged =
+    profile.first_name !== user?.first_name ||
+    profile.last_name !== user?.last_name ||
+    profile.previewImage !== null;
 
   return (
     <div className="space-y-8">
@@ -87,103 +145,117 @@ const ProfilePageClient: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Left Column - Image */}
           <div className="md:col-span-5 flex flex-col items-center">
-            <div className="w-full aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden relative">
-              {tempImage ? (
-                <img
-                  src={URL.createObjectURL(tempImage)}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="flex flex-col items-center text-gray-400">
-                  <ImageIcon className="w-10 h-10 mb-2" />
-                  <span className="text-xs">No Photo</span>
+            <div className="relative w-full aspect-square">
+              <label
+                className={`w-full h-full cursor-pointer ${
+                  !isEditing ? "pointer-events-none" : ""
+                }`}
+              >
+                <div className="w-full h-full bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden relative">
+                  {profile.previewImage ? (
+                    <img
+                      src={URL.createObjectURL(profile.previewImage)}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : profile.image ? (
+                    <img
+                      src={s3baseUrl + profile.image}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-gray-400">
+                      <ImageIcon className="w-10 h-10 mb-2" />
+                      <span className="text-xs">No Photo</span>
+                    </div>
+                  )}
                 </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  disabled={!isEditing}
+                />
+              </label>
+
+              {(profile.previewImage || profile.image) && isEditing && (
+                <button
+                  onClick={handleRemoveImage}
+                  className="absolute top-2 right-2 w-8 h-8 bg-white bg-opacity-70 hover:bg-opacity-100 rounded-full flex items-center justify-center shadow-md text-red-500 hover:text-red-600 transition"
+                >
+                  <Trash className="w-5 h-5" />
+                </button>
               )}
             </div>
-
-            {/* Image Info */}
-            {tempImage && (
-              <p className="text-xs text-gray-500 mt-2">
-                {Math.round(tempImage.size / 1024)} KB - Ratio: 1:1
-              </p>
-            )}
-
-            {/* Upload / Change / Remove Buttons */}
-            {isEditing && (
-              <div className="flex items-center mt-3 space-x-2">
-                {/* Choose/Change Photo */}
-                <label className="px-4 py-2 text-gray-500  dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-400 rounded-lg cursor-pointer text-sm flex items-center space-x-1 border border-transparent hover:border-gray-400 transition">
-                  {tempImage && <Pencil className="w-4 h-4" />}
-                  <span>{tempImage ? "Change Photo" : "Choose Photo"}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
-                </label>
-
-                {/* Remove Photo as text button */}
-                {tempImage && (
-                  <button
-                    onClick={removeTempImage}
-                    className="px-4 py-2 text-red-500 hover:text-red-600 rounded-lg text-sm flex items-center space-x-1 border border-transparent hover:border-red-500 transition"
-                  >
-                    <Trash className="w-4 h-4" />
-                    <span>Remove</span>
-                  </button>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Right Column - Form Fields */}
           <div className="md:col-span-7 flex flex-col justify-between">
             <div className="space-y-6">
-              {/** Inputs */}
-              {["name", "email", "phone", "company"].map((field, idx) => {
-                const icons = {
-                  name: User,
-                  email: Mail,
-                  phone: Phone,
-                  company: Building,
-                };
-                const labels = {
-                  name: "Full Name",
-                  email: "Email Address",
-                  phone: "Phone Number",
-                  company: "Company",
-                };
-                const Icon = icons[field as keyof typeof icons];
+              {/* First Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  First Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={profile.first_name}
+                    onChange={(e) =>
+                      setProfile({ ...profile, first_name: e.target.value })
+                    }
+                    disabled={!isEditing}
+                    className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none ${
+                      isEditing
+                        ? "focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        : "opacity-70 cursor-not-allowed"
+                    }`}
+                  />
+                </div>
+              </div>
 
-                return (
-                  <div key={idx}>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {labels[field as keyof typeof labels]}
-                    </label>
-                    <div className="relative">
-                      <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type={field === "email" ? "email" : "text"}
-                        value={tempProfile[field as keyof typeof tempProfile]}
-                        onChange={(e) =>
-                          setTempProfile({
-                            ...tempProfile,
-                            [field]: e.target.value,
-                          })
-                        }
-                        disabled={!isEditing}
-                        className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none ${
-                          isEditing
-                            ? "focus:ring-2 focus:ring-[#0077ED] focus:border-transparent"
-                            : "opacity-70 cursor-not-allowed"
-                        }`}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+              {/* Last Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Last Name
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={profile.last_name}
+                    onChange={(e) =>
+                      setProfile({ ...profile, last_name: e.target.value })
+                    }
+                    disabled={!isEditing}
+                    className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none ${
+                      isEditing
+                        ? "focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        : "opacity-70 cursor-not-allowed"
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    value={profile.email}
+                    disabled
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none opacity-70 cursor-not-allowed"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Buttons */}
@@ -191,7 +263,7 @@ const ProfilePageClient: React.FC = () => {
               {!isEditing ? (
                 <button
                   onClick={handleEdit}
-                  className="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-medium transition-colors flex items-center space-x-1"
+                  className="flex items-center space-x-2 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-medium transition-colors"
                 >
                   <Pencil className="w-4 h-4" />
                   <span>Edit</span>
@@ -207,10 +279,16 @@ const ProfilePageClient: React.FC = () => {
                   </button>
 
                   <button
+                    type="button"
                     onClick={handleSave}
-                    className="flex items-center space-x-2 px-6 py-3 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors"
+                    className="flex items-center space-x-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                    disabled={loading || !isFormChanged}
                   >
-                    <Save className="w-4 h-4" />
+                    {loading ? (
+                      <Spinner size="sm" className="text-white" />
+                    ) : (
+                      <Save className="w-4 h-4" />
+                    )}
                     <span>Save</span>
                   </button>
                 </>

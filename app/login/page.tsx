@@ -9,11 +9,10 @@ import { useAppContext } from "@/contexts/AppContext";
 export default function LoginPage() {
   const searchParams = useSearchParams();
 
-  const [email, setEmail] = useState("admin@exiby.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const { login } = useAppContext();
   const router = useRouter();
@@ -21,20 +20,14 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
-
-    try {
-      const success = await login(email, password);
-      if (success) {
-        router.push("/dashboard");
-      } else {
-        setError("Invalid email or password");
-      }
-    } catch (err) {
-      setError("An error occurred during login");
-    } finally {
-      setIsLoading(false);
+    const result = await login(email, password);
+    if (result.success) {
+      router.push("/dashboard");
+    } else {
+      // do nothing
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -102,14 +95,14 @@ export default function LoginPage() {
                   Sign in to your account
                 </p>
               </div>
-
+              {/* 
               {error && (
                 <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                   <p className="text-sm text-red-800 dark:text-red-200">
                     {error}
                   </p>
                 </div>
-              )}
+              )} */}
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
@@ -188,8 +181,7 @@ export default function LoginPage() {
                   )}
                 </button>
               </form>
-
-                         </div>
+            </div>
           </div>
         </div>
       </div>

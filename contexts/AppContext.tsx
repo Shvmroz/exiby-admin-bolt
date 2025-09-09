@@ -10,11 +10,16 @@ import React, {
   ReactNode,
 } from "react";
 
+import { _login_api, _logout_api } from "../DAL/authAPI";
+
 export interface User {
-  id: string;
-  name: string;
+  _id: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: string;
+  is_owner: boolean;
+  status: boolean;
+  profile_image: string;
 }
 
 export interface Notification {
@@ -30,8 +35,9 @@ interface AppContextType {
   // Authentication
   isAuthenticated: boolean;
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean }>;
   logout: () => void;
 
   // Theme
@@ -106,6 +112,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       if (token && userData) {
         setIsAuthenticated(true);
         setUser(JSON.parse(userData));
+        console.log(
+          "User data loaded from localStorage:",
+          JSON.parse(userData)
+        );
       }
       setLoading(false);
     };
@@ -130,49 +140,52 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [darkMode]);
 
-  // =====================================================
+  // =========================== Login
+
   const login = async (email: string, password: string) => {
     setLoading(true);
+  
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Check credentials
-      if (email !== "admin@exiby.com" || password !== "admin123") {
-        throw new Error("Invalid email or password");
+      const req_data = { email, password };
+      const result = await _login_api(req_data);
+  
+      if (result?.code === 200) {
+        localStorage.setItem("authToken", result?.token);
+        localStorage.setItem("userData", JSON.stringify(result?.admin));
+        setUser(result.admin);
+        setIsAuthenticated(true);
+  
+        enqueueSnackbar("Login successful", { variant: "success" });
+        return { success: true };
+      } else {
+        enqueueSnackbar(result?.message, { variant: "error" });
+        return { success: false };
       }
-
-      const mockUser: User = {
-        id: "1",
-        name: "Shamroz Khan",
-        email: email,
-        role: "Admin",
-      };
-
-      localStorage.setItem("authToken", "mock-token");
-      localStorage.setItem("userData", JSON.stringify(mockUser));
-
-      setIsAuthenticated(true);
-      setUser(mockUser);
-      return true;
     } catch (error) {
-      return false;
+      enqueueSnackbar("Something went wrong. Please try again.", {
+        variant: "error",
+      });
+      return { success: false };
     } finally {
       setLoading(false);
-      enqueueSnackbar("Login successful", { variant: "success" });
-
     }
-    
   };
-  // =====================================================
-
-  const logout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userData");
-    setIsAuthenticated(false);
-    setUser(null);
-    router.push("/login");
-    enqueueSnackbar("Logout successful", { variant: "success" });
+  
+  // ======================= Logout
+  const logout = async () => {
+    const result = await _logout_api();
+    if (result?.code === 200) {
+      router.push("/login");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userData");
+      setUser(null);
+      enqueueSnackbar("Logged out successfully", { variant: "success" });
+      return { success: true };
+    } else {
+      enqueueSnackbar(result?.message || "Logout failed", { variant: "error" });
+      router.push("/login");
+      return { success: false };
+    }
   };
   // =====================================================
 
@@ -214,6 +227,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const value: AppContextType = {
     isAuthenticated,
     user,
+    setUser,
     loading,
     login,
     logout,
