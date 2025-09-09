@@ -44,7 +44,7 @@ const DashboardSkeleton: React.FC = () => {
             <Skeleton className="h-6 w-40" />
             <Skeleton className="h-4 w-16" />
           </div>
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1">
             <div className="p-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="flex items-center justify-between p-3 rounded-lg">
@@ -70,7 +70,7 @@ const DashboardSkeleton: React.FC = () => {
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-700">
             <Skeleton className="h-6 w-36" />
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          <div className="flex-1 p-4 space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex justify-between items-start p-2 rounded-lg">
                 <div className="flex items-start space-x-2 flex-1 min-w-0">

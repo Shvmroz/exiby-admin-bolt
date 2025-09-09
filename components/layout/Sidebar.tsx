@@ -120,9 +120,14 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Header */}
       <Link href="/dashboard">
         <div className="cursor-pointer h-16 pl-8 border-b border-gray-200 dark:border-gray-700 flex items-center space-x-2">
-          <div className="flex items-center space-x-2">
-            <h1 className="text-blue-500 dark:text-white text-3xl font-extrabold leading-tight">
-              EXIBY
+          <div className="flex items-center space-x-2 ">
+            <img
+              src="/logo.png"
+              alt="ExiBy Logo"
+              className="h-8 w-8 object-contain"
+            />
+            <h1 className="text-blue-500 dark:text-white text-2xl font-extrabold leading-tight">
+              ExiBy
             </h1>
           </div>
         </div>

@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { useAppContext } from '@/contexts/AppContext';
 import PageSkeleton from '@/components/ui/skeleton/page-skeleton';
+import Spinner from '../ui/spinner';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     return (
       <div className="p-6">
         <PageSkeleton type={skeletonType} />
+        {/* <Spinner size="lg" /> */}
       </div>
     );
   }
@@ -34,6 +36,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     return (
       <div className="p-6">
         <PageSkeleton type={skeletonType} />
+        {/* <Spinner size="lg" /> */}
       </div>
     );
   }
