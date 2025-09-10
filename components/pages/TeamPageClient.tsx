@@ -32,6 +32,16 @@ import CsvExportDialog from '@/components/ui/csv-export-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
+import { useSnackbar } from 'notistack';
+import {
+  _get_team_members_api,
+  _create_team_member_api,
+  _update_team_member_api,
+  _delete_team_member_api,
+  _restore_team_member_api,
+  _permanent_delete_team_member_api,
+  _change_team_member_password_api,
+} from '@/DAL/teamAPI';
 
 interface TeamMember {
   _id: string;
@@ -57,6 +67,8 @@ const TABLE_HEAD: TableHeader[] = [
 
 const TeamPageClient: React.FC = () => {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+  
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [deletedMembers, setDeletedMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(false);
@@ -95,12 +107,44 @@ const TeamPageClient: React.FC = () => {
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Pagination state
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-  });
+  // Pagination state (following reference structure)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageCount, setPageCount] = useState(1);
+
+  // Pagination handlers (following reference structure)
+  const handleChangePage = (event: any, newPage: number) => {
+    setPage(newPage);
+    if (newPage <= 0) {
+      setPageCount(1);
+    } else {
+      setPageCount(newPage + 1);
+    }
+  };
+
+  const handleChangePages = (event: any, newPage: number) => {
+    if (newPage <= 0) {
+      setPage(0);
+      setPageCount(1);
+    } else {
+      setPage(newPage - 1);
+      setPageCount(newPage);
+    }
+  };
+
+  const handleChangeRowsPerPage = (event: any) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+    setPageCount(1);
+  };
+
+  const onRowsPerPageChange = (newLimit: number) => {
+    setRowsPerPage(newLimit);
+    setPage(0);
+    setPageCount(1);
+  };
 
   // Load team members
   const loadTeamMembers = async (includeDeleted = false) => {
@@ -111,22 +155,31 @@ const TeamPageClient: React.FC = () => {
     }
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const req_data = {
+        search: searchQuery,
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        active_only: activeOnly,
+        include_deleted: includeDeleted,
+      };
       
-      // TODO: Replace with actual API call
-      // const result = await _get_team_members_api({ page: pagination.page, limit: pagination.limit });
+      const result = await _get_team_members_api(req_data);
       
-      // For now, use empty array since we removed dummy data
-      const filteredData: TeamMember[] = [];
-      
-      if (includeDeleted) {
-        setDeletedMembers(filteredData);
+      if (result?.code === 200) {
+        const members = result.team_members || [];
+        
+        if (includeDeleted) {
+          setDeletedMembers(members.filter((m: TeamMember) => m.is_deleted));
+        } else {
+          setTeamMembers(members.filter((m: TeamMember) => !m.is_deleted));
+          setTotalCount(result.total_count || members.length);
+          setTotalPages(result.total_pages || Math.ceil(members.length / rowsPerPage));
+        }
       } else {
-        setTeamMembers(filteredData);
-        setPagination(prev => ({ ...prev, total: filteredData.length }));
+        enqueueSnackbar(result?.message || 'Failed to load team members', { variant: 'error' });
       }
     } catch (error) {
       console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} team members:`, error);
+      enqueueSnackbar('Failed to load team members', { variant: 'error' });
     } finally {
       if (includeDeleted) {
         setDeletedLoading(false);
@@ -142,19 +195,11 @@ const TeamPageClient: React.FC = () => {
     } else if (activeTab === 'deleted') {
       loadTeamMembers(true);
     }
-  }, [searchQuery, pagination.page, pagination.limit, activeTab]);
+  }, [searchQuery, page, rowsPerPage, activeTab]);
 
   if (loading && teamMembers.length === 0) {
     return <TableSkeleton rows={8} columns={5} showFilters={true} />;
   }
-
-  const handleChangePage = (newPage: number) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
-  };
-
-  const onRowsPerPageChange = (newLimit: number) => {
-    setPagination(prev => ({ ...prev, limit: newLimit, page: 1 }));
-  };
 
   const handleEdit = (member: TeamMember) => {
     setEditDialog({ open: true, member });
@@ -173,26 +218,31 @@ const TeamPageClient: React.FC = () => {
     
     setDeleteLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const result = await _delete_team_member_api(deleteDialog.member._id);
       
-      // TODO: Replace with actual API call
-      // const result = await _delete_team_member_api(deleteDialog.member._id);
-      
-      const deletedMember = {
-        ...deleteDialog.member,
-        deleted_at: new Date().toISOString(),
-        is_deleted: true,
-      };
+      if (result?.code === 200) {
+        enqueueSnackbar('Team member moved to deleted successfully', { variant: 'success' });
+        
+        // Move to deleted members (soft delete)
+        const deletedMember = {
+          ...deleteDialog.member,
+          deleted_at: new Date().toISOString(),
+          is_deleted: true,
+        };
 
-      setDeletedMembers(prev => [deletedMember, ...prev]);
-      setTeamMembers(prev => 
-        prev.filter(member => member._id !== deleteDialog.member!._id)
-      );
-      
-      setPagination(prev => ({ ...prev, total: prev.total - 1 }));
-      setDeleteDialog({ open: false, member: null });
+        setDeletedMembers(prev => [deletedMember, ...prev]);
+        setTeamMembers(prev => 
+          prev.filter(member => member._id !== deleteDialog.member!._id)
+        );
+        
+        setTotalCount(prev => prev - 1);
+        setDeleteDialog({ open: false, member: null });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to delete team member', { variant: 'error' });
+      }
     } catch (error) {
       console.error('Error deleting team member:', error);
+      enqueueSnackbar('Failed to delete team member', { variant: 'error' });
     } finally {
       setDeleteLoading(false);
     }
@@ -201,16 +251,20 @@ const TeamPageClient: React.FC = () => {
   const handleRestore = async (member: TeamMember) => {
     setRestoreLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // TODO: Replace with actual API call
-      // const result = await _restore_team_member_api(member._id);
-
-      const { deleted_at, is_deleted, ...restoredMember } = member;
-      setTeamMembers(prev => [restoredMember, ...prev]);
-      setDeletedMembers(prev => prev.filter(m => m._id !== member._id));
+      const result = await _restore_team_member_api(member._id);
+      
+      if (result?.code === 200) {
+        enqueueSnackbar('Team member restored successfully', { variant: 'success' });
+        
+        const { deleted_at, is_deleted, ...restoredMember } = member;
+        setTeamMembers(prev => [restoredMember, ...prev]);
+        setDeletedMembers(prev => prev.filter(m => m._id !== member._id));
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to restore team member', { variant: 'error' });
+      }
     } catch (error) {
       console.error('Error restoring team member:', error);
+      enqueueSnackbar('Failed to restore team member', { variant: 'error' });
     } finally {
       setRestoreLoading(false);
     }
@@ -219,14 +273,17 @@ const TeamPageClient: React.FC = () => {
   const handlePermanentDelete = async (member: TeamMember) => {
     setPermanentDeleteLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const result = await _permanent_delete_team_member_api(member._id);
       
-      // TODO: Replace with actual API call
-      // const result = await _permanent_delete_team_member_api(member._id);
-      
-      setDeletedMembers(prev => prev.filter(m => m._id !== member._id));
+      if (result?.code === 200) {
+        enqueueSnackbar('Team member permanently deleted', { variant: 'success' });
+        setDeletedMembers(prev => prev.filter(m => m._id !== member._id));
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to permanently delete team member', { variant: 'error' });
+      }
     } catch (error) {
       console.error('Error permanently deleting team member:', error);
+      enqueueSnackbar('Failed to permanently delete team member', { variant: 'error' });
     } finally {
       setPermanentDeleteLoading(false);
     }
@@ -235,26 +292,30 @@ const TeamPageClient: React.FC = () => {
   const handleSaveEdit = async (reqData: any) => {
     setEditLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const result = await _update_team_member_api(editDialog.member?._id, reqData);
       
-      // TODO: Replace with actual API call
-      // const result = await _update_team_member_api(editDialog.member?._id, reqData);
-      
-      // Update local state with the request data
-      if (editDialog.member) {
-        const updatedMember = {
-          ...editDialog.member,
-          ...reqData,
-        };
+      if (result?.code === 200) {
+        enqueueSnackbar('Team member updated successfully', { variant: 'success' });
         
-        setTeamMembers(prev =>
-          prev.map(member => member._id === editDialog.member!._id ? updatedMember : member)
-        );
+        // Update local state with the updated member data
+        if (editDialog.member) {
+          const updatedMember = {
+            ...editDialog.member,
+            ...reqData,
+          };
+          
+          setTeamMembers(prev =>
+            prev.map(member => member._id === editDialog.member!._id ? updatedMember : member)
+          );
+        }
+        
+        setEditDialog({ open: false, member: null });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to update team member', { variant: 'error' });
       }
-      
-      setEditDialog({ open: false, member: null });
     } catch (error) {
       console.error('Error updating team member:', error);
+      enqueueSnackbar('Failed to update team member', { variant: 'error' });
     } finally {
       setEditLoading(false);
     }
@@ -263,28 +324,32 @@ const TeamPageClient: React.FC = () => {
   const handleCreate = async (reqData: any) => {
     setCreateLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const result = await _create_team_member_api(reqData);
       
-      // TODO: Replace with actual API call
-      // const result = await _create_team_member_api(reqData);
-      
-      // Create new member with dummy ID for local state
-      const newMember = {
-        _id: `user_${Date.now()}`,
-        first_name: reqData.first_name,
-        last_name: reqData.last_name,
-        email: reqData.email,
-        access: reqData.access,
-        status: reqData.status,
-        last_login: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      };
-      
-      setTeamMembers(prev => [newMember, ...prev]);
-      setPagination(prev => ({ ...prev, total: prev.total + 1 }));
-      setCreateDialog(false);
+      if (result?.code === 200) {
+        enqueueSnackbar('Team member created successfully', { variant: 'success' });
+        
+        // Add new member to local state
+        const newMember = result.team_member || {
+          _id: `user_${Date.now()}`,
+          first_name: reqData.first_name,
+          last_name: reqData.last_name,
+          email: reqData.email,
+          access: reqData.access,
+          status: reqData.status,
+          last_login: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+        };
+        
+        setTeamMembers(prev => [newMember, ...prev]);
+        setTotalCount(prev => prev + 1);
+        setCreateDialog(false);
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to create team member', { variant: 'error' });
+      }
     } catch (error) {
       console.error('Error creating team member:', error);
+      enqueueSnackbar('Failed to create team member', { variant: 'error' });
     } finally {
       setCreateLoading(false);
     }
@@ -293,14 +358,17 @@ const TeamPageClient: React.FC = () => {
   const handlePasswordChange = async (memberId: string, newPassword: string) => {
     setPasswordLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const result = await _change_team_member_password_api(memberId, { password: newPassword });
       
-      // TODO: Replace with actual API call
-      // const result = await _change_team_member_password_api(memberId, { password: newPassword });
-      
-      setChangePasswordDialog({ open: false, member: null });
+      if (result?.code === 200) {
+        enqueueSnackbar('Password changed successfully', { variant: 'success' });
+        setChangePasswordDialog({ open: false, member: null });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to change password', { variant: 'error' });
+      }
     } catch (error) {
       console.error('Error changing password:', error);
+      enqueueSnackbar('Failed to change password', { variant: 'error' });
     } finally {
       setPasswordLoading(false);
     }
@@ -317,26 +385,17 @@ const TeamPageClient: React.FC = () => {
   const handleClearFilters = () => {
     setStatusFilter('all');
     setActiveOnly(false);
-    
-    // Reload data without filters
-    loadTeamMembers(false);
     setFilterDrawerOpen(false);
     setFilterLoading(false);
+    // Reload data without filters
+    loadTeamMembers(false);
   };
 
   const handleApplyFilters = async () => {
     setFilterLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // TODO: Apply filters with actual API call
-      // const result = await _get_team_members_api({ 
-      //   page: pagination.page, 
-      //   limit: pagination.limit,
-      //   status: statusFilter !== 'all' ? statusFilter : undefined,
-      //   active_only: activeOnly
-      // });
-      
+      loadTeamMembers(activeTab === 'deleted');
       setFilterDrawerOpen(false);
     } catch (error) {
       console.error('Error applying filters:', error);
@@ -359,10 +418,19 @@ const TeamPageClient: React.FC = () => {
     return Math.max(0, daysLeft);
   };
 
+  // Pagination configuration (following reference structure)
+  const customPagination = {
+    total_count: totalCount,
+    rows_per_page: rowsPerPage,
+    page: page,
+    handleChangePage: handleChangePage,
+    onRowsPerPageChange: onRowsPerPageChange,
+  };
+
   const deletedPagination = {
     total_count: deletedMembers.length,
-    rows_per_page: pagination.limit,
-    page: pagination.page,
+    rows_per_page: rowsPerPage,
+    page: page,
     handleChangePage,
     onRowsPerPageChange,
   };
@@ -485,8 +553,6 @@ const TeamPageClient: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -566,16 +632,10 @@ const TeamPageClient: React.FC = () => {
             data={teamMembers}
             TABLE_HEAD={TABLE_HEAD}
             MENU_OPTIONS={MENU_OPTIONS}
-            custom_pagination={{
-              total_count: pagination.total,
-              rows_per_page: pagination.limit,
-              page: pagination.page,
-              handleChangePage,
-              onRowsPerPageChange,
-            }}
-            pageCount={pagination.limit}
+            custom_pagination={customPagination}
+            pageCount={pageCount}
             totalPages={totalPages}
-            handleChangePages={handleChangePage}
+            handleChangePages={handleChangePages}
             selected={selected}
             setSelected={setSelected}
             checkbox_selection={true}
