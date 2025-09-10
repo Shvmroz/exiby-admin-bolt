@@ -12,9 +12,10 @@ import { Save, X, Key, Eye, EyeOff, Lock } from 'lucide-react';
 
 interface TeamMember {
   _id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: string;
+  access: string[];
   status: boolean;
 }
 
@@ -100,7 +101,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
       <DialogTitle>
         <div className="flex items-center" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
           <Key className="w-5 h-5 mr-2 text-[#0077ED]" />
-          Change Password - {member?.name}
+          Change Password - {member?.first_name} {member?.last_name}
         </div>
       </DialogTitle>
 
