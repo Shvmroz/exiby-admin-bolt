@@ -22,7 +22,6 @@ import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-tab
 import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
 import TeamMemberEditDialog from '@/components/team/TeamMemberEditDialog';
 import TeamMemberCreateDialog from '@/components/team/TeamMemberCreateDialog';
-import TeamMemberPermissionsDialog from '@/components/team/TeamMemberPermissionsDialog';
 import ChangePasswordDialog from '@/components/team/ChangePasswordDialog';
 import CustomDrawer from '@/components/ui/custom-drawer';
 import TeamFilters from '@/components/team/TeamFilters';
@@ -34,140 +33,22 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
 
-interface Permission {
-  module: string;
-  can_view: boolean;
-  can_create: boolean;
-  can_edit: boolean;
-  can_delete: boolean;
-}
-
 interface TeamMember {
   _id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: string;
+  access: string[];
   status: boolean;
-  permissions: Permission[];
   last_login: string;
   created_at: string;
   deleted_at?: string;
   is_deleted?: boolean;
 }
 
-// Dummy data
-const dummyData = {
-  data: {
-    team_members: [
-      {
-        _id: "user_123",
-        name: "Shamroz Khan",
-        email: "shamroz@exiby.com",
-        role: "Admin",
-        status: true,
-        permissions: [
-          { module: "dashboard", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "organizations", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "companies", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "payment_plans", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "email_templates", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "analytics", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "team", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "configuration", can_view: true, can_create: false, can_edit: true, can_delete: false },
-          { module: "settings", can_view: true, can_create: false, can_edit: true, can_delete: false },
-        ],
-        last_login: "2025-01-20T10:30:00.000Z",
-        created_at: "2025-01-15T10:30:00.000Z"
-      },
-      {
-        _id: "user_124",
-        name: "Sarah Johnson",
-        email: "sarah@exiby.com",
-        role: "Manager",
-        status: true,
-        permissions: [
-          { module: "dashboard", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "organizations", can_view: true, can_create: true, can_edit: true, can_delete: false },
-          { module: "companies", can_view: true, can_create: true, can_edit: true, can_delete: false },
-          { module: "payment_plans", can_view: true, can_create: false, can_edit: true, can_delete: false },
-          { module: "email_templates", can_view: true, can_create: true, can_edit: true, can_delete: false },
-          { module: "analytics", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "team", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "configuration", can_view: false, can_create: false, can_edit: false, can_delete: false },
-          { module: "settings", can_view: false, can_create: false, can_edit: false, can_delete: false },
-        ],
-        last_login: "2025-01-19T14:20:00.000Z",
-        created_at: "2025-01-10T14:20:00.000Z"
-      },
-      {
-        _id: "user_125",
-        name: "Mike Chen",
-        email: "mike@exiby.com",
-        role: "Editor",
-        status: true,
-        permissions: [
-          { module: "dashboard", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "organizations", can_view: true, can_create: false, can_edit: true, can_delete: false },
-          { module: "companies", can_view: true, can_create: false, can_edit: true, can_delete: false },
-          { module: "payment_plans", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "email_templates", can_view: true, can_create: true, can_edit: true, can_delete: false },
-          { module: "analytics", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "team", can_view: false, can_create: false, can_edit: false, can_delete: false },
-          { module: "configuration", can_view: false, can_create: false, can_edit: false, can_delete: false },
-          { module: "settings", can_view: false, can_create: false, can_edit: false, can_delete: false },
-        ],
-        last_login: "2025-01-18T09:15:00.000Z",
-        created_at: "2025-01-08T09:15:00.000Z"
-      },
-      {
-        _id: "user_126",
-        name: "Emma Wilson",
-        email: "emma@exiby.com",
-        role: "Viewer",
-        status: false,
-        permissions: [
-          { module: "dashboard", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "organizations", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "companies", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "payment_plans", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "email_templates", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "analytics", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "team", can_view: false, can_create: false, can_edit: false, can_delete: false },
-          { module: "configuration", can_view: false, can_create: false, can_edit: false, can_delete: false },
-          { module: "settings", can_view: false, can_create: false, can_edit: false, can_delete: false },
-        ],
-        last_login: "2025-01-17T16:45:00.000Z",
-        created_at: "2025-01-05T16:45:00.000Z"
-      },
-      {
-        _id: "user_127",
-        name: "David Rodriguez",
-        email: "david@exiby.com",
-        role: "Manager",
-        status: true,
-        permissions: [
-          { module: "dashboard", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "organizations", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "companies", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "payment_plans", can_view: true, can_create: false, can_edit: true, can_delete: false },
-          { module: "email_templates", can_view: true, can_create: true, can_edit: true, can_delete: true },
-          { module: "analytics", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "team", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "configuration", can_view: true, can_create: false, can_edit: false, can_delete: false },
-          { module: "settings", can_view: false, can_create: false, can_edit: false, can_delete: false },
-        ],
-        last_login: "2025-01-16T11:30:00.000Z",
-        created_at: "2025-01-03T11:30:00.000Z"
-      }
-    ],
-    total: 5
-  }
-};
-
 const TABLE_HEAD: TableHeader[] = [
   { key: 'user', label: 'User', type: 'custom' },
-  { key: 'role', label: 'Role', type: 'custom' },
-  { key: 'permissions', label: 'Approved Permissions', type: 'custom' },
+  { key: 'access', label: 'Module Access', type: 'custom' },
   { key: 'status', label: 'Status', type: 'custom' },
   { key: 'last_login', label: 'Last Login', type: 'custom' },
   { key: 'created_at', label: 'Created', type: 'custom' },
@@ -193,10 +74,6 @@ const TeamPageClient: React.FC = () => {
     member: TeamMember | null;
   }>({ open: false, member: null });
   const [createDialog, setCreateDialog] = useState(false);
-  const [permissionsDialog, setPermissionsDialog] = useState<{
-    open: boolean;
-    member: TeamMember | null;
-  }>({ open: false, member: null });
   const [changePasswordDialog, setChangePasswordDialog] = useState<{
     open: boolean;
     member: TeamMember | null;
@@ -207,11 +84,9 @@ const TeamPageClient: React.FC = () => {
   const [createLoading, setCreateLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
-  const [permissionsLoading, setPermissionsLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   // Filter states
-  const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [activeOnly, setActiveOnly] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -238,32 +113,12 @@ const TeamPageClient: React.FC = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Get active team members (exclude deleted ones)
-      const activeMembers = dummyData.data.team_members.filter(member => 
-        !deletedMembers.some(deleted => deleted._id === member._id)
-      );
+      // TODO: Replace with actual API call
+      // const result = await _get_team_members_api({ page: pagination.page, limit: pagination.limit });
       
-      let filteredData = includeDeleted
-        ? deletedMembers
-        : activeMembers;
+      // For now, use empty array since we removed dummy data
+      const filteredData: TeamMember[] = [];
       
-      if (searchQuery) {
-        filteredData = filteredData.filter(member =>
-          member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          member.role.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-      
-      if (roleFilter !== 'all') {
-        filteredData = filteredData.filter(member => member.role === roleFilter);
-      }
-      
-      if (statusFilter !== 'all') {
-        const isActive = statusFilter === 'active';
-        filteredData = filteredData.filter(member => member.status === isActive);
-      }
-
       if (includeDeleted) {
         setDeletedMembers(filteredData);
       } else {
@@ -290,7 +145,7 @@ const TeamPageClient: React.FC = () => {
   }, [searchQuery, pagination.page, pagination.limit, activeTab]);
 
   if (loading && teamMembers.length === 0) {
-    return <TableSkeleton rows={8} columns={6} showFilters={true} />;
+    return <TableSkeleton rows={8} columns={5} showFilters={true} />;
   }
 
   const handleChangePage = (newPage: number) => {
@@ -309,10 +164,6 @@ const TeamPageClient: React.FC = () => {
     setDeleteDialog({ open: true, member });
   };
 
-  const handlePermissions = (member: TeamMember) => {
-    setPermissionsDialog({ open: true, member });
-  };
-
   const handleChangePassword = (member: TeamMember) => {
     setChangePasswordDialog({ open: true, member });
   };
@@ -323,6 +174,9 @@ const TeamPageClient: React.FC = () => {
     setDeleteLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // TODO: Replace with actual API call
+      // const result = await _delete_team_member_api(deleteDialog.member._id);
       
       const deletedMember = {
         ...deleteDialog.member,
@@ -349,6 +203,9 @@ const TeamPageClient: React.FC = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
 
+      // TODO: Replace with actual API call
+      // const result = await _restore_team_member_api(member._id);
+
       const { deleted_at, is_deleted, ...restoredMember } = member;
       setTeamMembers(prev => [restoredMember, ...prev]);
       setDeletedMembers(prev => prev.filter(m => m._id !== member._id));
@@ -363,6 +220,10 @@ const TeamPageClient: React.FC = () => {
     setPermanentDeleteLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // TODO: Replace with actual API call
+      // const result = await _permanent_delete_team_member_api(member._id);
+      
       setDeletedMembers(prev => prev.filter(m => m._id !== member._id));
     } catch (error) {
       console.error('Error permanently deleting team member:', error);
@@ -371,14 +232,25 @@ const TeamPageClient: React.FC = () => {
     }
   };
 
-  const handleSaveEdit = async (updatedMember: TeamMember) => {
+  const handleSaveEdit = async (reqData: any) => {
     setEditLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      setTeamMembers(prev =>
-        prev.map(member => member._id === updatedMember._id ? updatedMember : member)
-      );
+      // TODO: Replace with actual API call
+      // const result = await _update_team_member_api(editDialog.member?._id, reqData);
+      
+      // Update local state with the request data
+      if (editDialog.member) {
+        const updatedMember = {
+          ...editDialog.member,
+          ...reqData,
+        };
+        
+        setTeamMembers(prev =>
+          prev.map(member => member._id === editDialog.member!._id ? updatedMember : member)
+        );
+      }
       
       setEditDialog({ open: false, member: null });
     } catch (error) {
@@ -388,10 +260,25 @@ const TeamPageClient: React.FC = () => {
     }
   };
 
-  const handleCreate = async (newMember: TeamMember) => {
+  const handleCreate = async (reqData: any) => {
     setCreateLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // TODO: Replace with actual API call
+      // const result = await _create_team_member_api(reqData);
+      
+      // Create new member with dummy ID for local state
+      const newMember = {
+        _id: `user_${Date.now()}`,
+        first_name: reqData.first_name,
+        last_name: reqData.last_name,
+        email: reqData.email,
+        access: reqData.access,
+        status: reqData.status,
+        last_login: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
       
       setTeamMembers(prev => [newMember, ...prev]);
       setPagination(prev => ({ ...prev, total: prev.total + 1 }));
@@ -403,27 +290,14 @@ const TeamPageClient: React.FC = () => {
     }
   };
 
-  const handleSavePermissions = async (updatedMember: TeamMember) => {
-    setPermissionsLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setTeamMembers(prev =>
-        prev.map(member => member._id === updatedMember._id ? updatedMember : member)
-      );
-      
-      setPermissionsDialog({ open: false, member: null });
-    } catch (error) {
-      console.error('Error updating permissions:', error);
-    } finally {
-      setPermissionsLoading(false);
-    }
-  };
-
   const handlePasswordChange = async (memberId: string, newPassword: string) => {
     setPasswordLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // TODO: Replace with actual API call
+      // const result = await _change_team_member_password_api(memberId, { password: newPassword });
+      
       setChangePasswordDialog({ open: false, member: null });
     } catch (error) {
       console.error('Error changing password:', error);
@@ -435,26 +309,17 @@ const TeamPageClient: React.FC = () => {
   // Helper functions
   const getAppliedFiltersCount = () => {
     let count = 0;
-    if (roleFilter !== 'all') count++;
     if (statusFilter !== 'all') count++;
     if (activeOnly) count++;
     return count;
   };
 
   const handleClearFilters = () => {
-    setRoleFilter('all');
     setStatusFilter('all');
     setActiveOnly(false);
     
-    // Get active team members (exclude deleted ones)
-    const activeMembers = dummyData.data.team_members.filter(member => 
-      !deletedMembers.some(deleted => deleted._id === member._id)
-    );
-    setTeamMembers(activeMembers);
-    setPagination(prev => ({
-      ...prev,
-      total: activeMembers.length,
-    }));
+    // Reload data without filters
+    loadTeamMembers(false);
     setFilterDrawerOpen(false);
     setFilterLoading(false);
   };
@@ -464,35 +329,14 @@ const TeamPageClient: React.FC = () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Get active team members (exclude deleted ones)
-      const activeMembers = dummyData.data.team_members.filter(member => 
-        !deletedMembers.some(deleted => deleted._id === member._id)
-      );
-      let filteredData = activeMembers;
-
-      if (roleFilter !== 'all') {
-        filteredData = filteredData.filter(member => member.role === roleFilter);
-      }
-
-      if (statusFilter !== 'all') {
-        const isActive = statusFilter === 'active';
-        filteredData = filteredData.filter(member => member.status === isActive);
-      }
-
-      if (activeOnly) {
-        filteredData = filteredData.filter(member => member.status);
-      }
-
-      if (searchQuery) {
-        filteredData = filteredData.filter(member =>
-          member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          member.role.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setTeamMembers(filteredData);
-      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      // TODO: Apply filters with actual API call
+      // const result = await _get_team_members_api({ 
+      //   page: pagination.page, 
+      //   limit: pagination.limit,
+      //   status: statusFilter !== 'all' ? statusFilter : undefined,
+      //   active_only: activeOnly
+      // });
+      
       setFilterDrawerOpen(false);
     } catch (error) {
       console.error('Error applying filters:', error);
@@ -502,7 +346,7 @@ const TeamPageClient: React.FC = () => {
   };
 
   // Helper functions for soft delete table
-  const getItemName = (member: TeamMember) => member.name;
+  const getItemName = (member: TeamMember) => `${member.first_name} ${member.last_name}`;
   const getDeletedAt = (member: TeamMember) => member.deleted_at || '';
   const getDaysUntilPermanentDelete = (member: TeamMember) => {
     if (!member.deleted_at) return 30;
@@ -528,11 +372,6 @@ const TeamPageClient: React.FC = () => {
       label: 'Edit',
       action: handleEdit,
       icon: <Edit className="w-4 h-4" />,
-    },
-    {
-      label: 'Permissions',
-      action: handlePermissions,
-      icon: <Shield className="w-4 h-4" />,
     },
     {
       label: 'Change Password',
@@ -561,23 +400,6 @@ const TeamPageClient: React.FC = () => {
     );
   };
 
-  const getRoleBadge = (role: string) => {
-    const roleConfig = {
-      Admin: { className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400' },
-      Manager: { className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' },
-      Editor: { className: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' },
-      Viewer: { className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400' },
-    };
-
-    const config = roleConfig[role as keyof typeof roleConfig] || roleConfig.Viewer;
-    
-    return (
-      <Badge className={config.className}>
-        {role}
-      </Badge>
-    );
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -588,17 +410,32 @@ const TeamPageClient: React.FC = () => {
     });
   };
 
-  const getApprovedPermissions = (permissions: Permission[]) => {
-    const approvedCount = permissions.filter(p => 
-      p.can_view || p.can_create || p.can_edit || p.can_delete
-    ).length;
-    
+  const getModuleAccess = (access: string[]) => {
+    const moduleLabels = {
+      dashboard: 'Dashboard',
+      organizations: 'Organizations',
+      companies: 'Companies',
+      events: 'Events',
+      payment_plans: 'Payment Plans',
+      email_templates: 'Email Templates',
+      analytics: 'Analytics',
+      team: 'Team',
+      configuration: 'Configuration',
+      settings: 'Settings',
+    };
+
     return (
-      <div className="flex items-center space-x-2">
-        <Shield className="w-4 h-4 text-blue-500" />
-        <span className="text-sm font-medium text-gray-900 dark:text-white">
-          {approvedCount}/{permissions.length} modules
-        </span>
+      <div className="flex flex-wrap gap-1">
+        {access.slice(0, 3).map((module, index) => (
+          <Badge key={index} className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 text-xs">
+            {moduleLabels[module as keyof typeof moduleLabels] || module}
+          </Badge>
+        ))}
+        {access.length > 3 && (
+          <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400 text-xs">
+            +{access.length - 3} more
+          </Badge>
+        )}
       </div>
     );
   };
@@ -613,7 +450,7 @@ const TeamPageClient: React.FC = () => {
             </div>
             <div className="min-w-0 flex-1">
               <div className="font-semibold text-gray-900 dark:text-white">
-                {member.name}
+                {member.first_name} {member.last_name}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                 <Mail className="w-3 h-3 mr-1" />
@@ -623,11 +460,8 @@ const TeamPageClient: React.FC = () => {
           </div>
         );
 
-      case 'role':
-        return getRoleBadge(member.role);
-
-      case 'permissions':
-        return getApprovedPermissions(member.permissions);
+      case 'access':
+        return getModuleAccess(member.access);
 
       case 'status':
         return getStatusBadge(member.status);
@@ -662,7 +496,7 @@ const TeamPageClient: React.FC = () => {
             My Team
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage team members and their role-based permissions
+            Manage team members and their module access permissions
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -775,7 +609,7 @@ const TeamPageClient: React.FC = () => {
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ open, member: null })}
         title="Move to Deleted Members"
-        content={`Are you sure you want to move "${deleteDialog.member?.name}" to deleted members? You can restore them within 30 days before permanent deletion.`}
+        content={`Are you sure you want to move "${deleteDialog.member ? getItemName(deleteDialog.member) : ''}" to deleted members? You can restore them within 30 days before permanent deletion.`}
         confirmButtonText="Move to Deleted"
         onConfirm={confirmDelete}
         loading={deleteLoading}
@@ -796,15 +630,6 @@ const TeamPageClient: React.FC = () => {
         onOpenChange={setCreateDialog}
         onSave={handleCreate}
         loading={createLoading}
-      />
-
-      {/* Permissions Dialog */}
-      <TeamMemberPermissionsDialog
-        open={permissionsDialog.open}
-        onOpenChange={(open) => setPermissionsDialog({ open, member: null })}
-        member={permissionsDialog.member}
-        onSave={handleSavePermissions}
-        loading={permissionsLoading}
       />
 
       {/* Change Password Dialog */}
@@ -834,8 +659,6 @@ const TeamPageClient: React.FC = () => {
         loading={filterLoading}
       >
         <TeamFilters
-          roleFilter={roleFilter}
-          setRoleFilter={setRoleFilter}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           activeOnly={activeOnly}

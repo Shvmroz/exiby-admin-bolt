@@ -9,11 +9,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CheckCircle, XCircle, Users, Shield } from 'lucide-react';
+import { CheckCircle, XCircle, Users } from 'lucide-react';
 
 interface TeamFiltersProps {
-  roleFilter: string;
-  setRoleFilter: (value: string) => void;
   statusFilter: string;
   setStatusFilter: (value: string) => void;
   activeOnly: boolean;
@@ -21,15 +19,11 @@ interface TeamFiltersProps {
 }
 
 const TeamFilters: React.FC<TeamFiltersProps> = ({
-  roleFilter,
-  setRoleFilter,
   statusFilter,
   setStatusFilter,
   activeOnly,
   setActiveOnly,
 }) => {
-  const roles = ['Admin', 'Manager', 'Editor', 'Viewer'];
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -44,29 +38,6 @@ const TeamFilters: React.FC<TeamFiltersProps> = ({
           onCheckedChange={setActiveOnly}
           className="data-[state=checked]:bg-[#0077ED]"
         />
-      </div>
-
-      {/* Role Filter */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Role
-        </label>
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="Filter by role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            {roles.map(role => (
-              <SelectItem key={role} value={role}>
-                <div className="flex items-center">
-                  <Shield className="w-4 h-4 mr-2 text-blue-500" />
-                  {role}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Status Filter */}

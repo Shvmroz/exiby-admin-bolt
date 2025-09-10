@@ -8,30 +8,16 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Save, X } from 'lucide-react';
-
-interface Permission {
-  module: string;
-  can_view: boolean;
-  can_create: boolean;
-  can_edit: boolean;
-  can_delete: boolean;
-}
+import { Switch } from '@/components/ui/switch';
+import { Save, X, Shield } from 'lucide-react';
 
 interface TeamMember {
   _id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  role: string;
+  access: string[];
   status: boolean;
-  permissions: Permission[];
   last_login: string;
   created_at: string;
 }
@@ -53,36 +39,76 @@ const TeamMemberEditDialog: React.FC<TeamMemberEditDialogProps> = ({
 }) => {
   const { darkMode } = useAppContext();
   const [formData, setFormData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
-    role: 'Viewer',
+    access: [] as string[],
     status: true,
   });
 
-  const roles = ['Admin', 'Manager', 'Editor', 'Viewer'];
+  const availableModules = [
+    'dashboard',
+    'organizations', 
+    'companies',
+    'events',
+    'payment_plans',
+    'email_templates',
+    'analytics',
+    'team',
+    'configuration',
+    'settings'
+  ];
+
+  const moduleLabels = {
+    dashboard: 'Dashboard',
+    organizations: 'Organizations',
+    companies: 'Companies',
+    events: 'Events',
+    payment_plans: 'Payment Plans',
+    email_templates: 'Email Templates',
+    analytics: 'Analytics',
+    team: 'Team Management',
+    configuration: 'Configuration',
+    settings: 'Settings',
+  };
 
   useEffect(() => {
     if (member) {
       setFormData({
-        name: member.name,
+        first_name: member.first_name,
+        last_name: member.last_name,
         email: member.email,
-        role: member.role,
+        access: member.access,
         status: member.status,
       });
     }
   }, [member]);
 
+  const handleAccessChange = (module: string, checked: boolean) => {
+    if (checked) {
+      setFormData(prev => ({
+        ...prev,
+        access: [...prev.access, module]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        access: prev.access.filter(m => m !== module)
+      }));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (member) {
-      const updatedMember: TeamMember = {
-        ...member,
-        name: formData.name,
+      const reqData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         email: formData.email,
-        role: formData.role,
+        access: formData.access,
         status: formData.status,
       };
-      onSave(updatedMember);
+      onSave(reqData);
     }
   };
 
@@ -90,13 +116,14 @@ const TeamMemberEditDialog: React.FC<TeamMemberEditDialogProps> = ({
     <Dialog 
       open={open} 
       onClose={() => onOpenChange(false)}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
           borderRadius: '12px',
+          maxHeight: '90vh',
         }
       }}
     >
@@ -105,92 +132,106 @@ const TeamMemberEditDialog: React.FC<TeamMemberEditDialogProps> = ({
       </DialogTitle>
 
       <DialogContent 
-        sx={{ paddingTop: 2, paddingBottom: 3 }}
+        sx={{ paddingTop: 2, paddingBottom: 2, overflow: 'auto' }}
         style={{ 
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000'
         }}
       >
         <form onSubmit={handleSubmit} className="space-y-6" id="team-member-edit-form">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Full Name
-            </label>
-            <Input
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Enter full name"
-              style={{
-                backgroundColor: darkMode ? '#374151' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                borderColor: darkMode ? '#4b5563' : '#d1d5db'
-              }}
-              required
-            />
-          </div>
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  First Name *
+                </label>
+                <Input
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  placeholder="Enter first name"
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                  required
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email Address
-            </label>
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="user@exiby.com"
-              style={{
-                backgroundColor: darkMode ? '#374151' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#000000',
-                borderColor: darkMode ? '#4b5563' : '#d1d5db'
-              }}
-              required
-            />
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Last Name *
+                </label>
+                <Input
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  placeholder="Enter last name"
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                  required
+                />
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Role
-            </label>
-            <Select
-              value={formData.role}
-              onValueChange={(value) => setFormData({ ...formData, role: value })}
-            >
-              <SelectTrigger
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Email Address *
+              </label>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="user@exiby.com"
                 style={{
                   backgroundColor: darkMode ? '#374151' : '#ffffff',
                   color: darkMode ? '#ffffff' : '#000000',
                   borderColor: darkMode ? '#4b5563' : '#d1d5db'
                 }}
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent
-                style={{
-                  backgroundColor: darkMode ? '#374151' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#000000',
-                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                }}
-              >
-                {roles.map(role => (
-                  <SelectItem key={role} value={role}>
-                    {role}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                required
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="edit_status"
+                checked={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.checked })}
+                className="w-4 h-4 text-[#0077ED] bg-gray-100 border-gray-300 rounded focus:ring-[#0077ED] dark:focus:ring-[#0077ED] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label htmlFor="edit_status" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Active User
+              </label>
+            </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="edit_status"
-              checked={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.checked })}
-              className="w-4 h-4 text-[#0077ED] bg-gray-100 border-gray-300 rounded focus:ring-[#0077ED] dark:focus:ring-[#0077ED] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-            />
-            <label htmlFor="edit_status" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Active User
-            </label>
+          {/* Permissions */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Module Access Permissions</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {availableModules.map((module) => (
+                <div key={module} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      {moduleLabels[module as keyof typeof moduleLabels]}
+                    </span>
+                  </div>
+                  <Switch
+                    checked={formData.access.includes(module)}
+                    onCheckedChange={(checked) => handleAccessChange(module, checked)}
+                    className="data-[state=checked]:bg-[#0077ED]"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </form>
       </DialogContent>
