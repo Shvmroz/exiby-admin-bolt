@@ -38,7 +38,7 @@ interface AppContextType {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean }>;
-  logout: () => void;
+  logout: () => Promise<{ success: boolean }>;
 
   // Theme
   darkMode: boolean;
@@ -187,8 +187,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       return { success: false };
     }
   };
-  // =====================================================
-
+  // ======================= Toggle Dark Mode
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);

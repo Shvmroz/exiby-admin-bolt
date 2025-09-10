@@ -14,18 +14,7 @@ interface TopbarProps {
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const { user, logout, darkMode, toggleDarkMode, unreadNotificationsCount } =
-    useAppContext() as {
-      user: {
-        first_name?: string;
-        last_name?: string;
-        email?: string;
-        profile_image?: string;
-      } | null;
-      logout: () => void;
-      darkMode: boolean;
-      toggleDarkMode: () => void;
-      unreadNotificationsCount: number;
-    };
+  useAppContext();
 
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
@@ -50,6 +39,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
       setLoading(false);
     }
   };
+  
 
   const handleNavigation = (path: string) => {
     setShowUserMenu(false);
