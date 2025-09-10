@@ -126,8 +126,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               alt="ExiBy Logo"
               className="h-8 w-8 object-contain"
             />
-            <h1 className="text-blue-500 dark:text-white text-2xl font-extrabold leading-tight">
-              ExiBy
+            <h1 className="text-blue-500 dark:text-white text-2xl font-extrabold leading-tight mt-1">
+              EXIBY
             </h1>
           </div>
         </div>
