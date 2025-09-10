@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Users,
   Search,
@@ -11,27 +11,28 @@ import {
   Edit,
   Trash2,
   Mail,
-  Shield,
   Key,
   CheckCircle,
   XCircle,
   User,
-  Calendar,
-} from 'lucide-react';
-import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-table';
-import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
-import TeamMemberEditDialog from '@/components/team/TeamMemberEditDialog';
-import TeamMemberCreateDialog from '@/components/team/TeamMemberCreateDialog';
-import ChangePasswordDialog from '@/components/team/ChangePasswordDialog';
-import CustomDrawer from '@/components/ui/custom-drawer';
-import TeamFilters from '@/components/team/TeamFilters';
-import SoftDeleteTable from '@/components/ui/soft-delete-table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import CsvExportDialog from '@/components/ui/csv-export-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
+} from "lucide-react";
+import CustomTable, {
+  TableHeader,
+  MenuOption,
+} from "@/components/ui/custom-table";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
+import TeamMemberEditDialog from "@/components/team/TeamMemberEditDialog";
+import TeamMemberCreateDialog from "@/components/team/TeamMemberCreateDialog";
+import ChangePasswordDialog from "@/components/team/ChangePasswordDialog";
+import CustomDrawer from "@/components/ui/custom-drawer";
+import TeamFilters from "@/components/team/TeamFilters";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import CsvExportDialog from "@/components/ui/csv-export-dialog";
+import { Badge } from "@/components/ui/badge";
+import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
+import { _admin_team_list_api } from "@/DAL/adminTeamAPI";
+import { useSnackbar } from "notistack";
 
 interface TeamMember {
   _id: string;
@@ -40,31 +41,26 @@ interface TeamMember {
   email: string;
   access: string[];
   status: boolean;
-  last_login: string;
-  created_at: string;
-  deleted_at?: string;
-  is_deleted?: boolean;
+  createdAt: string;
 }
 
 const TABLE_HEAD: TableHeader[] = [
-  { key: 'user', label: 'User', type: 'custom' },
-  { key: 'access', label: 'Module Access', type: 'custom' },
-  { key: 'status', label: 'Status', type: 'custom' },
-  { key: 'last_login', label: 'Last Login', type: 'custom' },
-  { key: 'created_at', label: 'Created', type: 'custom' },
-  { key: 'action', label: '', type: 'action', width: 'w-12' },
+  { key: "user", label: "User", type: "custom" },
+  { key: "access", label: "Module Access", type: "custom" },
+  { key: "status", label: "Status", type: "custom" },
+  { key: "createdAt", label: "Created", type: "custom" },
+  { key: "action", label: "", type: "action", width: "w-12" },
 ];
 
 const TeamPageClient: React.FC = () => {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // State
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [deletedMembers, setDeletedMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(false);
-  const [deletedLoading, setDeletedLoading] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  
+  const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     member: TeamMember | null;
@@ -78,316 +74,150 @@ const TeamPageClient: React.FC = () => {
     open: boolean;
     member: TeamMember | null;
   }>({ open: false, member: null });
-  
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
-  const [restoreLoading, setRestoreLoading] = useState(false);
-  const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
-
-  // Filter states
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState("all");
   const [activeOnly, setActiveOnly] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
-
-  // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Pagination state
+  // Pagination & API meta
   const [pagination, setPagination] = useState({
-    page: 1,
+    current_page: 1,
     limit: 20,
-    total: 0,
+    total_count: 0,
+    total_pages: 1,
   });
 
-  // Load team members
-  const loadTeamMembers = async (includeDeleted = false) => {
-    if (includeDeleted) {
-      setDeletedLoading(true);
-    } else {
-      setLoading(true);
-    }
+  const [filtersApplied, setFiltersApplied] = useState({
+    search: "",
+    sort_by: "createdAt",
+    sort_order: "desc",
+    page: 1,
+    limit: 20,
+  });
+
+  // API Call
+  const getAllTeamList = async () => {
+    setLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // TODO: Replace with actual API call
-      // const result = await _get_team_members_api({ page: pagination.page, limit: pagination.limit });
-      
-      // For now, use empty array since we removed dummy data
-      const filteredData: TeamMember[] = [];
-      
-      if (includeDeleted) {
-        setDeletedMembers(filteredData);
+      const result = await _admin_team_list_api({
+        page: pagination.current_page,
+        limit: pagination.limit,
+        req_data: {}, 
+      });
+
+      if (result?.code === 200) {
+        setTeamMembers(result.data.admins || []);
+        setPagination({
+          current_page: result.data.current_page || 1,
+          limit: result.data.limit || 20,
+          total_count: result.data.total_count || 0,
+          total_pages: result.data.total_pages || 1,
+        });
+        setFiltersApplied(result.data.filters_applied || filtersApplied);
       } else {
-        setTeamMembers(filteredData);
-        setPagination(prev => ({ ...prev, total: filteredData.length }));
+        enqueueSnackbar(result?.message || "Failed to load team members", {
+          variant: "error",
+        });
+        setTeamMembers([]);
       }
-    } catch (error) {
-      console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} team members:`, error);
+    } catch (err) {
+      console.error(err);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
+      setTeamMembers([]);
     } finally {
-      if (includeDeleted) {
-        setDeletedLoading(false);
-      } else {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeTab === 'all') {
-      loadTeamMembers(false);
-    } else if (activeTab === 'deleted') {
-      loadTeamMembers(true);
-    }
-  }, [searchQuery, pagination.page, pagination.limit, activeTab]);
+    getAllTeamList();
+  }, [pagination.current_page, pagination.limit]);
 
   if (loading && teamMembers.length === 0) {
     return <TableSkeleton rows={8} columns={5} showFilters={true} />;
   }
 
-  const handleChangePage = (newPage: number) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
-  };
+  // Table helpers
+  const handleChangePage = (newPage: number) =>
+    setPagination((prev) => ({ ...prev, current_page: newPage }));
+  const onRowsPerPageChange = (newLimit: number) =>
+    setPagination((prev) => ({ ...prev, limit: newLimit, current_page: 1 }));
 
-  const onRowsPerPageChange = (newLimit: number) => {
-    setPagination(prev => ({ ...prev, limit: newLimit, page: 1 }));
-  };
-
-  const handleEdit = (member: TeamMember) => {
+  const handleEdit = (member: TeamMember) =>
     setEditDialog({ open: true, member });
-  };
-
-  const handleDelete = (member: TeamMember) => {
+  const handleDelete = (member: TeamMember) =>
     setDeleteDialog({ open: true, member });
-  };
-
-  const handleChangePassword = (member: TeamMember) => {
+  const handleChangePassword = (member: TeamMember) =>
     setChangePasswordDialog({ open: true, member });
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteDialog.member) return;
-    
-    setDeleteLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // TODO: Replace with actual API call
-      // const result = await _delete_team_member_api(deleteDialog.member._id);
-      
-      const deletedMember = {
-        ...deleteDialog.member,
-        deleted_at: new Date().toISOString(),
-        is_deleted: true,
-      };
-
-      setDeletedMembers(prev => [deletedMember, ...prev]);
-      setTeamMembers(prev => 
-        prev.filter(member => member._id !== deleteDialog.member!._id)
-      );
-      
-      setPagination(prev => ({ ...prev, total: prev.total - 1 }));
-      setDeleteDialog({ open: false, member: null });
-    } catch (error) {
-      console.error('Error deleting team member:', error);
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  const handleRestore = async (member: TeamMember) => {
-    setRestoreLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // TODO: Replace with actual API call
-      // const result = await _restore_team_member_api(member._id);
-
-      const { deleted_at, is_deleted, ...restoredMember } = member;
-      setTeamMembers(prev => [restoredMember, ...prev]);
-      setDeletedMembers(prev => prev.filter(m => m._id !== member._id));
-    } catch (error) {
-      console.error('Error restoring team member:', error);
-    } finally {
-      setRestoreLoading(false);
-    }
-  };
-
-  const handlePermanentDelete = async (member: TeamMember) => {
-    setPermanentDeleteLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // TODO: Replace with actual API call
-      // const result = await _permanent_delete_team_member_api(member._id);
-      
-      setDeletedMembers(prev => prev.filter(m => m._id !== member._id));
-    } catch (error) {
-      console.error('Error permanently deleting team member:', error);
-    } finally {
-      setPermanentDeleteLoading(false);
-    }
-  };
 
   const handleSaveEdit = async (reqData: any) => {
     setEditLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // TODO: Replace with actual API call
-      // const result = await _update_team_member_api(editDialog.member?._id, reqData);
-      
-      // Update local state with the request data
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       if (editDialog.member) {
-        const updatedMember = {
-          ...editDialog.member,
-          ...reqData,
-        };
-        
-        setTeamMembers(prev =>
-          prev.map(member => member._id === editDialog.member!._id ? updatedMember : member)
+        const updatedMember = { ...editDialog.member, ...reqData };
+        setTeamMembers((prev) =>
+          prev.map((m) =>
+            m._id === editDialog.member!._id ? updatedMember : m
+          )
         );
       }
-      
       setEditDialog({ open: false, member: null });
-    } catch (error) {
-      console.error('Error updating team member:', error);
     } finally {
       setEditLoading(false);
     }
   };
 
-  const handleCreate = async (reqData: any) => {
-    setCreateLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // TODO: Replace with actual API call
-      // const result = await _create_team_member_api(reqData);
-      
-      // Create new member with dummy ID for local state
-      const newMember = {
-        _id: `user_${Date.now()}`,
-        first_name: reqData.first_name,
-        last_name: reqData.last_name,
-        email: reqData.email,
-        access: reqData.access,
-        status: reqData.status,
-        last_login: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      };
-      
-      setTeamMembers(prev => [newMember, ...prev]);
-      setPagination(prev => ({ ...prev, total: prev.total + 1 }));
-      setCreateDialog(false);
-    } catch (error) {
-      console.error('Error creating team member:', error);
-    } finally {
-      setCreateLoading(false);
-    }
-  };
-
-  const handlePasswordChange = async (memberId: string, newPassword: string) => {
+  const handlePasswordChange = async (
+    memberId: string,
+    newPassword: string
+  ) => {
     setPasswordLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // TODO: Replace with actual API call
-      // const result = await _change_team_member_password_api(memberId, { password: newPassword });
-      
-      setChangePasswordDialog({ open: false, member: null });
-    } catch (error) {
-      console.error('Error changing password:', error);
+      await new Promise((resolve) => setTimeout(resolve, 1500));
     } finally {
+      setChangePasswordDialog({ open: false, member: null });
       setPasswordLoading(false);
     }
   };
 
-  // Helper functions
-  const getAppliedFiltersCount = () => {
-    let count = 0;
-    if (statusFilter !== 'all') count++;
-    if (activeOnly) count++;
-    return count;
-  };
-
+  const getAppliedFiltersCount = () =>
+    (statusFilter !== "all" ? 1 : 0) + (activeOnly ? 1 : 0);
   const handleClearFilters = () => {
-    setStatusFilter('all');
+    setStatusFilter("all");
     setActiveOnly(false);
-    
-    // Reload data without filters
-    loadTeamMembers(false);
+    getAllTeamList();
+    setFilterDrawerOpen(false);
+  };
+  const handleApplyFilters = async () => {
+    setFilterLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
   };
 
-  const handleApplyFilters = async () => {
-    setFilterLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // TODO: Apply filters with actual API call
-      // const result = await _get_team_members_api({ 
-      //   page: pagination.page, 
-      //   limit: pagination.limit,
-      //   status: statusFilter !== 'all' ? statusFilter : undefined,
-      //   active_only: activeOnly
-      // });
-      
-      setFilterDrawerOpen(false);
-    } catch (error) {
-      console.error('Error applying filters:', error);
-    } finally {
-      setFilterLoading(false);
-    }
-  };
-
-  // Helper functions for soft delete table
-  const getItemName = (member: TeamMember) => `${member.first_name} ${member.last_name}`;
-  const getDeletedAt = (member: TeamMember) => member.deleted_at || '';
-  const getDaysUntilPermanentDelete = (member: TeamMember) => {
-    if (!member.deleted_at) return 30;
-    
-    const deletedDate = new Date(member.deleted_at);
-    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const now = new Date();
-    const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
-    
-    return Math.max(0, daysLeft);
-  };
-
-  const deletedPagination = {
-    total_count: deletedMembers.length,
-    rows_per_page: pagination.limit,
-    page: pagination.page,
-    handleChangePage,
-    onRowsPerPageChange,
-  };
-
   const MENU_OPTIONS: MenuOption[] = [
+    { label: "Edit", action: handleEdit, icon: <Edit className="w-4 h-4" /> },
     {
-      label: 'Edit',
-      action: handleEdit,
-      icon: <Edit className="w-4 h-4" />,
-    },
-    {
-      label: 'Change Password',
+      label: "Change Password",
       action: handleChangePassword,
       icon: <Key className="w-4 h-4" />,
     },
     {
-      label: 'Delete',
+      label: "Delete",
       action: handleDelete,
       icon: <Trash2 className="w-4 h-4" />,
-      variant: 'destructive',
+      variant: "destructive",
     },
   ];
 
-  const getStatusBadge = (status: boolean) => {
-    return status ? (
+  const getStatusBadge = (status: boolean) =>
+    status ? (
       <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
         <CheckCircle className="w-3 h-3 mr-1" />
         Active
@@ -398,37 +228,37 @@ const TeamPageClient: React.FC = () => {
         Inactive
       </Badge>
     );
-  };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-  };
 
   const getModuleAccess = (access: string[]) => {
-    const moduleLabels = {
-      dashboard: 'Dashboard',
-      organizations: 'Organizations',
-      companies: 'Companies',
-      events: 'Events',
-      payment_plans: 'Payment Plans',
-      email_templates: 'Email Templates',
-      analytics: 'Analytics',
-      team: 'Team',
-      configuration: 'Configuration',
-      settings: 'Settings',
+    const moduleLabels: Record<string, string> = {
+      dashboard: "Dashboard",
+      organizations: "Organizations",
+      companies: "Companies",
+      events: "Events",
+      payment_plans: "Payment Plans",
+      email_templates: "Email Templates",
+      analytics: "Analytics",
+      team: "Team",
+      configuration: "Configuration",
+      settings: "Settings",
     };
-
     return (
       <div className="flex flex-wrap gap-1">
-        {access.slice(0, 3).map((module, index) => (
-          <Badge key={index} className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 text-xs">
-            {moduleLabels[module as keyof typeof moduleLabels] || module}
+        {access.slice(0, 3).map((module, i) => (
+          <Badge
+            key={i}
+            className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 text-xs"
+          >
+            {moduleLabels[module] || module}
           </Badge>
         ))}
         {access.length > 3 && (
@@ -442,7 +272,7 @@ const TeamPageClient: React.FC = () => {
 
   const renderCell = (member: TeamMember, header: TableHeader) => {
     switch (header.key) {
-      case 'user':
+      case "user":
         return (
           <div className="flex items-start space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -459,33 +289,22 @@ const TeamPageClient: React.FC = () => {
             </div>
           </div>
         );
-
-      case 'access':
+      case "access":
         return getModuleAccess(member.access);
-
-      case 'status':
+      case "status":
         return getStatusBadge(member.status);
-
-      case 'last_login':
-        return (
-          <span className="text-gray-600 dark:text-gray-400 text-sm">
-            {formatDate(member.last_login)}
-          </span>
-        );
-
-      case 'created_at':
+      case "createdAt":
         return (
           <span className="text-gray-600 dark:text-gray-400">
-            {formatDate(member.created_at)}
+            {formatDate(member.createdAt)}
           </span>
         );
-
       default:
         return <span>{member[header.key as keyof TeamMember] as string}</span>;
     }
   };
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
+  const totalPages = pagination.total_pages;
 
   return (
     <div className="space-y-6">
@@ -551,67 +370,40 @@ const TeamPageClient: React.FC = () => {
       </div>
 
       {/* Team Members Table */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="all">
-            All Members ({teamMembers.length})
-          </TabsTrigger>
-          <TabsTrigger className="data-[state=active]:text-red-500" value="deleted">
-            Deleted Members ({deletedMembers.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-6">
-          <CustomTable
-            data={teamMembers}
-            TABLE_HEAD={TABLE_HEAD}
-            MENU_OPTIONS={MENU_OPTIONS}
-            custom_pagination={{
-              total_count: pagination.total,
-              rows_per_page: pagination.limit,
-              page: pagination.page,
-              handleChangePage,
-              onRowsPerPageChange,
-            }}
-            pageCount={pagination.limit}
-            totalPages={totalPages}
-            handleChangePages={handleChangePage}
-            selected={selected}
-            setSelected={setSelected}
-            checkbox_selection={true}
-            renderCell={renderCell}
-            loading={loading}
-            emptyMessage="No team members found"
-          />
-        </TabsContent>
-
-        <TabsContent value="deleted" className="space-y-6">
-          <SoftDeleteTable
-            data={deletedMembers}
-            TABLE_HEAD={TABLE_HEAD}
-            loading={deletedLoading}
-            emptyMessage="No deleted team members found"
-            onRestore={handleRestore}
-            onPermanentDelete={handlePermanentDelete}
-            renderCell={renderCell}
-            getItemName={getItemName}
-            getDeletedAt={getDeletedAt}
-            getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}
-            restoreLoading={restoreLoading}
-            deleteLoading={permanentDeleteLoading}
-            pagination={deletedPagination}
-          />
-        </TabsContent>
-      </Tabs>
+      <CustomTable
+        data={teamMembers}
+        TABLE_HEAD={TABLE_HEAD}
+        MENU_OPTIONS={MENU_OPTIONS}
+        custom_pagination={{
+          total_count: pagination.total_count,
+          rows_per_page: pagination.limit,
+          page: pagination.current_page,
+          handleChangePage,
+          onRowsPerPageChange,
+        }}
+        pageCount={pagination.limit}
+        totalPages={totalPages}
+        handleChangePages={handleChangePage}
+        selected={selected}
+        setSelected={setSelected}
+        checkbox_selection={true}
+        renderCell={renderCell}
+        loading={loading}
+        emptyMessage="No team members found"
+      />
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ open, member: null })}
-        title="Move to Deleted Members"
-        content={`Are you sure you want to move "${deleteDialog.member ? getItemName(deleteDialog.member) : ''}" to deleted members? You can restore them within 30 days before permanent deletion.`}
-        confirmButtonText="Move to Deleted"
-        onConfirm={confirmDelete}
+        title="Delete Team Member"
+        content={`Are you sure you want to delete "${
+          deleteDialog.member
+            ? `${deleteDialog.member.first_name} ${deleteDialog.member.last_name}`
+            : ""
+        }"?`}
+        confirmButtonText="Delete"
+        onConfirm={() => {}}
         loading={deleteLoading}
       />
 
@@ -628,8 +420,6 @@ const TeamPageClient: React.FC = () => {
       <TeamMemberCreateDialog
         open={createDialog}
         onOpenChange={setCreateDialog}
-        onSave={handleCreate}
-        loading={createLoading}
       />
 
       {/* Change Password Dialog */}

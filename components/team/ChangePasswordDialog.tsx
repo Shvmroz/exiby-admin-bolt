@@ -21,7 +21,7 @@ interface TeamMember {
 interface ChangePasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: TeamMember | null;
+  member: TeamMember | any;
   onSave: (memberId: string, newPassword: string) => void;
   loading?: boolean;
 }

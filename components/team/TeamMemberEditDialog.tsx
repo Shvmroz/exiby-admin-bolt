@@ -18,14 +18,13 @@ interface TeamMember {
   email: string;
   access: string[];
   status: boolean;
-  last_login: string;
   created_at: string;
 }
 
 interface TeamMemberEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: TeamMember | null;
+  member: TeamMember | any;
   onSave: (member: any) => void;
   loading?: boolean;
 }
@@ -123,7 +122,7 @@ const TeamMemberEditDialog: React.FC<TeamMemberEditDialogProps> = ({
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
           borderRadius: '12px',
-          maxHeight: '90vh',
+          overflow:"hidden",
         }
       }}
     >
@@ -138,7 +137,7 @@ const TeamMemberEditDialog: React.FC<TeamMemberEditDialogProps> = ({
           color: darkMode ? '#ffffff' : '#000000'
         }}
       >
-        <form onSubmit={handleSubmit} className="space-y-6" id="team-member-edit-form">
+        <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off" id="team-member-edit-form">
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h3>
@@ -194,6 +193,7 @@ const TeamMemberEditDialog: React.FC<TeamMemberEditDialogProps> = ({
                   borderColor: darkMode ? '#4b5563' : '#d1d5db'
                 }}
                 required
+                autoComplete="off"
               />
             </div>
 
