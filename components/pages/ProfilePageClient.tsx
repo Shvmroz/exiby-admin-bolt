@@ -8,7 +8,7 @@ import { _update_admin_profile_api } from "@/DAL/authAPI";
 import { useSnackbar } from "notistack";
 import Spinner from "../ui/spinner";
 import { s3baseUrl } from "@/config/config";
-import { deleteFileFunction, uploadFileFunction } from "@/utils/uploadFile";
+import { deleteFileFunction, uploadFileFunction } from "@/utils/fileUploadRemoveFunctions";
 
 const ProfilePageClient: React.FC = () => {
   const { user, setUser } = useAppContext();

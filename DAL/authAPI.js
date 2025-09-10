@@ -43,30 +43,3 @@ export const _update_admin_profile_api = async (data) => {
     return invokeApi(requestObj);
 };
 
-// export const _email_verification_api = async (data) => {
-//     const requestObj = {
-//         path: `/api/app_api/email_verification`,
-//         method: "POST`,
-//         postData: data,
-//     };
-//     return invokeApi(requestObj);
-// };
-
-// export const _code_verification_api = async (data) => {
-//     const requestObj = {
-//         path: `/api/app_api/code_verification`,
-//         method: "POST`,
-//         postData: data,
-//     };
-//     return invokeApi(requestObj);
-// };
-
-// export const _reset_password_api = async (data) => {
-//     const requestObj = {
-//         path: `/api/app_api/reset_password`,
-//         method: "POST`,
-//         postData: data,
-//     };
-//     return invokeApi(requestObj);
-// };
-
