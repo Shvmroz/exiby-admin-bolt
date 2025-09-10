@@ -3,55 +3,52 @@
 import React from "react";
 import { useAppContext } from "@/contexts/AppContext";
 import { useRouter } from "next/navigation";
-import {
-  Menu,
-  Bell,
-  Sun,
-  Moon,
-  User,
-  LogOut,
-  Lock,
-} from "lucide-react";
+import { Menu, Bell, Sun, Moon, User, LogOut, Lock } from "lucide-react";
 import NotificationsList from "@/components/notifications/NotificationsList";
 import ConfirmDeleteDialog from "../ui/confirm-delete-dialog";
+import { s3baseUrl } from "@/config/config";
 
 interface TopbarProps {
   onMenuClick: () => void;
 }
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
-  const {
-    user,
-    logout,
-    darkMode,
-    toggleDarkMode,
-    unreadNotificationsCount,
-  } = useAppContext() as {
-    user: {
-      first_name?: string;
-      last_name?: string;
-      email?: string;
-    } | null;
-    logout: () => void;
-    darkMode: boolean;
-    toggleDarkMode: () => void;
-    unreadNotificationsCount: number;
-  };
+  const { user, logout, darkMode, toggleDarkMode, unreadNotificationsCount } =
+    useAppContext() as {
+      user: {
+        first_name?: string;
+        last_name?: string;
+        email?: string;
+        profile_image?: string;
+      } | null;
+      logout: () => void;
+      darkMode: boolean;
+      toggleDarkMode: () => void;
+      unreadNotificationsCount: number;
+    };
 
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [showNotifications, setShowNotifications] = React.useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const handleLogoutClick = () => {
     setShowUserMenu(false);
     setShowLogoutDialog(true);
   };
 
-  const confirmLogout = () => {
-    setShowLogoutDialog(false);
-    setShowUserMenu(false);
-    logout();
+  const confirmLogout = async () => {
+    setLoading(true);
+    try {
+      await logout(); // wait for logout to complete
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setShowLogoutDialog(false);
+      setShowUserMenu(false);
+      setLoading(false);
+    }
   };
 
   const handleNavigation = (path: string) => {
@@ -120,11 +117,18 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
-            <div className="w-8 h-8 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">
-                {user?.first_name?.charAt(0) || "U"}
-              </span>
+            <div className="w-8 h-8 rounded-full  p-[2px] flex items-center justify-center">
+              <div className="w-full h-full rounded-full overflow-hidden">
+                <img
+                  src={
+                    user?.profile_image ? s3baseUrl + user.profile_image : ""
+                  }
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
+
             <div className="hidden md:block text-left">
               <div className="text-sm font-medium text-gray-900 dark:text-white">
                 {user?.first_name} {user?.last_name}
@@ -178,6 +182,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
         confirmButtonText="Logout"
         cancelButtonText="Cancel"
         onConfirm={confirmLogout}
+        loading={loading}
       />
     </div>
   );

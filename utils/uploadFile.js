@@ -24,24 +24,24 @@ export const uploadFileFunction = async (imageFile) => {
 
 
 // ===========================================================================================
-export const deleteFileFunction = async (filesToRemove) => {
-  if (!filesToRemove || filesToRemove.length === 0) {
-    console.log("No files to remove");
+export const deleteFileFunction = async (fileToRemove) => {
+  if (!fileToRemove) {
+    console.log("No file to remove");
     return;
   }
 
   const payload = {
-    path: filesToRemove.map(file => ({ Key: file })),
+    file_path: fileToRemove,
   };
 
-  console.log("payload ", payload)
+  console.log("payload ", payload);
+
   const response = await _delete_file_from_s3(payload);
   if (response.code === 200) {
-    console.log("Files removed successfully");
+    console.log("File removed successfully");
     return response;
   } else {
-    console.error("Failed to remove files", response.message);
+    console.error("Failed to remove file", response.message);
     return response;
   }
-
 };

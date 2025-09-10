@@ -1,14 +1,8 @@
+// ProfilePageClient.tsx
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import {
-  User,
-  Mail,
-  Save,
-  Pencil,
-  Image as ImageIcon,
-  Trash,
-} from "lucide-react";
+import { User, Mail, Save, Pencil, Image as ImageIcon, Trash } from "lucide-react";
 import { useAppContext } from "@/contexts/AppContext";
 import { _update_admin_profile_api } from "@/DAL/authAPI";
 import { useSnackbar } from "notistack";
@@ -30,7 +24,6 @@ const ProfilePageClient: React.FC = () => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -51,16 +44,18 @@ const ProfilePageClient: React.FC = () => {
 
     const maxSize = 1 * 1024 * 1024; // 1MB
     if (file.size > maxSize) {
-      enqueueSnackbar("Image must be less than or equal to 1MB", {
-        variant: "warning",
-      });
+      enqueueSnackbar("Image must be less than or equal to 1MB", { variant: "warning" });
       return;
     }
 
     setProfile((prev) => ({ ...prev, previewImage: file }));
   };
 
-  const handleEdit = () => setIsEditing(true);
+  const handleRemoveImage = () => {
+    setProfile((prev) => ({ ...prev, image: "", previewImage: null }));
+    if (fileInputRef.current) fileInputRef.current.value = ""; // reset input
+  };
+
   const handleCancel = () => {
     setProfile({
       first_name: user?.first_name || "",
@@ -72,18 +67,19 @@ const ProfilePageClient: React.FC = () => {
     setIsEditing(false);
   };
 
-  const handleRemoveImage = () => {
-    setProfile((prev) => ({ ...prev, image: "", previewImage: null }));
-  };
-
-  // Save handler
   const handleSave = async () => {
     setLoading(true);
-
-    // Upload new image only if a file is selected
     let uploaded_image = profile.image;
+
     if (profile.previewImage) {
-      // if (profile.image) await deleteFileFunction(profile.image);
+      if (user?.profile_image) {
+        const deleted = await deleteFileFunction(user.profile_image);
+        if (!deleted) {
+          enqueueSnackbar("Failed to delete old image", { variant: "error" });
+          setLoading(false);
+          return;
+        }
+      }
       uploaded_image = await uploadFileFunction(profile.previewImage);
     }
 
@@ -98,6 +94,8 @@ const ProfilePageClient: React.FC = () => {
 
     if (result?.code === 200) {
       enqueueSnackbar(result.message, { variant: "success" });
+
+      // Update profile state
       setProfile({
         first_name: result.admin.first_name || "",
         last_name: result.admin.last_name || "",
@@ -105,17 +103,25 @@ const ProfilePageClient: React.FC = () => {
         image: result.admin.profile_image || "",
         previewImage: null,
       });
-      // setUser((prev) => ({
-      //   ...prev!,
-      //   first_name: result.admin.first_name || "",
-      //   last_name: result.admin.last_name || "",
-      //   profile_image: result.admin.profile_image || "",
-      // }));
+
+      // Update context
+      setUser((prev) => ({
+        ...prev!,
+        first_name: result.admin.first_name || "",
+        last_name: result.admin.last_name || "",
+        profile_image: result.admin.profile_image || "",
+      }));
+
+      // Update localStorage
+      const storedUser = JSON.parse(localStorage.getItem("userData") || "{}");
+      storedUser.first_name = result.admin.first_name || storedUser.first_name;
+      storedUser.last_name = result.admin.last_name || storedUser.last_name;
+      storedUser.profile_image = result.admin.profile_image || storedUser.profile_image;
+      localStorage.setItem("userData", JSON.stringify(storedUser));
+
       setIsEditing(false);
     } else {
-      enqueueSnackbar(result?.message || "Failed to update profile", {
-        variant: "error",
-      });
+      enqueueSnackbar(result?.message || "Failed to update profile", { variant: "error" });
     }
 
     setLoading(false);
@@ -131,39 +137,25 @@ const ProfilePageClient: React.FC = () => {
       {/* Header */}
       <div className="flex items-center space-x-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Profile Settings
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profile Settings</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Update your personal information and profile details
           </p>
         </div>
       </div>
 
-      {/* Main Profile Section */}
+      {/* Main */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Left Column - Image */}
-          <div className="md:col-span-5 flex flex-col items-center">
+          {/* Image */}
+          <div className="md:col-span-4 flex flex-col items-center">
             <div className="relative w-full aspect-square">
-              <label
-                className={`w-full h-full cursor-pointer ${
-                  !isEditing ? "pointer-events-none" : ""
-                }`}
-              >
-                <div className="w-full h-full bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden relative">
+              <label className={`w-full h-full cursor-pointer ${!isEditing ? "pointer-events-none" : ""}`}>
+                <div className="relative w-full aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden">
                   {profile.previewImage ? (
-                    <img
-                      src={URL.createObjectURL(profile.previewImage)}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={URL.createObjectURL(profile.previewImage)} alt="Preview" className="w-full h-full object-cover" />
                   ) : profile.image ? (
-                    <img
-                      src={s3baseUrl + profile.image}
-                      alt="Profile"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={s3baseUrl + profile.image} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
                     <div className="flex flex-col items-center text-gray-400">
                       <ImageIcon className="w-10 h-10 mb-2" />
@@ -171,14 +163,8 @@ const ProfilePageClient: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                  disabled={!isEditing}
-                />
+
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={!isEditing} />
               </label>
 
               {(profile.previewImage || profile.image) && isEditing && (
@@ -190,29 +176,24 @@ const ProfilePageClient: React.FC = () => {
                 </button>
               )}
             </div>
+            <p className="text-gray-500 text-xs mt-2 text-center">Recommended: 1:1 image, up to 1MB</p>
           </div>
 
-          {/* Right Column - Form Fields */}
-          <div className="md:col-span-7 flex flex-col justify-between">
-            <div className="space-y-6">
+          {/* Form */}
+          <div className="md:col-span-8 flex flex-col justify-between space-y-6">
+            <div>
               {/* First Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  First Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-600 dark:text-gray-300" />
                   <input
                     type="text"
                     value={profile.first_name}
-                    onChange={(e) =>
-                      setProfile({ ...profile, first_name: e.target.value })
-                    }
+                    onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
                     disabled={!isEditing}
-                    className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none ${
-                      isEditing
-                        ? "focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        : "opacity-70 cursor-not-allowed"
+                    className={` text-gray-900 dark:text-gray-200 w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none ${
+                      isEditing ? "focus:ring-2 focus:ring-blue-500 focus:border-transparent" : "opacity-70 cursor-not-allowed"
                     }`}
                   />
                 </div>
@@ -220,22 +201,16 @@ const ProfilePageClient: React.FC = () => {
 
               {/* Last Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Last Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4  text-gray-600 dark:text-gray-300" />
                   <input
                     type="text"
                     value={profile.last_name}
-                    onChange={(e) =>
-                      setProfile({ ...profile, last_name: e.target.value })
-                    }
+                    onChange={(e) => setProfile({ ...profile, last_name: e.target.value })}
                     disabled={!isEditing}
-                    className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none ${
-                      isEditing
-                        ? "focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        : "opacity-70 cursor-not-allowed"
+                    className={` text-gray-900 dark:text-gray-200 w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none ${
+                      isEditing ? "focus:ring-2 focus:ring-blue-500 focus:border-transparent" : "opacity-70 cursor-not-allowed"
                     }`}
                   />
                 </div>
@@ -243,17 +218,10 @@ const ProfilePageClient: React.FC = () => {
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email Address
-                </label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="email"
-                    value={profile.email}
-                    disabled
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none opacity-70 cursor-not-allowed"
-                  />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4  text-gray-600 dark:text-gray-300" />
+                  <input type="email" value={profile.email} disabled className=" text-gray-900 dark:text-gray-200 w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none opacity-70 cursor-not-allowed" />
                 </div>
               </div>
             </div>
@@ -261,34 +229,22 @@ const ProfilePageClient: React.FC = () => {
             {/* Buttons */}
             <div className="mt-6 flex justify-end space-x-3">
               {!isEditing ? (
-                <button
-                  onClick={handleEdit}
-                  className="flex items-center space-x-2 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-medium transition-colors"
-                >
+                <button onClick={() => setIsEditing(true)} className="flex items-center space-x-2 px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-medium transition-colors">
                   <Pencil className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-medium transition-colors"
-                  >
+                  <button type="button" onClick={handleCancel} className="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg font-medium transition-colors">
                     Cancel
                   </button>
-
                   <button
                     type="button"
                     onClick={handleSave}
                     className="flex items-center space-x-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
                     disabled={loading || !isFormChanged}
                   >
-                    {loading ? (
-                      <Spinner size="sm" className="text-white" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )}
+                    {loading && <Spinner size="sm" className="text-white" />}
                     <span>Save</span>
                   </button>
                 </>

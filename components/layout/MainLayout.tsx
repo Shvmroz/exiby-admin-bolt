@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import { useAppContext } from "@/contexts/AppContext";
@@ -10,13 +11,7 @@ import Spinner from "../ui/spinner";
 interface MainLayoutProps {
   children: React.ReactNode;
   requireAuth?: boolean;
-  skeletonType?:
-    | "dashboard"
-    | "table"
-    | "form"
-    | "analytics"
-    | "profile"
-    | "settings";
+  skeletonType?: "dashboard" | "table" | "form" | "analytics" | "profile" | "settings";
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -25,17 +20,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   skeletonType = "table",
 }) => {
   const { isAuthenticated, loading } = useAppContext();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  if (loading || (requireAuth && !isAuthenticated)) {
+  useEffect(() => {
+    if (!loading && requireAuth && !isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [loading, isAuthenticated, requireAuth, router]);
+
+  // Show loading spinner while checking auth
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="lg" />
-        {/* <PageSkeleton type={skeletonType} */}
+        <Spinner  />
       </div>
     );
   }
-  
+
+  // Don't render protected content if not authenticated
+  if (requireAuth && !isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {/* Permanent Sidebar for desktop */}
@@ -66,16 +73,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar */}
         <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
-        {/* Content */}
         <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
-          <div className="p-6">{children}</div>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </div>
         </main>
       </div>
     </div>
   );
-};
+}
 
 export default MainLayout;

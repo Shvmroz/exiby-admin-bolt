@@ -3,25 +3,27 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/contexts/AppContext';
-import PageSkeleton from '@/components/ui/skeleton/page-skeleton';
+import Spinner from '@/components/ui/spinner';
 
 export default function Home() {
   const { isAuthenticated, loading } = useAppContext();
   const router = useRouter();
 
   useEffect(() => {
+    // Only redirect after auth state is confirmed
     if (!loading) {
       if (isAuthenticated) {
-        router.push('/dashboard');
+        router.replace('/dashboard');
       } else {
-        router.push('/login');
+        router.replace('/login');
       }
     }
   }, [isAuthenticated, loading, router]);
 
+  // Show loading spinner while checking auth
   return (
-    <div className="p-6">
-      <PageSkeleton type="dashboard" />
+    <div className="flex items-center justify-center min-h-screen">
+      <Spinner />
     </div>
   );
 }
