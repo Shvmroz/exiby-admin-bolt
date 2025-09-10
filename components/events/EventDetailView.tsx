@@ -124,6 +124,7 @@ const EventDetailView: React.FC<EventDetailViewProps> = ({
         sx: {
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
+          overflowY: 'hidden',
         }
       }}
     >

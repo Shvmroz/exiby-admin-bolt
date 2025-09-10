@@ -419,11 +419,11 @@ const EventsPageClient: React.FC = () => {
   };
 
   const MENU_OPTIONS: MenuOption[] = [
-    {
-      label: 'View',
-      action: (event) => setDetailView({ open: true, event }),
-      icon: <Eye className="w-4 h-4" />,
-    },
+    // {
+    //   label: 'View',
+    //   action: (event) => setDetailView({ open: true, event }),
+    //   icon: <Eye className="w-4 h-4" />,
+    // },
     {
       label: 'Edit',
       action: handleEdit,

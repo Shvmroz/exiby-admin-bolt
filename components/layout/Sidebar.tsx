@@ -68,8 +68,8 @@ const menuItems = [
     text: "Events",
     icon: Calendar,
     path: "/events",
-    color: "text-indigo-600",
-    bgColor: "bg-indigo-50",
+    color: "text-yellow-600",
+    bgColor: "bg-yelllow-50",
   },
   {
     text: "Email Templates",
@@ -103,15 +103,15 @@ const menuItems = [
     text: "Email Configuration",
     icon: Mail,
     path: "/configuration/email",
-    color: "text-blue-500",
-    bgColor: "bg-blue-50",
+    color: "text-pink-700",
+    bgColor: "bg-pink-50",
   },
   {
     text: "Settings",
     icon: Wrench,
     path: "/settings",
-    color: "text-gray-500",
-    bgColor: "bg-gray-50",
+    color: "text-gray-400",
+    bgColor: "bg-gray-100",
   },
 ];
 
@@ -141,7 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </Link>
 
       {/* Navigation */}
-      <div className="flex-1 py-4 px-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      <div className="flex-1 py-4 px-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
         {menuItems.map((item) => {
           const isActive = pathname === item.path;
           const Icon = item.icon;

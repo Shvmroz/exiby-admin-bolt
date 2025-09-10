@@ -143,14 +143,14 @@ const EventEditDialog: React.FC<EventEditDialogProps> = ({
     <Dialog 
       open={open} 
       onClose={() => onOpenChange(false)}
-      maxWidth="lg"
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
           backgroundColor: darkMode ? '#1f2937' : '#ffffff',
           color: darkMode ? '#ffffff' : '#000000',
           borderRadius: '12px',
-          maxHeight: '90vh',
+          overflow: 'hidden',
         }
       }}
     >
