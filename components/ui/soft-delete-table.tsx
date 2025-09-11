@@ -1,29 +1,22 @@
 "use client";
 
 import React from "react";
-import CustomTable, {
-  TableHeader,
-  MenuOption,
-} from "@/components/ui/custom-table";
+import CustomTable, { TableHeader } from "@/components/ui/custom-table";
 import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RotateCcw, Trash2, Clock, AlertTriangle } from "lucide-react";
 
 interface SoftDeleteTableProps<T> {
   data: T[];
-  TABLE_HEAD: TableHeader[];
   loading?: boolean;
   emptyMessage?: string;
   onRestore: (item: T) => void;
   onPermanentDelete: (item: T) => void;
-  renderCell: (item: T, header: TableHeader) => React.ReactNode;
   getItemName: (item: T) => string;
   getDeletedAt: (item: T) => string;
   getDaysUntilPermanentDelete: (item: T) => number;
   restoreLoading?: boolean;
   deleteLoading?: boolean;
-  // Pagination props
   pagination: {
     total_count: number;
     rows_per_page: number;
@@ -35,12 +28,10 @@ interface SoftDeleteTableProps<T> {
 
 function SoftDeleteTable<T extends { _id: string }>({
   data,
-  TABLE_HEAD,
   loading = false,
   emptyMessage = "No deleted items found",
   onRestore,
   onPermanentDelete,
-  renderCell,
   getItemName,
   getDeletedAt,
   getDaysUntilPermanentDelete,
@@ -48,23 +39,11 @@ function SoftDeleteTable<T extends { _id: string }>({
   deleteLoading = false,
   pagination,
 }: SoftDeleteTableProps<T>) {
-  const [restoreDialog, setRestoreDialog] = React.useState<{
-    open: boolean;
-    item: T | null;
-  }>({ open: false, item: null });
+  const [restoreDialog, setRestoreDialog] = React.useState<{ open: boolean; item: T | null }>({ open: false, item: null });
+  const [permanentDeleteDialog, setPermanentDeleteDialog] = React.useState<{ open: boolean; item: T | null }>({ open: false, item: null });
 
-  const [permanentDeleteDialog, setPermanentDeleteDialog] = React.useState<{
-    open: boolean;
-    item: T | null;
-  }>({ open: false, item: null });
-
-  const handleRestore = (item: T) => {
-    setRestoreDialog({ open: true, item });
-  };
-
-  const handlePermanentDelete = (item: T) => {
-    setPermanentDeleteDialog({ open: true, item });
-  };
+  const handleRestore = (item: T) => setRestoreDialog({ open: true, item });
+  const handlePermanentDelete = (item: T) => setPermanentDeleteDialog({ open: true, item });
 
   const confirmRestore = () => {
     if (restoreDialog.item) {
@@ -105,99 +84,91 @@ function SoftDeleteTable<T extends { _id: string }>({
     }
   };
 
-  // Enhanced table headers with soft delete specific columns
-  const enhancedTableHead: TableHeader[] = [
-    { key: "name", label: "Item", type: "custom" }, // item name + icon
-    { key: "deleted_at", label: "Deleted At", type: "custom" },
-    { key: "days_left", label: "Days Until Permanent Delete", type: "custom" },
-    { key: "restore", label: "Restore", type: "custom", width: "w-24" },
+  // Table headers with renderData for SoftDeleteTable
+  const TABLE_HEAD: TableHeader[] = [
+    {
+      key: "index",
+      label: "#",
+      renderData: (_item, index) => <span className="text-gray-500 dark:text-gray-400 text-sm">{index !== undefined ? index + 1 : "-"}</span>,
+    },
+    {
+      key: "name",
+      label: "Item",
+      renderData: (item) => (
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-500" />
+          <span className="font-medium text-gray-800 dark:text-gray-200">{getItemName(item)}</span>
+        </div>
+      ),
+    },
+    {
+      key: "deleted_at",
+      label: "Deleted At",
+      renderData: (item) => (
+        <span className="text-gray-600 dark:text-gray-400 text-sm">
+          {new Date(getDeletedAt(item)).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+      ),
+    },
+    {
+      key: "days_left",
+      label: "Days Until Permanent Delete",
+      renderData: (item) => getDaysLeftBadge(getDaysUntilPermanentDelete(item)),
+    },
+    {
+      key: "restore",
+      label: "Restore",
+      width: "w-24",
+      renderData: (item) => (
+        <Badge
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRestore(item);
+          }}
+          className="cursor-pointer bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400"
+        >
+          <RotateCcw className="w-3 h-3 mr-1" />
+          Restore
+        </Badge>
+      ),
+    },
     {
       key: "permanent_delete",
       label: "Permanent Delete",
-      type: "custom",
       width: "w-32",
+      renderData: (item) => (
+        <Badge
+          onClick={(e) => {
+            e.stopPropagation();
+            handlePermanentDelete(item);
+          }}
+          className="cursor-pointer bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400"
+        >
+          <Trash2 className="w-3 h-3 mr-1" />
+          Delete Permanently
+        </Badge>
+      ),
     },
   ];
 
-  const enhancedRenderCell = (item: T, header: TableHeader) => {
-    switch (header.key) {
-      case "name":
-        return (
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-500" />{" "}
-            {/* you can swap with any icon */}
-            <span className="font-medium text-gray-800 dark:text-gray-200">
-              {getItemName(item)}
-            </span>
-          </div>
-        );
-
-      case "deleted_at":
-        return (
-          <span className="text-gray-600 dark:text-gray-400 text-sm">
-            {new Date(getDeletedAt(item)).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </span>
-        );
-
-      case "days_left":
-        return getDaysLeftBadge(getDaysUntilPermanentDelete(item));
-
-      case "restore":
-        return (
-          <Badge
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRestore(item);
-            }}
-            className="cursor-pointer bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400"
-          >
-            <RotateCcw className="w-3 h-3 mr-1" />
-            Restore
-          </Badge>
-        );
-
-      case "permanent_delete":
-        return (
-          <Badge
-            onClick={(e) => {
-              e.stopPropagation();
-              handlePermanentDelete(item);
-            }}
-            className="cursor-pointer bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400"
-          >
-            <Trash2 className="w-3 h-3 mr-1" />
-            Delete Permanently
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
-
-  const totalPages = Math.ceil(
-    pagination.total_count / pagination.rows_per_page
-  );
+  const totalPages = Math.ceil(pagination.total_count / pagination.rows_per_page);
 
   return (
     <>
       <CustomTable
         data={data}
-        TABLE_HEAD={enhancedTableHead}
-        MENU_OPTIONS={[]} // No menu options for soft delete table
+        TABLE_HEAD={TABLE_HEAD}
+        MENU_OPTIONS={[]}
         custom_pagination={pagination}
         pageCount={pagination.rows_per_page}
         totalPages={totalPages}
         handleChangePages={pagination.handleChangePage}
-        selected={[]}
-        setSelected={() => {}}
-        checkbox_selection={false}
-        renderCell={enhancedRenderCell}
         loading={loading}
         emptyMessage={emptyMessage}
       />
@@ -207,9 +178,7 @@ function SoftDeleteTable<T extends { _id: string }>({
         open={restoreDialog.open}
         onOpenChange={(open) => setRestoreDialog({ open, item: null })}
         title="Restore Item"
-        content={`Are you sure you want to restore "${
-          restoreDialog.item ? getItemName(restoreDialog.item) : ""
-        }"? This will move the item back to the active list.`}
+        content={`Are you sure you want to restore "${restoreDialog.item ? getItemName(restoreDialog.item) : ""}"? This will move the item back to the active list.`}
         confirmButtonClass="bg-green-600 hover:bg-green-700 text-white"
         confirmButtonText="Restore"
         cancelButtonText="Cancel"
@@ -222,11 +191,7 @@ function SoftDeleteTable<T extends { _id: string }>({
         open={permanentDeleteDialog.open}
         onOpenChange={(open) => setPermanentDeleteDialog({ open, item: null })}
         title="Permanent Delete"
-        content={`Are you sure you want to permanently delete "${
-          permanentDeleteDialog.item
-            ? getItemName(permanentDeleteDialog.item)
-            : ""
-        }"? This action cannot be undone and will completely remove all data.`}
+        content={`Are you sure you want to permanently delete "${permanentDeleteDialog.item ? getItemName(permanentDeleteDialog.item) : ""}"? This action cannot be undone and will completely remove all data.`}
         confirmButtonText="Permanently Delete"
         cancelButtonText="Cancel"
         onConfirm={confirmPermanentDelete}

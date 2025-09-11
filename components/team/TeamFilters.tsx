@@ -26,19 +26,6 @@ const TeamFilters: React.FC<TeamFiltersProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-        <div className="flex items-center space-x-2">
-          <Users className="w-4 h-4 text-blue-500" />
-          <span className="text-sm font-medium text-gray-900 dark:text-white">
-            Active Members Only
-          </span>
-        </div>
-        <Switch
-          checked={activeOnly}
-          onCheckedChange={setActiveOnly}
-          className="data-[state=checked]:bg-[#0077ED]"
-        />
-      </div>
 
       {/* Status Filter */}
       <div>

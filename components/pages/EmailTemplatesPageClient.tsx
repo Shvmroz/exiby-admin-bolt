@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Mail,
   Search,
@@ -15,28 +15,31 @@ import {
   User,
   FileText,
   Tag,
-} from 'lucide-react';
-import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-table';
-import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
-import EmailTemplateEditDialog from '@/components/email-templates/EmailTemplateEditDialog';
-import EmailTemplateCreateDialog from '@/components/email-templates/EmailTemplateCreateDialog';
-import EmailTemplatePreviewDialog from '@/components/email-templates/EmailTemplatePreviewDialog';
-import CustomDrawer from '@/components/ui/custom-drawer';
-import EmailTemplateFilters from '@/components/email-templates/EmailTemplateFilters';
-import SoftDeleteTable from '@/components/ui/soft-delete-table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import CsvExportDialog from '@/components/ui/csv-export-dialog';
+} from "lucide-react";
+import CustomTable, {
+  TableHeader,
+  MenuOption,
+} from "@/components/ui/custom-table";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
+import EmailTemplateEditDialog from "@/components/email-templates/EmailTemplateEditDialog";
+import EmailTemplateCreateDialog from "@/components/email-templates/EmailTemplateCreateDialog";
+import EmailTemplatePreviewDialog from "@/components/email-templates/EmailTemplatePreviewDialog";
+import CustomDrawer from "@/components/ui/custom-drawer";
+import EmailTemplateFilters from "@/components/email-templates/EmailTemplateFilters";
+import SoftDeleteTable from "@/components/ui/soft-delete-table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import CsvExportDialog from "@/components/ui/csv-export-dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
 
 interface EmailTemplate {
   _id: string;
@@ -79,7 +82,7 @@ const dummyData = {
         `,
         variables: ["platform_name", "user_name", "login_url"],
         is_active: true,
-        created_at: "2025-08-15T10:30:00.000Z"
+        created_at: "2025-08-15T10:30:00.000Z",
       },
       {
         _id: "template_124",
@@ -106,7 +109,7 @@ const dummyData = {
         `,
         variables: ["user_name", "event_name", "event_date", "event_details"],
         is_active: true,
-        created_at: "2025-08-12T14:20:00.000Z"
+        created_at: "2025-08-12T14:20:00.000Z",
       },
       {
         _id: "template_125",
@@ -132,7 +135,7 @@ const dummyData = {
         `,
         variables: ["user_name", "reset_url"],
         is_active: true,
-        created_at: "2025-08-10T09:15:00.000Z"
+        created_at: "2025-08-10T09:15:00.000Z",
       },
       {
         _id: "template_126",
@@ -159,9 +162,15 @@ const dummyData = {
             </div>
           </div>
         `,
-        variables: ["user_name", "event_name", "event_time", "event_date", "event_location"],
+        variables: [
+          "user_name",
+          "event_name",
+          "event_time",
+          "event_date",
+          "event_location",
+        ],
         is_active: true,
-        created_at: "2025-08-08T16:45:00.000Z"
+        created_at: "2025-08-08T16:45:00.000Z",
       },
       {
         _id: "template_127",
@@ -191,23 +200,20 @@ const dummyData = {
             </div>
           </div>
         `,
-        variables: ["user_name", "event_name", "payment_amount", "transaction_id", "payment_date"],
+        variables: [
+          "user_name",
+          "event_name",
+          "payment_amount",
+          "transaction_id",
+          "payment_date",
+        ],
         is_active: false,
-        created_at: "2025-08-05T11:30:00.000Z"
-      }
+        created_at: "2025-08-05T11:30:00.000Z",
+      },
     ],
-    total: 5
-  }
+    total: 5,
+  },
 };
-
-const TABLE_HEAD: TableHeader[] = [
-  { key: 'template', label: 'Template', type: 'custom' },
-  { key: 'subject', label: 'Subject', type: 'custom' },
-  { key: 'template_type', label: 'Type', type: 'custom' },
-  { key: 'status', label: 'Status', type: 'custom' },
-  { key: 'created_at', label: 'Created', type: 'custom' },
-  { key: 'action', label: '', type: 'action', width: 'w-12' },
-];
 
 const EmailTemplatesPageClient: React.FC = () => {
   const router = useRouter();
@@ -215,9 +221,8 @@ const EmailTemplatesPageClient: React.FC = () => {
   const [deletedTemplates, setDeletedTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletedLoading, setDeletedLoading] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     template: EmailTemplate | null;
@@ -238,8 +243,8 @@ const EmailTemplatesPageClient: React.FC = () => {
   const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
 
   // Filter states
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [activeOnly, setActiveOnly] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
@@ -264,43 +269,56 @@ const EmailTemplatesPageClient: React.FC = () => {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Get active email templates (exclude deleted ones)
-      const activeTemplates = dummyData.data.email_templates.filter(template => 
-        !deletedTemplates.some(deleted => deleted._id === template._id)
+      const activeTemplates = dummyData.data.email_templates.filter(
+        (template) =>
+          !deletedTemplates.some((deleted) => deleted._id === template._id)
       );
-      
+
       // Filter data based on search and status
-      let filteredData = includeDeleted
-        ? deletedTemplates
-        : activeTemplates;
-      
+      let filteredData = includeDeleted ? deletedTemplates : activeTemplates;
+
       if (searchQuery) {
-        filteredData = filteredData.filter(template =>
-          template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          template.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          template.template_type.toLowerCase().includes(searchQuery.toLowerCase())
+        filteredData = filteredData.filter(
+          (template) =>
+            template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            template.subject
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            template.template_type
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
         );
       }
-      
-      if (statusFilter !== 'all') {
-        const isActive = statusFilter === 'active';
-        filteredData = filteredData.filter(template => template.is_active === isActive);
+
+      if (statusFilter !== "all") {
+        const isActive = statusFilter === "active";
+        filteredData = filteredData.filter(
+          (template) => template.is_active === isActive
+        );
       }
-      
-      if (typeFilter !== 'all') {
-        filteredData = filteredData.filter(template => template.template_type === typeFilter);
+
+      if (typeFilter !== "all") {
+        filteredData = filteredData.filter(
+          (template) => template.template_type === typeFilter
+        );
       }
 
       if (includeDeleted) {
         setDeletedTemplates(filteredData);
       } else {
         setEmailTemplates(filteredData);
-        setPagination(prev => ({ ...prev, total: filteredData.length }));
+        setPagination((prev) => ({ ...prev, total: filteredData.length }));
       }
     } catch (error) {
-      console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} email templates:`, error);
+      console.error(
+        `Error loading ${
+          includeDeleted ? "deleted" : "active"
+        } email templates:`,
+        error
+      );
     } finally {
       if (includeDeleted) {
         setDeletedLoading(false);
@@ -311,9 +329,9 @@ const EmailTemplatesPageClient: React.FC = () => {
   };
 
   useEffect(() => {
-    if (activeTab === 'all') {
+    if (activeTab === "all") {
       loadEmailTemplates(false);
-    } else if (activeTab === 'deleted') {
+    } else if (activeTab === "deleted") {
       loadEmailTemplates(true);
     }
   }, [searchQuery, pagination.page, pagination.limit, activeTab]);
@@ -323,11 +341,11 @@ const EmailTemplatesPageClient: React.FC = () => {
   }
 
   const handleChangePage = (newPage: number) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
+    setPagination((prev) => ({ ...prev, page: newPage }));
   };
 
   const onRowsPerPageChange = (newLimit: number) => {
-    setPagination(prev => ({ ...prev, limit: newLimit, page: 1 }));
+    setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
   };
 
   const handlePreview = (template: EmailTemplate) => {
@@ -344,12 +362,12 @@ const EmailTemplatesPageClient: React.FC = () => {
 
   const confirmDelete = async () => {
     if (!deleteDialog.template) return;
-    
+
     setDeleteLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // Move to deleted templates (soft delete)
       const deletedTemplate = {
         ...deleteDialog.template,
@@ -357,17 +375,17 @@ const EmailTemplatesPageClient: React.FC = () => {
         is_deleted: true,
       };
 
-      setDeletedTemplates(prev => [deletedTemplate, ...prev]);
-      setEmailTemplates(prev => 
-        prev.filter(template => template._id !== deleteDialog.template!._id)
+      setDeletedTemplates((prev) => [deletedTemplate, ...prev]);
+      setEmailTemplates((prev) =>
+        prev.filter((template) => template._id !== deleteDialog.template!._id)
       );
-      
+
       // Update pagination total
-      setPagination(prev => ({ ...prev, total: prev.total - 1 }));
-      
+      setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
+
       setDeleteDialog({ open: false, template: null });
     } catch (error) {
-      console.error('Error deleting email template:', error);
+      console.error("Error deleting email template:", error);
     } finally {
       setDeleteLoading(false);
     }
@@ -377,16 +395,16 @@ const EmailTemplatesPageClient: React.FC = () => {
     setRestoreLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Remove deleted_at and is_deleted properties
       const { deleted_at, is_deleted, ...restoredTemplate } = template;
 
       // Move back to active templates
-      setEmailTemplates(prev => [restoredTemplate, ...prev]);
-      setDeletedTemplates(prev => prev.filter(t => t._id !== template._id));
+      setEmailTemplates((prev) => [restoredTemplate, ...prev]);
+      setDeletedTemplates((prev) => prev.filter((t) => t._id !== template._id));
     } catch (error) {
-      console.error('Error restoring email template:', error);
+      console.error("Error restoring email template:", error);
     } finally {
       setRestoreLoading(false);
     }
@@ -396,12 +414,12 @@ const EmailTemplatesPageClient: React.FC = () => {
     setPermanentDeleteLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Remove from deleted templates permanently
-      setDeletedTemplates(prev => prev.filter(t => t._id !== template._id));
+      setDeletedTemplates((prev) => prev.filter((t) => t._id !== template._id));
     } catch (error) {
-      console.error('Error permanently deleting email template:', error);
+      console.error("Error permanently deleting email template:", error);
     } finally {
       setPermanentDeleteLoading(false);
     }
@@ -411,16 +429,18 @@ const EmailTemplatesPageClient: React.FC = () => {
     setEditLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // Update local state
-      setEmailTemplates(prev =>
-        prev.map(template => template._id === updatedTemplate._id ? updatedTemplate : template)
+      setEmailTemplates((prev) =>
+        prev.map((template) =>
+          template._id === updatedTemplate._id ? updatedTemplate : template
+        )
       );
-      
+
       setEditDialog({ open: false, template: null });
     } catch (error) {
-      console.error('Error updating email template:', error);
+      console.error("Error updating email template:", error);
     } finally {
       setEditLoading(false);
     }
@@ -430,15 +450,15 @@ const EmailTemplatesPageClient: React.FC = () => {
     setCreateLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Add to local state
-      setEmailTemplates(prev => [newTemplate, ...prev]);
-      setPagination(prev => ({ ...prev, total: prev.total + 1 }));
-      
+      setEmailTemplates((prev) => [newTemplate, ...prev]);
+      setPagination((prev) => ({ ...prev, total: prev.total + 1 }));
+
       setCreateDialog(false);
     } catch (error) {
-      console.error('Error creating email template:', error);
+      console.error("Error creating email template:", error);
     } finally {
       setCreateLoading(false);
     }
@@ -447,24 +467,25 @@ const EmailTemplatesPageClient: React.FC = () => {
   // Helper to count active filters
   const getAppliedFiltersCount = () => {
     let count = 0;
-    if (statusFilter !== 'all') count++;
-    if (typeFilter !== 'all') count++;
+    if (statusFilter !== "all") count++;
+    if (typeFilter !== "all") count++;
     if (activeOnly) count++;
     return count;
   };
 
   const handleClearFilters = () => {
     // Reset all filters
-    setStatusFilter('all');
-    setTypeFilter('all');
+    setStatusFilter("all");
+    setTypeFilter("all");
     setActiveOnly(false);
-    
+
     // Get active email templates (exclude deleted ones)
-    const activeTemplates = dummyData.data.email_templates.filter(template => 
-      !deletedTemplates.some(deleted => deleted._id === template._id)
+    const activeTemplates = dummyData.data.email_templates.filter(
+      (template) =>
+        !deletedTemplates.some((deleted) => deleted._id === template._id)
     );
     setEmailTemplates(activeTemplates);
-    setPagination(prev => ({
+    setPagination((prev) => ({
       ...prev,
       total: activeTemplates.length,
     }));
@@ -474,15 +495,19 @@ const EmailTemplatesPageClient: React.FC = () => {
 
   // Helper functions for soft delete table
   const getItemName = (template: EmailTemplate) => template.name;
-  const getDeletedAt = (template: EmailTemplate) => template.deleted_at || '';
+  const getDeletedAt = (template: EmailTemplate) => template.deleted_at || "";
   const getDaysUntilPermanentDelete = (template: EmailTemplate) => {
     if (!template.deleted_at) return 30;
-    
+
     const deletedDate = new Date(template.deleted_at);
-    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const permanentDeleteDate = new Date(
+      deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000
+    ); // 30 days
     const now = new Date();
-    const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
-    
+    const daysLeft = Math.ceil(
+      (permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+    );
+
     return Math.max(0, daysLeft);
   };
 
@@ -498,41 +523,51 @@ const EmailTemplatesPageClient: React.FC = () => {
   const handleApplyFilters = async () => {
     setFilterLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // Get active email templates (exclude deleted ones)
-      const activeTemplates = dummyData.data.email_templates.filter(template => 
-        !deletedTemplates.some(deleted => deleted._id === template._id)
+      const activeTemplates = dummyData.data.email_templates.filter(
+        (template) =>
+          !deletedTemplates.some((deleted) => deleted._id === template._id)
       );
       let filteredData = activeTemplates;
 
-      if (statusFilter !== 'all') {
-        const isActive = statusFilter === 'active';
-        filteredData = filteredData.filter(template => template.is_active === isActive);
+      if (statusFilter !== "all") {
+        const isActive = statusFilter === "active";
+        filteredData = filteredData.filter(
+          (template) => template.is_active === isActive
+        );
       }
 
-      if (typeFilter !== 'all') {
-        filteredData = filteredData.filter(template => template.template_type === typeFilter);
+      if (typeFilter !== "all") {
+        filteredData = filteredData.filter(
+          (template) => template.template_type === typeFilter
+        );
       }
 
       if (activeOnly) {
-        filteredData = filteredData.filter(template => template.is_active);
+        filteredData = filteredData.filter((template) => template.is_active);
       }
 
       // Apply search query if exists
       if (searchQuery) {
-        filteredData = filteredData.filter(template =>
-          template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          template.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          template.template_type.toLowerCase().includes(searchQuery.toLowerCase())
+        filteredData = filteredData.filter(
+          (template) =>
+            template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            template.subject
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            template.template_type
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
         );
       }
 
       setEmailTemplates(filteredData);
-      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      setPagination((prev) => ({ ...prev, total: filteredData.length }));
       setFilterDrawerOpen(false);
     } catch (error) {
-      console.error('Error applying filters:', error);
+      console.error("Error applying filters:", error);
     } finally {
       setFilterLoading(false);
     }
@@ -540,15 +575,15 @@ const EmailTemplatesPageClient: React.FC = () => {
 
   const MENU_OPTIONS: MenuOption[] = [
     {
-      label: 'Edit',
+      label: "Edit",
       action: handleEdit,
       icon: <Edit className="w-4 h-4" />,
     },
     {
-      label: 'Delete',
+      label: "Delete",
       action: handleDelete,
       icon: <Trash2 className="w-4 h-4" />,
-      variant: 'destructive',
+      variant: "destructive",
     },
   ];
 
@@ -564,64 +599,86 @@ const EmailTemplatesPageClient: React.FC = () => {
     );
   };
 
-
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
-  const renderCell = (template: EmailTemplate, header: TableHeader) => {
-    switch (header.key) {
-      case 'template':
-        return (
-          <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Mail className="w-5 h-5 text-white" />
+  const TABLE_HEAD: TableHeader[] = [
+    {
+      key: "index",
+      label: "#",
+      renderData: (row, rowIndex) => (
+        <span className="text-gray-500 dark:text-gray-400 text-sm">
+          {rowIndex !== undefined ? rowIndex + 1 : "-"}.
+        </span>
+      ),
+    },
+    {
+      key: "template",
+      label: "Template",
+      renderData: (template) => (
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Mail className="w-5 h-5 text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {template.name}
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold text-gray-900 dark:text-white">
-                {template.name}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {template.variables.length} variables
-              </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {template.variables.length} variables
             </div>
           </div>
-        );
-
-      case 'subject':
-        return (
-          <div className="max-w-xs">
-            <div className="font-medium text-gray-900 dark:text-white truncate">
-              {template.subject}
-            </div>
+        </div>
+      ),
+    },
+    {
+      key: "subject",
+      label: "Subject",
+      renderData: (template) => (
+        <div className="max-w-xs">
+          <div className="font-medium text-gray-900 dark:text-white truncate">
+            {template.subject}
           </div>
-        );
-
-      case 'template_type':
-        return (
-          <Badge className={template.template_type}>
-            {template.template_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-          </Badge>
-        );
-
-      case 'status':
-        return getStatusBadge(template.is_active);
-
-      case 'created_at':
-        return (
-          <span className="text-gray-600 dark:text-gray-400">
-            {formatDate(template.created_at)}
-          </span>
-        );
-
-      default:
-        return <span>{template[header.key as keyof EmailTemplate] as string}</span>;
-    }
-  };
+        </div>
+      ),
+    },
+    {
+      key: "template_type",
+      label: "Type",
+      renderData: (template) => (
+        <Badge className={template.template_type}>
+          {template.template_type
+            .replace("_", " ")
+            .replace(/\b\w/g, (x: string) => x.toUpperCase())}
+        </Badge>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      renderData: (template) => getStatusBadge(template.is_active),
+    },
+    {
+      key: "created_at",
+      label: "Created",
+      renderData: (template) => (
+        <span className="text-gray-600 dark:text-gray-400">
+          {formatDate(template.created_at)}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "",
+      type: "action",
+      width: "w-12",
+    },
+  ];
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
@@ -638,7 +695,7 @@ const EmailTemplatesPageClient: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-        <Button
+          <Button
             onClick={() => setExportDialog(true)}
             variant="outline"
             className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -653,7 +710,6 @@ const EmailTemplatesPageClient: React.FC = () => {
             <Plus className="w-4 h-4 mr-2" />
             Add Template
           </Button>
-       
         </div>
       </div>
 
@@ -692,12 +748,19 @@ const EmailTemplatesPageClient: React.FC = () => {
       </div>
 
       {/* Email Templates Table */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="all">
             All Templates ({emailTemplates.length})
           </TabsTrigger>
-          <TabsTrigger className="data-[state=active]:text-red-500" value="deleted">
+          <TabsTrigger
+            className="data-[state=active]:text-red-500"
+            value="deleted"
+          >
             Deleted Templates ({deletedTemplates.length})
           </TabsTrigger>
         </TabsList>
@@ -717,11 +780,9 @@ const EmailTemplatesPageClient: React.FC = () => {
             pageCount={pagination.limit}
             totalPages={totalPages}
             handleChangePages={handleChangePage}
-            selected={selected}
-            setSelected={setSelected}
-            checkbox_selection={true}
-            onRowClick={(template) => setPreviewDialog({ open: true, template })}
-            renderCell={renderCell}
+            onRowClick={(template) =>
+              setPreviewDialog({ open: true, template })
+            }
             loading={loading}
             emptyMessage="No email templates found"
           />
@@ -730,12 +791,10 @@ const EmailTemplatesPageClient: React.FC = () => {
         <TabsContent value="deleted" className="space-y-6">
           <SoftDeleteTable
             data={deletedTemplates}
-            TABLE_HEAD={TABLE_HEAD}
             loading={deletedLoading}
             emptyMessage="No deleted email templates found"
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
-            renderCell={renderCell}
             getItemName={getItemName}
             getDeletedAt={getDeletedAt}
             getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}

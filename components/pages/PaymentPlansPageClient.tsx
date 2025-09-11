@@ -161,17 +161,7 @@ const dummyData = {
   },
 };
 
-const TABLE_HEAD: TableHeader[] = [
-  { key: "plan", label: "Plan", type: "custom" },
-  { key: "pricing", label: "Pricing", type: "custom" },
-  { key: "max_events", label: "Max Events", type: "custom" },
-  { key: "max_attendees", label: "Max Attendees", type: "custom" },
-  { key: "max_companies", label: "Max Companies", type: "custom" },
-  { key: "status", label: "Status", type: "custom" },
-  { key: "trial_days", label: "Trial", type: "custom" },
-  { key: "created_at", label: "Created", type: "custom" },
-  { key: "action", label: "", type: "action", width: "w-12" },
-];
+
 
 const PaymentPlansPageClient: React.FC = () => {
   const router = useRouter();
@@ -179,7 +169,6 @@ const PaymentPlansPageClient: React.FC = () => {
   const [deletedPlans, setDeletedPlans] = useState<PaymentPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletedLoading, setDeletedLoading] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
@@ -215,6 +204,125 @@ const PaymentPlansPageClient: React.FC = () => {
   const [popularOnly, setPopularOnly] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
+
+  const TABLE_HEAD: TableHeader[] = [
+    {
+      key: "index",
+      label: "#",
+      renderData: (_row, rowIndex) => (
+        <span className="text-gray-500 dark:text-gray-400 text-sm">
+          {rowIndex !== undefined ? rowIndex + 1 : "-"}.
+        </span>
+      ),
+    },
+    {
+      key: "plan",
+      label: "Plan",
+      renderData: (plan) => (
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <CreditCard className="w-5 h-5 text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {plan.plan_name}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              {plan.description.length > 50
+                ? `${plan.description.substring(0, 50)}...`
+                : plan.description}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "pricing",
+      label: "Pricing",
+      renderData: (plan) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <DollarSign className="w-4 h-4 text-green-500" />
+            <span className="font-semibold text-green-600 dark:text-green-400">
+              {formatCurrency(plan.price, plan.currency)}
+            </span>
+          </div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            per {plan.billing_cycle}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "max_events",
+      label: "Max Events",
+      renderData: (plan) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="w-4 h-4 text-purple-500" />
+          <span className="font-medium text-gray-900 dark:text-white">
+            {plan.max_events}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "max_attendees",
+      label: "Max Attendees",
+      renderData: (plan) => (
+        <div className="flex items-center space-x-2">
+          <Users className="w-4 h-4 text-blue-500" />
+          <span className="font-medium text-gray-900 dark:text-white">
+            {plan.max_attendees.toLocaleString()}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "max_companies",
+      label: "Max Companies",
+      renderData: (plan) => (
+        <div className="flex items-center space-x-2">
+          <Building className="w-4 h-4 text-orange-500" />
+          <span className="font-medium text-gray-900 dark:text-white">
+            {plan.max_companies}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      renderData: (plan) => getStatusBadge(plan.is_active, plan.is_popular),
+    },
+    {
+      key: "trial_days",
+      label: "Trial",
+      renderData: (plan) => (
+        <div className="flex items-center space-x-2">
+          <Clock className="w-4 h-4 text-blue-500" />
+          <span className="font-medium text-gray-900 dark:text-white">
+            {plan.trial_days} days
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "created_at",
+      label: "Created",
+      renderData: (plan) => (
+        <span className="text-gray-600 dark:text-gray-400">
+          {formatDate(plan.created_at)}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "",
+      type: "action",
+      width: "w-12",
+    },
+  ];
+  
 
   // Load payment plans
   const loadPaymentPlans = async (includeDeleted = false) => {
@@ -555,96 +663,7 @@ const PaymentPlansPageClient: React.FC = () => {
     }).format(amount);
   };
 
-  const renderCell = (plan: PaymentPlan, header: TableHeader) => {
-    switch (header.key) {
-      case "plan":
-        return (
-          <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <CreditCard className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold text-gray-900 dark:text-white">
-                {plan.plan_name}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                {plan.description.length > 50
-                  ? `${plan.description.substring(0, 50)}...`
-                  : plan.description}
-              </div>
-            </div>
-          </div>
-        );
-
-      case "pricing":
-        return (
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <DollarSign className="w-4 h-4 text-green-500" />
-              <span className="font-semibold text-green-600 dark:text-green-400">
-                {formatCurrency(plan.price, plan.currency)}
-              </span>
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              per {plan.billing_cycle}
-            </div>
-          </div>
-        );
-
-      case "max_events":
-        return (
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-purple-500" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {plan.max_events}
-            </span>
-          </div>
-        );
-
-      case "max_attendees":
-        return (
-          <div className="flex items-center space-x-2">
-            <Users className="w-4 h-4 text-blue-500" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {plan.max_attendees.toLocaleString()}
-            </span>
-          </div>
-        );
-
-      case "max_companies":
-        return (
-          <div className="flex items-center space-x-2">
-            <Building className="w-4 h-4 text-orange-500" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {plan.max_companies}
-            </span>
-          </div>
-        );
-
-      case "status":
-        return getStatusBadge(plan.is_active, plan.is_popular);
-
-      case "trial_days":
-        return (
-          <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4 text-blue-500" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {plan.trial_days} days
-            </span>
-          </div>
-        );
-
-      case "created_at":
-        return (
-          <span className="text-gray-600 dark:text-gray-400">
-            {formatDate(plan.created_at)}
-          </span>
-        );
-
-      default:
-        return <span>{plan[header.key as keyof PaymentPlan] as string}</span>;
-    }
-  };
+  
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
@@ -745,10 +764,6 @@ const PaymentPlansPageClient: React.FC = () => {
             pageCount={pagination.limit}
             totalPages={totalPages}
             handleChangePages={handleChangePage}
-            selected={selected}
-            setSelected={setSelected}
-            checkbox_selection={true}
-            renderCell={renderCell}
             loading={loading}
             emptyMessage="No payment plans found"
           />
@@ -757,12 +772,10 @@ const PaymentPlansPageClient: React.FC = () => {
         <TabsContent value="deleted" className="space-y-6">
           <SoftDeleteTable
             data={deletedPlans}
-            TABLE_HEAD={TABLE_HEAD}
             loading={deletedLoading}
             emptyMessage="No deleted payment plans found"
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
-            renderCell={renderCell}
             getItemName={getItemName}
             getDeletedAt={getDeletedAt}
             getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}

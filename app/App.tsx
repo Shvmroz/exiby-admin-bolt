@@ -52,7 +52,7 @@ export default function App({ children }: { children: React.ReactNode }) {
           vertical: "bottom",
           horizontal: "right",
         }}
-        autoHideDuration={2000}
+        autoHideDuration={3000}
       >
         <CssBaseline />
         <AppProvider>{children}</AppProvider>

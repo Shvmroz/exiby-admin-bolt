@@ -28,18 +28,19 @@ import Spinner from "../ui/spinner";
 interface TeamMemberCreateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSave: (member: any) => void;
+  loading?: boolean;
 }
 
 const TeamMemberCreateDialog: React.FC<TeamMemberCreateDialogProps> = ({
   open,
   onOpenChange,
-
+  onSave,
+  loading = false,
 }) => {
-  const { enqueueSnackbar } = useSnackbar();
 
   const { darkMode } = useAppContext();
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -91,8 +92,7 @@ const TeamMemberCreateDialog: React.FC<TeamMemberCreateDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    const req_data = {
+    const reqData = {
       email: formData.email,
       password: formData.password,
       first_name: formData.first_name,
@@ -100,20 +100,9 @@ const TeamMemberCreateDialog: React.FC<TeamMemberCreateDialogProps> = ({
       access: formData.access,
       status: formData.status,
     };
+    
+    onSave(reqData);
 
-    const result = await _add_admin_team_api(req_data);
-    if (result?.code === 200) {
-      // onSave(reqData);
-      handleClose();
-      enqueueSnackbar("Admin member added successfully", {
-        variant: "success",
-      });
-    } else {
-      enqueueSnackbar(result?.message || "New admin member add failed", {
-        variant: "error",
-      });
-    }
-    setLoading(false);
   };
 
   const handleClose = () => {
@@ -126,7 +115,6 @@ const TeamMemberCreateDialog: React.FC<TeamMemberCreateDialogProps> = ({
       status: true,
     });
     onOpenChange(false);
-    setLoading(false);
   };
 
   return (
@@ -277,13 +265,13 @@ const TeamMemberCreateDialog: React.FC<TeamMemberCreateDialogProps> = ({
                 onChange={(e) =>
                   setFormData({ ...formData, status: e.target.checked })
                 }
-                className="w-4 h-4 text-[#0077ED] bg-gray-100 border-gray-300 rounded focus:ring-[#0077ED] dark:focus:ring-[#0077ED] dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                className="w-4 h-4 rounded border border-gray-300 bg-gray-100 dark:bg-gray-700 dark:border-gray-600"
               />
               <label
                 htmlFor="status"
                 className="text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Active User
+                {formData.status ? "Active User" : "Inactive User"}
               </label>
             </div>
           </div>
@@ -327,7 +315,6 @@ const TeamMemberCreateDialog: React.FC<TeamMemberCreateDialogProps> = ({
           type="button"
           variant="outline"
           onClick={handleClose}
-          disabled={loading}
           style={{
             backgroundColor: darkMode ? "#374151" : "#f9fafb",
             color: darkMode ? "#f3f4f6" : "#374151",

@@ -192,22 +192,12 @@ const dummyData = {
   }
 };
 
-const TABLE_HEAD: TableHeader[] = [
-  { key: 'event', label: 'Event', type: 'custom' },
-  { key: 'venue', label: 'Venue', type: 'custom' },
-  { key: 'schedule', label: 'Schedule', type: 'custom' },
-  { key: 'pricing', label: 'Pricing', type: 'custom' },
-  { key: 'attendees', label: 'Attendees', type: 'custom' },
-  { key: 'status', label: 'Status', type: 'custom' },
-  { key: 'created_at', label: 'Created', type: 'custom' },
-  { key: 'action', label: '', type: 'action', width: 'w-12' },
-];
+
 
 const EventsPageClient: React.FC = () => {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -496,114 +486,133 @@ const EventsPageClient: React.FC = () => {
     }).format(amount);
   };
 
-  const renderCell = (event: Event, header: TableHeader) => {
-    switch (header.key) {
-      case 'event':
-        return (
-          <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold text-gray-900 dark:text-white">
-                {event.title}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                {event.description.length > 60
-                  ? `${event.description.substring(0, 60)}...`
-                  : event.description}
-              </div>
-              <div className="flex items-center space-x-2 mt-1">
-                {event.is_public ? (
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 text-xs">
-                    <Globe className="w-2 h-2 mr-1" />
-                    Public
-                  </Badge>
-                ) : (
-                  <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400 text-xs">
-                    Private
-                  </Badge>
-                )}
-              </div>
-            </div>
+  
+  const TABLE_HEAD: TableHeader[] = [
+    {
+      key: "index",
+      label: "#",
+      renderData: (_row, rowIndex) => (
+        <span className="text-gray-500 dark:text-gray-400 text-sm">
+          {rowIndex !== undefined ? rowIndex + 1 : "-"}.
+        </span>
+      ),
+    },
+    {
+      key: "event",
+      label: "Event",
+      renderData: (event) => (
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Calendar className="w-5 h-5 text-white" />
           </div>
-        );
-
-      case 'venue':
-        return (
-          <div className="space-y-1">
-            {getVenueTypeBadge(event.venue.type)}
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {event.venue.type === 'virtual' ? (
-                <span>{event.venue.platform}</span>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-gray-900 dark:text-white">{event.title}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              {event.description.length > 60
+                ? `${event.description.substring(0, 60)}...`
+                : event.description}
+            </div>
+            <div className="flex items-center space-x-2 mt-1">
+              {event.is_public ? (
+                <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 text-xs">
+                  <Globe className="w-2 h-2 mr-1" />
+                  Public
+                </Badge>
               ) : (
-                <span>{event.venue.city}, {event.venue.state}</span>
+                <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400 text-xs">
+                  Private
+                </Badge>
               )}
             </div>
           </div>
-        );
-
-      case 'schedule':
-        return (
-          <div className="space-y-1">
-            <div className="flex items-center space-x-1 text-sm">
-              <Clock className="w-3 h-3 text-gray-400" />
-              <span className="text-gray-900 dark:text-white font-medium">
-                {formatDateTime(event.startAt)}
-              </span>
-            </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400">
-              to {formatDateTime(event.endAt)}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-500">
-              Reg. deadline: {formatDate(event.registration_deadline)}
-            </div>
+        </div>
+      ),
+    },
+    {
+      key: "venue",
+      label: "Venue",
+      renderData: (event) => (
+        <div className="space-y-1">
+          {getVenueTypeBadge(event.venue.type)}
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {event.venue.type === "virtual"
+              ? event.venue.platform
+              : `${event.venue.city}, ${event.venue.state}`}
           </div>
-        );
-
-      case 'pricing':
-        return (
-          <div className="space-y-1">
-            {event.isPaidEvent ? (
-              <div className="flex items-center space-x-1">
-                <DollarSign className="w-4 h-4 text-green-500" />
-                <span className="font-semibold text-green-600 dark:text-green-400">
-                  {formatCurrency(event.ticketPrice, event.currency)}
-                </span>
-              </div>
-            ) : (
-              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                Free
-              </Badge>
-            )}
-          </div>
-        );
-
-      case 'attendees':
-        return (
-          <div className="flex items-center space-x-2">
-            <Users className="w-4 h-4 text-blue-500" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {event.max_attendees}
+        </div>
+      ),
+    },
+    {
+      key: "schedule",
+      label: "Schedule",
+      renderData: (event) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-1 text-sm">
+            <Clock className="w-3 h-3 text-gray-400" />
+            <span className="text-gray-900 dark:text-white font-medium">
+              {formatDateTime(event.startAt)}
             </span>
           </div>
-        );
+          <div className="text-xs text-gray-600 dark:text-gray-400">
+            to {formatDateTime(event.endAt)}
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-500">
+            Reg. deadline: {formatDate(event.registration_deadline)}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "pricing",
+      label: "Pricing",
+      renderData: (event) => (
+        <div className="space-y-1">
+          {event.isPaidEvent ? (
+            <div className="flex items-center space-x-1">
+              <DollarSign className="w-4 h-4 text-green-500" />
+              <span className="font-semibold text-green-600 dark:text-green-400">
+                {formatCurrency(event.ticketPrice, event.currency)}
+              </span>
+            </div>
+          ) : (
+            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+              Free
+            </Badge>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: "attendees",
+      label: "Attendees",
+      renderData: (event) => (
+        <div className="flex items-center space-x-2">
+          <Users className="w-4 h-4 text-blue-500" />
+          <span className="font-medium text-gray-900 dark:text-white">{event.max_attendees}</span>
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      renderData: (event) => getStatusBadge(event.status),
+    },
+    {
+      key: "created_at",
+      label: "Created",
+      renderData: (event) => (
+        <span className="text-gray-600 dark:text-gray-400">{formatDate(event.created_at)}</span>
+      ),
+    },
+    {
+      key: "action",
+      label: "",
+      type: "action",
+      width: "w-12",
+    },
+  ];
 
-      case 'status':
-        return getStatusBadge(event.status);
-
-      case 'created_at':
-        return (
-          <span className="text-gray-600 dark:text-gray-400">
-            {formatDate(event.created_at)}
-          </span>
-        );
-
-      default:
-        return <span>{event[header.key as keyof Event] as string}</span>;
-    }
-  };
-
+  
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
   return (
@@ -684,11 +693,7 @@ const EventsPageClient: React.FC = () => {
         pageCount={pagination.limit}
         totalPages={totalPages}
         handleChangePages={handleChangePage}
-        selected={selected}
-        setSelected={setSelected}
-        checkbox_selection={true}
         onRowClick={handleRowClick}
-        renderCell={renderCell}
         loading={loading}
         emptyMessage="No events found"
       />

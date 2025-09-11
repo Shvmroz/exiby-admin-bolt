@@ -148,17 +148,7 @@ const dummyData = {
   }
 };
 
-const TABLE_HEAD: TableHeader[] = [
-  { key: 'organization', label: 'Organization', type: 'custom' },
-  { key: 'category', label: 'Category', type: 'custom' },
-  { key: 'subscription_status', label: 'Status', type: 'custom' },
-  { key: 'subscription_period', label: 'Subscription Period', type: 'custom' },
-  { key: 'total_events', label: 'Events', type: 'custom' },
-  { key: 'total_companies', label: 'Companies', type: 'custom' },
-  { key: 'total_revenue', label: 'Revenue', type: 'custom' },
-  { key: 'total_attendees', label: 'Attendees', type: 'custom' },
-  { key: 'action', label: '', type: 'action', width: 'w-12' },
-];
+
 
 const OrganizationsPageClient: React.FC = () => {
   const router = useRouter();
@@ -166,7 +156,6 @@ const OrganizationsPageClient: React.FC = () => {
   const [deletedOrganizations, setDeletedOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletedLoading, setDeletedLoading] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -205,6 +194,140 @@ const OrganizationsPageClient: React.FC = () => {
     limit: 20,
     total: 0,
   });
+
+
+  const TABLE_HEAD: TableHeader[] = [
+    {
+      key: "index",
+      label: "#",
+      renderData: (_row, rowIndex) => (
+        <span className="text-gray-500 dark:text-gray-400 text-sm">
+          {rowIndex !== undefined ? rowIndex + 1 : "-"}.
+        </span>
+      ),
+    },
+    {
+      key: "organization",
+      label: "Organization",
+      renderData: (organization) => (
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-lg flex items-center justify-center flex-shrink-0">
+            <Building2 className="w-5 h-5 text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {organization.orgn_user.name}
+            </div>
+            <div className="text-sm text-gray-700 dark:text-gray-300 truncate">
+              {organization.bio.description}
+            </div>
+            {organization.bio.website && (
+              <a
+                href={organization.bio.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-xs text-[#0077ED] dark:text-[#4A9AFF] hover:text-[#0066CC] dark:hover:text-[#6BB6FF] mt-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="w-3 h-3 mr-1" />
+                Website
+              </a>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "category",
+      label: "Category",
+      renderData: (organization) => (
+        <div className="flex items-center space-x-2">
+          {organization.category === "organization" ? (
+            <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          ) : (
+            <Building className="w-4 h-4 text-green-600 dark:text-green-400" />
+          )}
+          <span className="font-medium text-gray-900 dark:text-white capitalize">
+            {organization.category}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "subscription_status",
+      label: "Status",
+      renderData: (organization) => getStatusBadge(organization.subscription_status),
+    },
+    {
+      key: "subscription_period",
+      label: "Subscription Period",
+      renderData: (organization) => (
+        <div className="text-sm">
+          <div className="text-gray-900 dark:text-white">
+            {formatDate(organization.subscription_start)}
+          </div>
+          <div className="text-gray-600 dark:text-gray-300">
+            to {formatDate(organization.subscription_end)}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "total_events",
+      label: "Events",
+      renderData: (organization) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          <span className="font-medium text-gray-900 dark:text-white">
+            {organization.total_events}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "total_companies",
+      label: "Companies",
+      renderData: (organization) => (
+        <div className="flex items-center space-x-2">
+          <Building className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <span className="font-medium text-gray-900 dark:text-white">
+            {organization.total_companies}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "total_revenue",
+      label: "Revenue",
+      renderData: (organization) => (
+        <div className="flex items-center space-x-2">
+          <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
+          <span className="font-medium text-green-600 dark:text-green-400">
+            ${organization.total_revenue.toLocaleString()}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "total_attendees",
+      label: "Attendees",
+      renderData: (organization) => (
+        <div className="flex items-center space-x-2">
+          <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+          <span className="font-medium text-gray-900 dark:text-white">
+            {organization.total_attendees.toLocaleString()}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "action",
+      label: "",
+      type: "action",
+      width: "w-12",
+    },
+  ];
+  
 
   // Load organizations
   const loadOrganizations = async (includeDeleted = false) => {
@@ -532,110 +655,7 @@ const OrganizationsPageClient: React.FC = () => {
     });
   };
 
-  const renderCell = (organization: Organization, header: TableHeader) => {
-    switch (header.key) {
-      case 'organization':
-        return (
-          <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-lg flex items-center justify-center flex-shrink-0">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold text-gray-900 dark:text-white">
-                {organization.orgn_user.name}
-              </div>
-              <div className="text-sm text-gray-700 dark:text-gray-300 truncate">
-                {organization.bio.description}
-              </div>
-              {organization.bio.website && (
-                <a
-                  href={organization.bio.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-xs text-[#0077ED] dark:text-[#4A9AFF] hover:text-[#0066CC] dark:hover:text-[#6BB6FF] mt-1"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ExternalLink className="w-3 h-3 mr-1" />
-                  Website
-                </a>
-              )}
-            </div>
-          </div>
-        );
-
-      case 'category':
-        return (
-          <div className="flex items-center space-x-2">
-            {organization.category === 'organization' ? (
-              <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            ) : (
-              <Building className="w-4 h-4 text-green-600 dark:text-green-400" />
-            )}
-            <span className="font-medium text-gray-900 dark:text-white capitalize">
-              {organization.category}
-            </span>
-          </div>
-        );
-
-      case 'subscription_status':
-        return getStatusBadge(organization.subscription_status);
-
-      case 'subscription_period':
-        return (
-          <div className="text-sm">
-            <div className="text-gray-900 dark:text-white">
-              {formatDate(organization.subscription_start)}
-            </div>
-            <div className="text-gray-600 dark:text-gray-300">
-              to {formatDate(organization.subscription_end)}
-            </div>
-          </div>
-        );
-
-      case 'total_events':
-        return (
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {organization.total_events}
-            </span>
-          </div>
-        );
-
-      case 'total_companies':
-        return (
-          <div className="flex items-center space-x-2">
-            <Building className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {organization.total_companies}
-            </span>
-          </div>
-        );
-
-      case 'total_revenue':
-        return (
-          <div className="flex items-center space-x-2">
-            <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
-            <span className="font-medium text-green-600 dark:text-green-400">
-              ${organization.total_revenue.toLocaleString()}
-            </span>
-          </div>
-        );
-
-      case 'total_attendees':
-        return (
-          <div className="flex items-center space-x-2">
-            <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {organization.total_attendees.toLocaleString()}
-            </span>
-          </div>
-        );
-
-      default:
-        return <span className="text-gray-900 dark:text-white">{organization[header.key as keyof Organization] as string}</span>;
-    }
-  };
+  
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
@@ -731,11 +751,7 @@ const OrganizationsPageClient: React.FC = () => {
             pageCount={pagination.limit}
             totalPages={totalPages}
             handleChangePages={handleChangePage}
-            selected={selected}
-            setSelected={setSelected}
-            checkbox_selection={true}
             onRowClick={handleRowClick}
-            renderCell={renderCell}
             loading={loading}
             emptyMessage="No organizations found"
           />
@@ -744,12 +760,10 @@ const OrganizationsPageClient: React.FC = () => {
         <TabsContent value="deleted" className="space-y-6">
           <SoftDeleteTable
             data={deletedOrganizations}
-            TABLE_HEAD={TABLE_HEAD}
             loading={deletedLoading}
             emptyMessage="No deleted organizations found"
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
-            renderCell={renderCell}
             getItemName={getItemName}
             getDeletedAt={getDeletedAt}
             getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}

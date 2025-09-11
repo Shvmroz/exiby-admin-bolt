@@ -31,8 +31,15 @@ import { Input } from "@/components/ui/input";
 import CsvExportDialog from "@/components/ui/csv-export-dialog";
 import { Badge } from "@/components/ui/badge";
 import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
-import { _admin_team_list_api } from "@/DAL/adminTeamAPI";
+import {
+  _add_admin_team_api,
+  _admin_team_list_api,
+  _change_team_member_password_api,
+  _delete_team_member_api,
+  _edit_team_member_api,
+} from "@/DAL/adminTeamAPI";
 import { useSnackbar } from "notistack";
+import { s3baseUrl } from "@/config/config";
 
 interface TeamMember {
   _id: string;
@@ -42,15 +49,8 @@ interface TeamMember {
   access: string[];
   status: boolean;
   createdAt: string;
+  profile_image?: string;
 }
-
-const TABLE_HEAD: TableHeader[] = [
-  { key: "user", label: "User", type: "custom" },
-  { key: "access", label: "Module Access", type: "custom" },
-  { key: "status", label: "Status", type: "custom" },
-  { key: "createdAt", label: "Created", type: "custom" },
-  { key: "action", label: "", type: "action", width: "w-12" },
-];
 
 const TeamPageClient: React.FC = () => {
   const router = useRouter();
@@ -59,7 +59,8 @@ const TeamPageClient: React.FC = () => {
   // State
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [addLoading, setAddLoading] = useState(false);
+  const [rowData, setRowData] = useState<TeamMember | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -99,16 +100,196 @@ const TeamPageClient: React.FC = () => {
     limit: 20,
   });
 
-  // API Call
+  const TABLE_HEAD: TableHeader[] = [
+    {
+      key: "index",
+      label: "#",
+      renderData: (row, rowIndex) => (
+        <span className="text-gray-500 dark:text-gray-400 text-sm">
+          {rowIndex !== undefined ? rowIndex + 1 : "-"}.
+        </span>
+      ),
+    },
+    {
+      key: "user",
+      label: "User",
+      renderData: (row) => (
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden">
+            {row.profile_image ? (
+              <img
+                src={s3baseUrl + row.profile_image}
+                alt={`${row.first_name} ${row.last_name}`}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/fallback-user.png";
+                }}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-cyan-500 to-cyan-600 flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {row.first_name} {row.last_name}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+              <Mail className="w-3 h-3 mr-1" />
+              {row.email}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "access",
+      label: "Module Access",
+      renderData: (row) => (row.access ? getModuleAccess(row.access) : null),
+    },
+    {
+      key: "status",
+      label: "Status",
+      renderData: (row) => (row.status !== undefined ? getStatusBadge(row.status) : null),
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      renderData: (row) => (
+        <span className="text-gray-600 dark:text-gray-400">
+          {row.createdAt ? formatDate(row.createdAt) : "-"}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "",
+      type: "action",
+    },
+  ];
+
+  // Table helpers
+  const handleChangePage = (newPage: number) =>
+    setPagination((prev) => ({ ...prev, current_page: newPage }));
+  const onRowsPerPageChange = (newLimit: number) =>
+    setPagination((prev) => ({ ...prev, limit: newLimit, current_page: 1 }));
+
+  const handleDelete = (member: TeamMember) => {
+    setDeleteDialog({ open: true, member });
+    setRowData(member);
+  };
+
+  // delete
+  const handleConfirmDelete = async () => {
+    if (!rowData?._id) {
+      return;
+    }
+    setDeleteLoading(true);
+    const result = await _delete_team_member_api(rowData._id);
+    if (result?.code === 200) {
+      enqueueSnackbar("Team member deleted successfully", {
+        variant: "success",
+      });
+      setTeamMembers((prev) =>
+        prev.filter((member) => member._id !== rowData._id)
+      );
+      setDeleteDialog({ open: false, member: null });
+      setRowData(null);
+    } else {
+      enqueueSnackbar(result?.message || "Failed to delete team member", {
+        variant: "error",
+      });
+    }
+
+    setDeleteLoading(false);
+  };
+
+  const handleEdit = (member: TeamMember) => {
+    setEditDialog({ open: true, member });
+    setRowData(member);
+  };
+
+  const handleSaveEdit = async (data: Partial<TeamMember>) => {
+    console.log("Edit Data:", data);
+    if (!rowData?._id) return;
+    setEditLoading(true);
+    const result = await _edit_team_member_api(rowData._id, data);
+    if (result?.code === 200) {
+      setEditDialog({ open: false, member: null });
+      setRowData(null);
+      setEditLoading(false);
+      setTeamMembers((prev) =>
+        prev.map((m) =>
+          m._id === rowData._id ? { ...m, ...result?.admin } : m
+        )
+      );
+
+      enqueueSnackbar("Team member updated successfully", {
+        variant: "success",
+      });
+    } else {
+      enqueueSnackbar(result?.message || "Failed to update team member", {
+        variant: "error",
+      });
+      setEditLoading(false);
+    }
+  };
+
+  const handleAddNewMember = async (data: Partial<TeamMember>) => {
+    setAddLoading(true);
+
+    const result = await _add_admin_team_api(data);
+
+    if (result?.code === 200) {
+      // Append the new member to the list
+      setTeamMembers((prev) => [...prev, result.data || data]);
+
+      setCreateDialog(false);
+      enqueueSnackbar("Admin member added successfully", {
+        variant: "success",
+      });
+      setAddLoading(false);
+    } else {
+      enqueueSnackbar(result?.message || "New admin member add failed", {
+        variant: "error",
+      });
+      setAddLoading(false);
+    }
+  };
+
+  const handleChangePassword = (member: TeamMember) => {
+    setRowData(member);
+    setChangePasswordDialog({ open: true, member });
+  };
+
+  const handlePasswordChange = async (data: { new_password: string }) => {
+    if (!rowData?._id) {
+      return;
+    }
+    setPasswordLoading(true);
+    const result = await _change_team_member_password_api(rowData._id, data);
+
+    if (result?.code === 200) {
+      setPasswordLoading(false);
+      setChangePasswordDialog({ open: false, member: null });
+      enqueueSnackbar("Password changed successfully", { variant: "success" });
+    } else {
+      setPasswordLoading(false);
+      enqueueSnackbar(result?.message || "Password change failed", {
+        variant: "error",
+      });
+    }
+  };
+
   const getAllTeamList = async () => {
     setLoading(true);
 
     try {
-      const result = await _admin_team_list_api({
-        page: pagination.current_page,
-        limit: pagination.limit,
-        req_data: {}, 
-      });
+      const result = await _admin_team_list_api(
+        pagination.current_page,
+        pagination.limit
+      );
 
       if (result?.code === 200) {
         setTeamMembers(result.data.admins || []);
@@ -131,58 +312,6 @@ const TeamPageClient: React.FC = () => {
       setTeamMembers([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getAllTeamList();
-  }, [pagination.current_page, pagination.limit]);
-
-  if (loading && teamMembers.length === 0) {
-    return <TableSkeleton rows={8} columns={5} showFilters={true} />;
-  }
-
-  // Table helpers
-  const handleChangePage = (newPage: number) =>
-    setPagination((prev) => ({ ...prev, current_page: newPage }));
-  const onRowsPerPageChange = (newLimit: number) =>
-    setPagination((prev) => ({ ...prev, limit: newLimit, current_page: 1 }));
-
-  const handleEdit = (member: TeamMember) =>
-    setEditDialog({ open: true, member });
-  const handleDelete = (member: TeamMember) =>
-    setDeleteDialog({ open: true, member });
-  const handleChangePassword = (member: TeamMember) =>
-    setChangePasswordDialog({ open: true, member });
-
-  const handleSaveEdit = async (reqData: any) => {
-    setEditLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      if (editDialog.member) {
-        const updatedMember = { ...editDialog.member, ...reqData };
-        setTeamMembers((prev) =>
-          prev.map((m) =>
-            m._id === editDialog.member!._id ? updatedMember : m
-          )
-        );
-      }
-      setEditDialog({ open: false, member: null });
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handlePasswordChange = async (
-    memberId: string,
-    newPassword: string
-  ) => {
-    setPasswordLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-    } finally {
-      setChangePasswordDialog({ open: false, member: null });
-      setPasswordLoading(false);
     }
   };
 
@@ -218,7 +347,7 @@ const TeamPageClient: React.FC = () => {
 
   const getStatusBadge = (status: boolean) =>
     status ? (
-      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 ">
         <CheckCircle className="w-3 h-3 mr-1" />
         Active
       </Badge>
@@ -270,41 +399,16 @@ const TeamPageClient: React.FC = () => {
     );
   };
 
-  const renderCell = (member: TeamMember, header: TableHeader) => {
-    switch (header.key) {
-      case "user":
-        return (
-          <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <User className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold text-gray-900 dark:text-white">
-                {member.first_name} {member.last_name}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                <Mail className="w-3 h-3 mr-1" />
-                {member.email}
-              </div>
-            </div>
-          </div>
-        );
-      case "access":
-        return getModuleAccess(member.access);
-      case "status":
-        return getStatusBadge(member.status);
-      case "createdAt":
-        return (
-          <span className="text-gray-600 dark:text-gray-400">
-            {formatDate(member.createdAt)}
-          </span>
-        );
-      default:
-        return <span>{member[header.key as keyof TeamMember] as string}</span>;
-    }
-  };
-
   const totalPages = pagination.total_pages;
+
+
+  useEffect(() => {
+    getAllTeamList();
+  }, [pagination.total_pages, pagination.limit]);
+
+  if (loading && teamMembers.length === 0) {
+    return <TableSkeleton rows={8} columns={5} showFilters={true} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -341,14 +445,26 @@ const TeamPageClient: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search team members..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            <div className="relative w-full flex">
+              {/* Input with left icon */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search team members..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-24" // leave space for button
+                />
+              </div>
+
+              {/* Search Button */}
+              <Button
+                // onClick={handleSearch}
+                variant="outline"
+                className="absolute right-0 top-1/2 transform -translate-y-1/2  border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Search
+              </Button>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -384,10 +500,6 @@ const TeamPageClient: React.FC = () => {
         pageCount={pagination.limit}
         totalPages={totalPages}
         handleChangePages={handleChangePage}
-        selected={selected}
-        setSelected={setSelected}
-        checkbox_selection={true}
-        renderCell={renderCell}
         loading={loading}
         emptyMessage="No team members found"
       />
@@ -403,15 +515,18 @@ const TeamPageClient: React.FC = () => {
             : ""
         }"?`}
         confirmButtonText="Delete"
-        onConfirm={() => {}}
+        onConfirm={handleConfirmDelete}
         loading={deleteLoading}
       />
 
       {/* Edit Team Member Dialog */}
       <TeamMemberEditDialog
         open={editDialog.open}
-        onOpenChange={(open) => setEditDialog({ open, member: null })}
-        member={editDialog.member}
+        onOpenChange={(open) => {
+          setEditDialog({ open, member: null });
+          if (!open) setRowData(null);
+        }}
+        member={rowData}
         onSave={handleSaveEdit}
         loading={editLoading}
       />
@@ -420,6 +535,8 @@ const TeamPageClient: React.FC = () => {
       <TeamMemberCreateDialog
         open={createDialog}
         onOpenChange={setCreateDialog}
+        onSave={handleAddNewMember}
+        loading={addLoading}
       />
 
       {/* Change Password Dialog */}
@@ -435,7 +552,7 @@ const TeamPageClient: React.FC = () => {
       <CsvExportDialog
         open={exportDialog}
         onOpenChange={setExportDialog}
-        exportType="team_members"
+        exportType="my_team"
         title="Team Members"
       />
 

@@ -12,10 +12,9 @@ import { Save, X, Key, Eye, EyeOff, Lock } from 'lucide-react';
 
 interface TeamMember {
   _id: string;
-  first_name: string;
-  last_name: string;
+  name: string;
   email: string;
-  access: string[];
+  role: string;
   status: boolean;
 }
 
@@ -23,7 +22,7 @@ interface ChangePasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   member: TeamMember | any;
-  onSave: (memberId: string, newPassword: string) => void;
+  onSave: (data: { new_password: string }) => void;
   loading?: boolean;
 }
 
@@ -66,9 +65,11 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
     
     if (!validateForm()) return;
     
+    
     if (member) {
-      onSave(member._id, formData.newPassword);
-      
+      let req_data = { new_password: formData.newPassword };
+      onSave(req_data); //api call
+  
       // Reset form
       setFormData({
         newPassword: '',
@@ -101,7 +102,7 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
       <DialogTitle>
         <div className="flex items-center" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
           <Key className="w-5 h-5 mr-2 text-[#0077ED]" />
-          Change Password - {member?.first_name} {member?.last_name}
+          Change Password - {member?.name}
         </div>
       </DialogTitle>
 
@@ -198,7 +199,6 @@ const ChangePasswordDialog: React.FC<ChangePasswordDialogProps> = ({
           type="button"
           variant="outline"
           onClick={handleClose}
-          disabled={loading}
           style={{
             backgroundColor: darkMode ? '#374151' : '#f9fafb',
             color: darkMode ? '#f3f4f6' : '#374151',

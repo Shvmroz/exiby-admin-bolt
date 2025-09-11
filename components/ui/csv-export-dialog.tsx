@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useAppContext } from '@/contexts/AppContext';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Download, Calendar, FileText, X } from 'lucide-react';
+import React, { useState } from "react";
+import { useAppContext } from "@/contexts/AppContext";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Download, Calendar, FileText, X } from "lucide-react";
 
 interface CsvExportDialogProps {
   open: boolean;
@@ -25,79 +25,90 @@ const CsvExportDialog: React.FC<CsvExportDialogProps> = ({
 }) => {
   const { darkMode } = useAppContext();
   const [dateRange, setDateRange] = useState({
-    start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    end_date: new Date().toISOString().split('T')[0],
+    start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
+    end_date: new Date().toISOString().split("T")[0],
   });
   const [isExporting, setIsExporting] = useState(false);
-
+  const isDateRangeInvalid =
+    new Date(dateRange.end_date) < new Date(dateRange.start_date);
   const handleExport = async () => {
     setIsExporting(true);
-    
+
     const requestBody = {
+      start_date: dateRange.start_date,
+      end_date: dateRange.end_date,
       export_type: exportType,
-      date_range: dateRange,
     };
 
-    console.log('Export Request Body:', requestBody);
+    console.log("Export Request Body:", requestBody);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock response
-      const response = {
-        data: {
-          download_url: `https://api.platform.com/exports/${exportType}_${dateRange.start_date.replace(/-/g, '')}_${dateRange.end_date.replace(/-/g, '')}.xlsx`,
-          status: "ready"
+      // Simulate API call / replace with actual API
+      const response = await fetch(
+        `https://api.platform.com/exports/download`, // your API endpoint
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
         }
-      };
+      );
 
-      console.log('Export Response:', response);
+      if (!response.ok) throw new Error("Export failed");
 
-      if (response.data.status === "ready") {
-        // Create a temporary link and trigger download
-        const link = document.createElement('a');
-        link.href = response.data.download_url;
-        link.download = `${exportType}_export_${dateRange.start_date}_to_${dateRange.end_date}.xlsx`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        onOpenChange(false);
-      }
+      const blob = await response.blob(); // get file as blob
+      const filename = `export_${dateRange.start_date}_to_${dateRange.end_date}.xlsx`;
+
+      // Create URL and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      onOpenChange(false);
     } catch (error) {
-      console.error('Export error:', error);
+      console.error("Export error:", error);
     } finally {
       setIsExporting(false);
     }
   };
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={() => onOpenChange(false)}
       maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#000000',
-          borderRadius: '12px',
-        }
+          backgroundColor: darkMode ? "#1f2937" : "#ffffff",
+          color: darkMode ? "#ffffff" : "#000000",
+          borderRadius: "12px",
+        },
       }}
     >
       <DialogTitle>
-        <div className="flex items-center" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+        <div
+          className="flex items-center"
+          style={{ color: darkMode ? "#ffffff" : "#000000" }}
+        >
           <Download className="w-5 h-5 mr-2 text-[#0077ED]" />
           Export {title}
         </div>
       </DialogTitle>
 
-      <DialogContent 
+      <DialogContent
         sx={{ paddingTop: 2, paddingBottom: 3 }}
-        style={{ 
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#000000'
+        style={{
+          backgroundColor: darkMode ? "#1f2937" : "#ffffff",
+          color: darkMode ? "#ffffff" : "#000000",
         }}
       >
         <div className="space-y-6">
@@ -112,68 +123,77 @@ const CsvExportDialog: React.FC<CsvExportDialogProps> = ({
               </p>
             </div>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Start Date
               </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  type="date"
-                  value={dateRange.start_date}
-                  onChange={(e) => setDateRange({ ...dateRange, start_date: e.target.value })}
-                  className="pl-10"
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                />
-              </div>
+              <input
+                type="date"
+                value={dateRange.start_date}
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, start_date: e.target.value })
+                }
+                className=" w-full h-10 px-3 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                style={{
+                  backgroundColor: darkMode ? "#374151" : "#ffffff",
+                  borderColor: darkMode ? "#4b5563" : "#d1d5db",
+                  color: darkMode ? "#ffffff" : "#000000",
+                }}
+              />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 End Date
               </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input
-                  type="date"
-                  value={dateRange.end_date}
-                  onChange={(e) => setDateRange({ ...dateRange, end_date: e.target.value })}
-                  className="pl-10"
-                  style={{
-                    backgroundColor: darkMode ? '#374151' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#000000',
-                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
-                  }}
-                />
-              </div>
+              <input
+                type="date"
+                value={dateRange.end_date}
+                onChange={(e) =>
+                  setDateRange({ ...dateRange, end_date: e.target.value })
+                }
+                className={`w-full h-10 px-3 rounded-md border text-sm focus:outline-none focus:ring-2 ${
+                  isDateRangeInvalid
+                    ? "border-red-500 focus:ring-red-500"
+                    : "focus:ring-blue-500"
+                } dark:text-white`}
+                style={{
+                  backgroundColor: darkMode ? "#374151" : "#ffffff",
+                  borderColor: darkMode ? "#4b5563" : "#d1d5db",
+                  color: darkMode ? "#ffffff" : "#000000",
+                }}
+              />
+              {isDateRangeInvalid && (
+                <p className="text-xs text-red-500 mt-1">
+                  End date cannot be earlier than start date
+                </p>
+              )}
             </div>
           </div>
 
           <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              <strong>Note:</strong> The export will include all {title.toLowerCase()} data within the selected date range. 
-              Large date ranges may take longer to process.
+              <strong>Note:</strong> The export will include all{" "}
+              {title.toLowerCase()} data within the selected date range. Large
+              date ranges may take longer to process.
             </p>
           </div>
         </div>
       </DialogContent>
 
-      <DialogActions sx={{ borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` }}>
+      <DialogActions
+        sx={{ borderTop: `1px solid ${darkMode ? "#374151" : "#e5e7eb"}` }}
+      >
         <Button
           type="button"
           variant="outline"
           onClick={() => onOpenChange(false)}
           disabled={isExporting}
           style={{
-            backgroundColor: darkMode ? '#374151' : '#f9fafb',
-            color: darkMode ? '#f3f4f6' : '#374151',
-            borderColor: darkMode ? '#4b5563' : '#d1d5db'
+            backgroundColor: darkMode ? "#374151" : "#f9fafb",
+            color: darkMode ? "#f3f4f6" : "#374151",
+            borderColor: darkMode ? "#4b5563" : "#d1d5db",
           }}
         >
           <X className="w-4 h-4 mr-2" />
@@ -181,7 +201,12 @@ const CsvExportDialog: React.FC<CsvExportDialogProps> = ({
         </Button>
         <Button
           onClick={handleExport}
-          disabled={isExporting || !dateRange.start_date || !dateRange.end_date}
+          disabled={
+            isExporting ||
+            !dateRange.start_date ||
+            !dateRange.end_date ||
+            isDateRangeInvalid
+          }
           className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
         >
           {isExporting ? (

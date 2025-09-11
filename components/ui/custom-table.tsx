@@ -100,9 +100,9 @@ TableCell.displayName = "TableCell";
 export interface TableHeader {
   key: string;
   label: string;
-  type?: "text" | "action" | "custom";
-  sortable?: boolean;
   width?: string;
+  type?: "text" | "action";
+  renderData?: (row: any, rowIndex?: number) => React.ReactNode;
 }
 
 export interface MenuOption {
@@ -128,11 +128,12 @@ interface CustomTableProps {
   pageCount: number;
   totalPages: number;
   handleChangePages: (page: number) => void;
-  selected: string[];
-  setSelected: (selected: string[]) => void;
-  checkbox_selection?: boolean;
   onRowClick?: (item: any) => void;
-  renderCell?: (item: any, header: TableHeader) => React.ReactNode;
+  renderCell?: (
+    item: any,
+    header: TableHeader,
+    index?: number
+  ) => React.ReactNode;
   loading?: boolean;
   emptyMessage?: string;
 }
@@ -146,9 +147,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
   pageCount,
   totalPages,
   handleChangePages,
-  selected,
-  setSelected,
-  checkbox_selection = false,
   onRowClick,
   renderCell,
   loading = false,
@@ -161,25 +159,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
     handleChangePage,
     onRowsPerPageChange,
   } = custom_pagination;
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelected(data.map((item) => item._id));
-    } else {
-      setSelected([]);
-    }
-  };
-
-  const handleSelectRow = (id: string, checked: boolean) => {
-    if (checked) {
-      setSelected([...selected, id]);
-    } else {
-      setSelected(selected.filter((selectedId) => selectedId !== id));
-    }
-  };
-
-  const isAllSelected = data.length > 0 && selected.length === data.length;
-  const isIndeterminate = selected.length > 0 && selected.length < data.length;
 
   const startItem = (page - 1) * rows_per_page + 1;
   const endItem = Math.min(page * rows_per_page, total_count);
@@ -203,17 +182,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
         <Table className="min-w-full">
           <TableHeader>
             <TableRow className="bg-gray-50 dark:bg-gray-700/50">
-              {checkbox_selection && (
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={isAllSelected}
-                    onCheckedChange={handleSelectAll}
-                    ref={(ref: any) => {
-                      if (ref) ref.indeterminate = isIndeterminate;
-                    }}
-                  />
-                </TableHead>
-              )}
               {TABLE_HEAD.map((header) => (
                 <TableHead
                   key={header.key}
@@ -226,11 +194,12 @@ const CustomTable: React.FC<CustomTableProps> = ({
               ))}
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={TABLE_HEAD.length + (checkbox_selection ? 1 : 0)}
+                  colSpan={TABLE_HEAD.length}
                   className="text-center py-12"
                 >
                   <p className="text-gray-500 dark:text-gray-400">
@@ -239,22 +208,12 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((item) => (
+              data.map((item, rowIndex) => (
                 <TableRow
                   key={item._id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                   onClick={() => onRowClick?.(item)}
                 >
-                  {checkbox_selection && (
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={selected.includes(item._id)}
-                        onCheckedChange={(checked) =>
-                          handleSelectRow(item._id, checked as boolean)
-                        }
-                      />
-                    </TableCell>
-                  )}
                   {TABLE_HEAD.map((header) => (
                     <TableCell
                       key={header.key}
@@ -292,8 +251,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
-                      ) : renderCell ? (
-                        renderCell(item, header)
+                      ) : header.renderData ? (
+                        header.renderData(item, rowIndex)
                       ) : (
                         <span className="text-gray-900 dark:text-white">
                           {item[header.key]}
@@ -330,6 +289,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="5">5</SelectItem>
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="20">20</SelectItem>
                   <SelectItem value="50">50</SelectItem>
