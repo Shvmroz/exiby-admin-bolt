@@ -271,12 +271,22 @@ const CompaniesPageClient: React.FC = () => {
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Pagination state
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-  });
+  // Local pagination (handled fully by frontend)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+  // API meta (comes only from server)
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Table helpers
+  const handleChangePage = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const onRowsPerPageChange = (newLimit: number) => {
+    setRowsPerPage(newLimit);
+    setCurrentPage(1); // reset to first page
+  };
 
   // Load companies
   const loadCompanies = async (includeDeleted = false) => {
@@ -321,7 +331,8 @@ const CompaniesPageClient: React.FC = () => {
         setDeletedCompanies(filteredData);
       } else {
         setCompanies(filteredData);
-        setPagination(prev => ({ ...prev, total: filteredData.length }));
+        setTotalCount(filteredData.length);
+        setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
       }
     } catch (error) {
       console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} companies:`, error);
@@ -340,19 +351,11 @@ const CompaniesPageClient: React.FC = () => {
     } else if (activeTab === 'deleted') {
       loadCompanies(true);
     }
-  }, [searchQuery, pagination.page, pagination.limit, activeTab]);
+  }, [searchQuery, currentPage, rowsPerPage, activeTab]);
 
   if (loading && companies.length === 0) {
     return <TableSkeleton rows={8} columns={7} showFilters={true} />;
   }
-
-  const handleChangePage = (newPage: number) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
-  };
-
-  const onRowsPerPageChange = (newLimit: number) => {
-    setPagination(prev => ({ ...prev, limit: newLimit, page: 1 }));
-  };
 
   const handleEdit = (company: Company) => {
     setEditDialog({ open: true, company });
@@ -382,8 +385,9 @@ const CompaniesPageClient: React.FC = () => {
         prev.filter(company => company._id !== deleteDialog.company!._id)
       );
       
-      // Update pagination total
-      setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+      // Update total count
+      setTotalCount(prev => prev - 1);
+      setTotalPages(Math.ceil((totalCount - 1) / rowsPerPage));
       
       setDeleteDialog({ open: false, company: null });
     } catch (error) {
@@ -454,7 +458,8 @@ const CompaniesPageClient: React.FC = () => {
       
       // Add to local state
       setCompanies(prev => [newCompany, ...prev]);
-      setPagination(prev => ({ ...prev, total: prev.total + 1 }));
+      setTotalCount(prev => prev + 1);
+      setTotalPages(Math.ceil((totalCount + 1) / rowsPerPage));
       
       setCreateDialog(false);
     } catch (error) {
@@ -488,10 +493,8 @@ const CompaniesPageClient: React.FC = () => {
       !deletedCompanies.some(deleted => deleted._id === company._id)
     );
     setCompanies(activeCompanies);
-    setPagination(prev => ({
-      ...prev,
-      total: activeCompanies.length,
-    }));
+    setTotalCount(activeCompanies.length);
+    setTotalPages(Math.ceil(activeCompanies.length / rowsPerPage));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
   };
@@ -530,7 +533,8 @@ const CompaniesPageClient: React.FC = () => {
       }
 
       setCompanies(filteredData);
-      setPagination(prev => ({ ...prev, total: filteredData.length }));
+      setTotalCount(filteredData.length);
+      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
       setFilterDrawerOpen(false);
     } catch (error) {
       console.error('Error applying filters:', error);
@@ -572,9 +576,9 @@ const CompaniesPageClient: React.FC = () => {
 
   // Pagination for deleted companies
   const deletedPagination = {
-    total_count: deletedCompanies.length,
-    rows_per_page: pagination.limit,
-    page: pagination.page,
+    total_count: totalCount,
+    rows_per_page: rowsPerPage,
+    page: currentPage,
     handleChangePage,
     onRowsPerPageChange,
   };
@@ -790,20 +794,12 @@ const CompaniesPageClient: React.FC = () => {
             data={companies}
             TABLE_HEAD={TABLE_HEAD}
             MENU_OPTIONS={MENU_OPTIONS}
-            custom_pagination={{
-              total_count: pagination.total,
-              rows_per_page: pagination.limit,
-              page: pagination.page,
-              handleChangePage,
-              onRowsPerPageChange,
-            }}
-            pageCount={pagination.limit}
+            custom_pagination={deletedPagination}
             totalPages={totalPages}
             handleChangePages={handleChangePage}
             selected={selected}
             setSelected={setSelected}
             checkbox_selection={true}
-            onRowClick={handleRowClick}
             renderCell={renderCell}
             loading={loading}
             emptyMessage="No companies found"

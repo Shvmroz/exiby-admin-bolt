@@ -190,13 +190,22 @@ const PaymentPlansPageClient: React.FC = () => {
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Pagination state
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-  });
+  // Local pagination (handled fully by frontend)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+  // API meta (comes only from server)
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
+  // Table helpers
+  const handleChangePage = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const onRowsPerPageChange = (newLimit: number) => {
+    setRowsPerPage(newLimit);
+    setCurrentPage(1); // reset to first page
+  };
   // filter states
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -361,7 +370,8 @@ const PaymentPlansPageClient: React.FC = () => {
         setDeletedPlans(filteredData);
       } else {
         setPaymentPlans(filteredData);
-        setPagination((prev) => ({ ...prev, total: filteredData.length }));
+        setTotalCount(filteredData.length);
+        setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
       }
     } catch (error) {
       console.error(
@@ -383,19 +393,11 @@ const PaymentPlansPageClient: React.FC = () => {
     } else if (activeTab === "deleted") {
       loadPaymentPlans(true);
     }
-  }, [searchQuery, pagination.page, pagination.limit, activeTab]);
+  }, [searchQuery, currentPage, rowsPerPage, activeTab]);
 
   if (loading && paymentPlans.length === 0) {
     return <TableSkeleton rows={8} columns={8} showFilters={true} />;
   }
-
-  const handleChangePage = (newPage: number) => {
-    setPagination((prev) => ({ ...prev, page: newPage }));
-  };
-
-  const onRowsPerPageChange = (newLimit: number) => {
-    setPagination((prev) => ({ ...prev, limit: newLimit, page: 1 }));
-  };
 
   const handleEdit = (plan: PaymentPlan) => {
     setEditDialog({ open: true, plan });
@@ -425,8 +427,9 @@ const PaymentPlansPageClient: React.FC = () => {
         prev.filter((plan) => plan._id !== deleteDialog.plan!._id)
       );
 
-      // Update pagination total
-      setPagination((prev) => ({ ...prev, total: prev.total - 1 }));
+      // Update total count
+      setTotalCount(prev => prev - 1);
+      setTotalPages(Math.ceil((totalCount - 1) / rowsPerPage));
 
       setDeleteDialog({ open: false, plan: null });
     } catch (error) {
@@ -497,7 +500,8 @@ const PaymentPlansPageClient: React.FC = () => {
 
       // Add to local state
       setPaymentPlans((prev) => [newPlan, ...prev]);
-      setPagination((prev) => ({ ...prev, total: prev.total + 1 }));
+      setTotalCount(prev => prev + 1);
+      setTotalPages(Math.ceil((totalCount + 1) / rowsPerPage));
 
       setCreateDialog(false);
     } catch (error) {
@@ -529,10 +533,8 @@ const PaymentPlansPageClient: React.FC = () => {
       !deletedPlans.some(deleted => deleted._id === plan._id)
     );
     setPaymentPlans(activePlans);
-    setPagination((prev) => ({
-      ...prev,
-      total: activePlans.length,
-    }));
+    setTotalCount(activePlans.length);
+    setTotalPages(Math.ceil(activePlans.length / rowsPerPage));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
   };
@@ -559,9 +561,9 @@ const PaymentPlansPageClient: React.FC = () => {
 
   // Pagination for deleted plans
   const deletedPagination = {
-    total_count: deletedPlans.length,
-    rows_per_page: pagination.limit,
-    page: pagination.page,
+    total_count: totalCount,
+    rows_per_page: rowsPerPage,
+    page: currentPage,
     handleChangePage,
     onRowsPerPageChange,
   };
@@ -601,7 +603,8 @@ const PaymentPlansPageClient: React.FC = () => {
       }
 
       setPaymentPlans(filteredData);
-      setPagination((prev) => ({ ...prev, total: filteredData.length }));
+      setTotalCount(filteredData.length);
+      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
       setFilterDrawerOpen(false);
     } catch (error) {
       console.error("Error applying filters:", error);
@@ -665,7 +668,6 @@ const PaymentPlansPageClient: React.FC = () => {
 
   
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
 
   return (
     <div className="space-y-6">
@@ -754,16 +756,8 @@ const PaymentPlansPageClient: React.FC = () => {
             data={paymentPlans}
             TABLE_HEAD={TABLE_HEAD}
             MENU_OPTIONS={MENU_OPTIONS}
-            custom_pagination={{
-              total_count: pagination.total,
-              rows_per_page: pagination.limit,
-              page: pagination.page,
-              handleChangePage,
-              onRowsPerPageChange,
-            }}
-            pageCount={pagination.limit}
+            custom_pagination={deletedPagination}
             totalPages={totalPages}
-            handleChangePages={handleChangePage}
             loading={loading}
             emptyMessage="No payment plans found"
           />
