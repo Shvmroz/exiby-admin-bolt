@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import AnalyticsPageClient from '@/components/pages/AnalyticsPageClient';
+import AnalyticsPageClient from './AnalyticsPageClient';
 
 export default function AnalyticsPage() {
   return (

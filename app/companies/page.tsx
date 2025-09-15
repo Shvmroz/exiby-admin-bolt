@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import CompaniesPageClient from '@/components/pages/CompaniesPageClient';
+import CompaniesPageClient from './CompaniesPageClient';
 
 export default function CompaniesPage() {
   return (

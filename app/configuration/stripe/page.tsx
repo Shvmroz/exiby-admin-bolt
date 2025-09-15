@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import StripeConfigurationPageClient from '@/components/pages/StripeConfigurationPageClient';
+import StripeConfigurationPageClient from './StripeConfigurationPageClient';
 
 export default function StripeConfigurationPage() {
   return (

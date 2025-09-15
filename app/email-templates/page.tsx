@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import EmailTemplatesPageClient from '@/components/pages/EmailTemplatesPageClient';
+import EmailTemplatesPageClient from './EmailTemplatesPageClient';
 
 export default function EmailTemplatesPage() {
   return (

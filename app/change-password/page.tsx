@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import ChangePasswordPageClient from '@/components/pages/ChangePasswordPageClient';
+import ChangePasswordPageClient from './ChangePasswordPageClient';
 
 export default function ChangePasswordPage() {
   return (

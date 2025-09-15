@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import SettingsPageClient from '@/components/pages/SettingsPageClient';
+import SettingsPageClient from './SettingsPageClient';
 
 export default function SettingsPage() {
   return (

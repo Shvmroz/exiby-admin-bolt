@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import TeamPageClient from '@/components/pages/TeamPageClient';
+import TeamPageClient from './TeamPageClient';
 
 export default function TeamPage() {
   return (

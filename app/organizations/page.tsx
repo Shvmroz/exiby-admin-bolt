@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import OrganizationsPageClient from '@/components/pages/OrganizationsPageClient';
+import OrganizationsPageClient from './OrganizationsPageClient';
 
 export default function OrganizationsPage() {
   return (

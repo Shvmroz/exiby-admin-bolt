@@ -6,7 +6,7 @@ import { User, Mail, Save, Pencil, Image as ImageIcon, Trash } from "lucide-reac
 import { useAppContext } from "@/contexts/AppContext";
 import { _update_admin_profile_api } from "@/DAL/authAPI";
 import { useSnackbar } from "notistack";
-import Spinner from "../ui/spinner";
+import Spinner from "../../components/ui/spinner";
 import { s3baseUrl } from "@/config/config";
 import { deleteFileFunction, uploadFileFunction } from "@/utils/fileUploadRemoveFunctions";
 

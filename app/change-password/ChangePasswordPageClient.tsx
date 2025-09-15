@@ -5,7 +5,7 @@ import { Lock, Save, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 import { _change_password_api } from "@/DAL/authAPI";
-import Spinner from "../ui/spinner";
+import Spinner from "../../components/ui/spinner";
 
 const ChangePasswordPageClient: React.FC = () => {
   const router = useRouter();

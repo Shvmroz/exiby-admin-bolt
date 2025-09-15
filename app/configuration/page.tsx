@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import ConfigurationPageClient from '@/components/pages/ConfigurationPageClient';
+import ConfigurationPageClient from './ConfigurationPageClient';
 
 export default function ConfigurationPage() {
   return (

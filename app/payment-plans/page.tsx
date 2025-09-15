@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import PaymentPlansPageClient from '@/components/pages/PaymentPlansPageClient';
+import PaymentPlansPageClient from './PaymentPlansPageClient';
 
 export default function PaymentPlansPage() {
   return (

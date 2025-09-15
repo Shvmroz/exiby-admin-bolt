@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import DashboardPageClient from '@/components/pages/DashboardPageClient';
+import DashboardPageClient from './DashboardPageClient';
 
 export default function DashboardPage() {
   return (

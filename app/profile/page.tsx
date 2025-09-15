@@ -1,5 +1,5 @@
 import MainLayout from '@/components/layout/MainLayout';
-import ProfilePageClient from '@/components/pages/ProfilePageClient';
+import ProfilePageClient from './ProfilePageClient';
 
 export default function ProfilePage() {
   return (
