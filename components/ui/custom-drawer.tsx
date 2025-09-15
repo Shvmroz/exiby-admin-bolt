@@ -41,6 +41,10 @@ const CustomDrawer: React.FC<CustomDrawerProps> = ({
 }) => {
   return (
     <SheetPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <SheetPrimitive.Description className="sr-only">
+        This drawer contains filter options for the list.
+      </SheetPrimitive.Description>
+      
       <SheetPrimitive.Portal>
         {/* Overlay */}
         <SheetPrimitive.Overlay
@@ -61,10 +65,11 @@ const CustomDrawer: React.FC<CustomDrawerProps> = ({
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="flex items-center text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <SheetPrimitive.Title className="flex items-center text-lg font-semibold text-gray-900 dark:text-gray-100">
               <Filter className="w-5 h-5 mr-2 text-blue-500" />
-              {title ? title : "Filters"}
-            </h2>
+              {title || "Filters"}
+            </SheetPrimitive.Title>
+
             <SheetPrimitive.Close className="p-1 rounded opacity-70 hover:opacity-100 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none ">
               <X className="h-5 w-5 text-gray-900 dark:text-gray-100" />
               <span className="sr-only">Close</span>
