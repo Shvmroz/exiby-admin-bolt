@@ -1,32 +1,38 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { CheckCircle, XCircle, Users } from 'lucide-react';
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface TeamFiltersProps {
   statusFilter: string;
   setStatusFilter: (value: string) => void;
-  activeOnly: boolean;
-  setActiveOnly: (value: boolean) => void;
+  createdFrom: string;
+  setCreatedFrom: (value: string) => void;
+  createdTo: string;
+  setCreatedTo: (value: string) => void;
+  isDateRangeInvalid: boolean;
 }
 
 const TeamFilters: React.FC<TeamFiltersProps> = ({
   statusFilter,
   setStatusFilter,
-  activeOnly,
-  setActiveOnly,
+  createdFrom,
+  setCreatedFrom,
+  createdTo,
+  setCreatedTo,
+  isDateRangeInvalid,
 }) => {
+
   return (
     <div className="space-y-6">
-
       {/* Status Filter */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -53,6 +59,33 @@ const TeamFilters: React.FC<TeamFiltersProps> = ({
           </SelectContent>
         </Select>
       </div>
+
+      {/* Date Range Filter */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Created From
+        </label>
+        <Input
+          type="date"
+          value={createdFrom}
+          onChange={(e) => setCreatedFrom(e.target.value)}
+        />
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Created To
+        </label>
+        <Input
+          type="date"
+          value={createdTo}
+          onChange={(e) => setCreatedTo(e.target.value)}
+        />
+          {isDateRangeInvalid && (
+        <p className="text-xs text-red-500 mt-1">
+          End date cannot be earlier than start date
+        </p>
+      )}
+      </div>
+
+    
     </div>
   );
 };

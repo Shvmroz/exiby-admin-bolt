@@ -79,11 +79,12 @@ const TeamPageClient: React.FC = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
-  const [activeOnly, setActiveOnly] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
   const [exportDialog, setExportDialog] = useState(false);
 
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
 
   const [filtersApplied, setFiltersApplied] = useState({
     search: "",
@@ -95,12 +96,11 @@ const TeamPageClient: React.FC = () => {
   // Local pagination (handled fully by frontend)
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  // API meta (comes only from server)
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-   // Table helpers
-   const handleChangePage = (newPage: number) => {
+  // Table helpers
+  const handleChangePage = (newPage: number) => {
     setCurrentPage(newPage);
   };
 
@@ -178,8 +178,6 @@ const TeamPageClient: React.FC = () => {
       type: "action",
     },
   ];
-
- 
 
   const handleDelete = (member: TeamMember) => {
     setDeleteDialog({ open: true, member });
@@ -288,18 +286,35 @@ const TeamPageClient: React.FC = () => {
     }
   };
 
-  const getAllTeamList = async () => {
+  const handleSearch = () => {
+    setCurrentPage(1);
+    getAllTeamList(searchQuery);
+  };
+
+  const getAllTeamList = async (
+    searchQuery?: string,
+    filters?: { status?: string; created_from?: string; created_to?: string }
+  ) => {
     setLoading(true);
-  
     try {
-      const result = await _admin_team_list_api(currentPage, rowsPerPage);
-  
+      const apiFilters = {
+        status: filters?.status ?? "",
+        created_from: filters?.created_from ?? "",
+        created_to: filters?.created_to ?? "",
+      };
+
+      // Call API with search query and filters
+      const result = await _admin_team_list_api(
+        currentPage,
+        rowsPerPage,
+        searchQuery || "",
+        apiFilters
+      );
+
       if (result?.code === 200) {
         setTeamMembers(result.data.admins || []);
-  
         setTotalCount(result.data.total_count);
         setTotalPages(result.data.total_pages);
-  
         setFiltersApplied(result.data.filters_applied || filtersApplied);
       } else {
         enqueueSnackbar(result?.message || "Failed to load team members", {
@@ -315,21 +330,47 @@ const TeamPageClient: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
-  const getAppliedFiltersCount = () =>
-    (statusFilter !== "all" ? 1 : 0) + (activeOnly ? 1 : 0);
-  const handleClearFilters = () => {
-    setStatusFilter("all");
-    setActiveOnly(false);
-    getAllTeamList();
+  const handleApplyFilters = () => {
+    const filters: {
+      status?: string;
+      created_from?: string;
+      created_to?: string;
+    } = {};
+
+    // Status filter as string
+    if (statusFilter === "active") filters.status = "true";
+    else if (statusFilter === "inactive") filters.status = "false";
+    else filters.status = ""; // empty string if no value
+
+    // Date range
+    if (createdFrom) filters.created_from = createdFrom;
+    if (createdTo) filters.created_to = createdTo;
+
+    // Call API with search query and filters
+    getAllTeamList(searchQuery, filters);
+
+    // Close filter drawer
     setFilterDrawerOpen(false);
   };
-  const handleApplyFilters = async () => {
-    setFilterLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+
+  const isDateRangeInvalid = Boolean(
+    createdFrom && createdTo && new Date(createdTo) < new Date(createdFrom)
+  );
+
+  const getAppliedFiltersCount = () => {
+    let count = 0;
+    if (statusFilter !== "all") count += 1;
+    if (createdFrom) count += 1;
+    if (createdTo) count += 1;
+    return count;
+  };
+  const handleClearFilters = () => {
+    setStatusFilter("all");
+    setCreatedFrom("");
+    setCreatedTo("");
+    getAllTeamList();
     setFilterDrawerOpen(false);
-    setFilterLoading(false);
   };
 
   const MENU_OPTIONS: MenuOption[] = [
@@ -346,19 +387,6 @@ const TeamPageClient: React.FC = () => {
       variant: "destructive",
     },
   ];
-
-  const getStatusBadge = (status: boolean) =>
-    status ? (
-      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 ">
-        <CheckCircle className="w-3 h-3 mr-1" />
-        Active
-      </Badge>
-    ) : (
-      <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
-        <XCircle className="w-3 h-3 mr-1" />
-        Inactive
-      </Badge>
-    );
 
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("en-US", {
@@ -404,6 +432,19 @@ const TeamPageClient: React.FC = () => {
   useEffect(() => {
     getAllTeamList();
   }, [currentPage, rowsPerPage]);
+// =============================================================================================
+  const getStatusBadge = (status: boolean) =>
+    status ? (
+      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 ">
+        <CheckCircle className="w-3 h-3 mr-1" />
+        Active
+      </Badge>
+    ) : (
+      <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
+        <XCircle className="w-3 h-3 mr-1" />
+        Inactive
+      </Badge>
+    );
 
   if (loading && teamMembers.length === 0) {
     return <TableSkeleton rows={8} columns={5} showFilters={true} />;
@@ -452,18 +493,32 @@ const TeamPageClient: React.FC = () => {
                   placeholder="Search team members..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-24" // leave space for button
+                  className="pl-10 pr-24"
                 />
               </div>
 
               {/* Search Button */}
-              <Button
-                // onClick={handleSearch}
-                variant="outline"
-                className="absolute right-0 top-1/2 transform -translate-y-1/2  border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Search
-              </Button>
+              {filtersApplied?.search && filtersApplied.search !== "" ? (
+                <Button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCurrentPage(1);
+                    getAllTeamList(""); // reset to no search
+                  }}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Clear
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSearch}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Search
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -561,12 +616,16 @@ const TeamPageClient: React.FC = () => {
         onClear={handleClearFilters}
         onFilter={handleApplyFilters}
         loading={filterLoading}
+        applyButtonDisabled={isDateRangeInvalid}
       >
         <TeamFilters
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          activeOnly={activeOnly}
-          setActiveOnly={setActiveOnly}
+          createdFrom={createdFrom}
+          setCreatedFrom={setCreatedFrom}
+          createdTo={createdTo}
+          setCreatedTo={setCreatedTo}
+          isDateRangeInvalid={isDateRangeInvalid}
         />
       </CustomDrawer>
     </div>

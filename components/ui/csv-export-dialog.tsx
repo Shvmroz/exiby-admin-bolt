@@ -128,18 +128,12 @@ const CsvExportDialog: React.FC<CsvExportDialogProps> = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Start Date
               </label>
-              <input
+              <Input
                 type="date"
                 value={dateRange.start_date}
                 onChange={(e) =>
                   setDateRange({ ...dateRange, start_date: e.target.value })
                 }
-                className=" w-full h-10 px-3 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-                style={{
-                  backgroundColor: darkMode ? "#374151" : "#ffffff",
-                  borderColor: darkMode ? "#4b5563" : "#d1d5db",
-                  color: darkMode ? "#ffffff" : "#000000",
-                }}
               />
             </div>
 
@@ -147,23 +141,14 @@ const CsvExportDialog: React.FC<CsvExportDialogProps> = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 End Date
               </label>
-              <input
+              <Input
                 type="date"
                 value={dateRange.end_date}
                 onChange={(e) =>
                   setDateRange({ ...dateRange, end_date: e.target.value })
                 }
-                className={`w-full h-10 px-3 rounded-md border text-sm focus:outline-none focus:ring-2 ${
-                  isDateRangeInvalid
-                    ? "border-red-500 focus:ring-red-500"
-                    : "focus:ring-blue-500"
-                } dark:text-white`}
-                style={{
-                  backgroundColor: darkMode ? "#374151" : "#ffffff",
-                  borderColor: darkMode ? "#4b5563" : "#d1d5db",
-                  color: darkMode ? "#ffffff" : "#000000",
-                }}
               />
+
               {isDateRangeInvalid && (
                 <p className="text-xs text-red-500 mt-1">
                   End date cannot be earlier than start date
