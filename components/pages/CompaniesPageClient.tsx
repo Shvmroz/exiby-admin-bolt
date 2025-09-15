@@ -29,13 +29,7 @@ import SoftDeleteTable from '@/components/ui/soft-delete-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
@@ -222,16 +216,6 @@ const dummyData = {
   }
 };
 
-const TABLE_HEAD: TableHeader[] = [
-  { key: 'company', label: 'Company', type: 'custom' },
-  { key: 'industry', label: 'Industry', type: 'custom' },
-  { key: 'contact', label: 'Contact', type: 'custom' },
-  { key: 'status', label: 'Status', type: 'custom' },
-  { key: 'total_events', label: 'Events', type: 'custom' },
-  { key: 'total_payments', label: 'Payments', type: 'custom' },
-  { key: 'created_at', label: 'Created', type: 'custom' },
-  { key: 'action', label: '', type: 'action', width: 'w-12' },
-];
 
 const CompaniesPageClient: React.FC = () => {
   const router = useRouter();
@@ -239,7 +223,6 @@ const CompaniesPageClient: React.FC = () => {
   const [deletedCompanies, setDeletedCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletedLoading, setDeletedLoading] = useState(false);
-  const [selected, setSelected] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -278,7 +261,127 @@ const CompaniesPageClient: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Load companies
+
+
+  const TABLE_HEAD: TableHeader[] = [
+    {
+      key: "index",
+      label: "#",
+      renderData: (row, rowIndex) => (
+        <span className="text-gray-500 dark:text-gray-400 text-sm">
+          {rowIndex !== undefined ? rowIndex + 1 : "-"}.
+        </span>
+      ),
+    },
+    {
+      key: "company",
+      label: "Company",
+      renderData: (company: Company) => (
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Building className="w-5 h-5 text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {company.orgn_user.name}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              {company.bio.description}
+            </div>
+            {company.social_links.website && (
+              <a
+                href={company.social_links.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center text-xs text-[#0077ED] hover:text-[#0066CC] mt-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="w-3 h-3 mr-1" />
+                Website
+              </a>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "industry",
+      label: "Industry",
+      renderData: (company: Company) => (
+        <div className="flex items-center space-x-2">
+          <span className="font-medium text-gray-900 dark:text-white">
+            {company.bio.industry}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "contact",
+      label: "Contact",
+      renderData: (company: Company) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2 text-sm">
+            <Mail className="w-3 h-3 text-gray-400" />
+            <span className="text-gray-600 dark:text-gray-400 truncate">
+              {company.contact.email}
+            </span>
+          </div>
+          <div className="flex items-center space-x-2 text-sm">
+            <Phone className="w-3 h-3 text-gray-400" />
+            <span className="text-gray-600 dark:text-gray-400">
+              {company.contact.phone}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      renderData: (company: Company) => getStatusBadge(company.status),
+    },
+    {
+      key: "total_events",
+      label: "Events",
+      renderData: (company: Company) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="w-4 h-4 text-purple-500" />
+          <span className="font-medium text-gray-900 dark:text-white">
+            {company.total_events}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "total_payments",
+      label: "Payments",
+      renderData: (company: Company) => (
+        <div className="flex items-center space-x-2">
+          <DollarSign className="w-4 h-4 text-green-500" />
+          <span className="font-medium text-green-600 dark:text-green-400">
+            ${company.total_payments.toLocaleString()}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "created_at",
+      label: "Created",
+      renderData: (company: Company) => (
+        <span className="text-gray-600 dark:text-gray-400">
+          {formatDate(company.created_at)}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      label: "",
+      type: "action",
+      width: "w-12",
+    },
+  ];
+  
+
   const loadCompanies = async (includeDeleted = false) => {
     if (includeDeleted) {
       setDeletedLoading(true);
@@ -557,14 +660,7 @@ const CompaniesPageClient: React.FC = () => {
     setCurrentPage(1); // reset to first page
   };
 
-  // Pagination configuration
-  const paginationConfig = {
-    total_count: totalCount,
-    rows_per_page: rowsPerPage,
-    page: currentPage,
-    handleChangePage,
-    onRowsPerPageChange,
-  };
+
 
   const MENU_OPTIONS: MenuOption[] = [
     {
@@ -600,100 +696,6 @@ const CompaniesPageClient: React.FC = () => {
     });
   };
 
-  const renderCell = (company: Company, header: TableHeader) => {
-    switch (header.key) {
-      case 'company':
-        return (
-          <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Building className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="font-semibold text-gray-900 dark:text-white">
-                {company.orgn_user.name}
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                {company.bio.description}
-              </div>
-              {company.social_links.website && (
-                <a
-                  href={company.social_links.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center text-xs text-[#0077ED] hover:text-[#0066CC] mt-1"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <ExternalLink className="w-3 h-3 mr-1" />
-                  Website
-                </a>
-              )}
-            </div>
-          </div>
-        );
-
-      case 'industry':
-        return (
-          <div className="flex items-center space-x-2">
-            <span className="font-medium text-gray-900 dark:text-white">
-              {company.bio.industry}
-            </span>
-          </div>
-        );
-
-      case 'contact':
-        return (
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2 text-sm">
-              <Mail className="w-3 h-3 text-gray-400" />
-              <span className="text-gray-600 dark:text-gray-400 truncate">
-                {company.contact.email}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2 text-sm">
-              <Phone className="w-3 h-3 text-gray-400" />
-              <span className="text-gray-600 dark:text-gray-400">
-                {company.contact.phone}
-              </span>
-            </div>
-          </div>
-        );
-
-      case 'status':
-        return getStatusBadge(company.status);
-
-      case 'total_events':
-        return (
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-purple-500" />
-            <span className="font-medium text-gray-900 dark:text-white">
-              {company.total_events}
-            </span>
-          </div>
-        );
-
-      case 'total_payments':
-        return (
-          <div className="flex items-center space-x-2">
-            <DollarSign className="w-4 h-4 text-green-500" />
-            <span className="font-medium text-green-600 dark:text-green-400">
-              ${company.total_payments.toLocaleString()}
-            </span>
-          </div>
-        );
-
-      case 'created_at':
-        return (
-          <span className="text-gray-600 dark:text-gray-400">
-            {formatDate(company.created_at)}
-          </span>
-        );
-
-      default:
-        return <span>{company[header.key as keyof Company] as string}</span>;
-    }
-  };
-
-  const totalPages = Math.ceil(totalCount / rowsPerPage);
 
   return (
     <div className="space-y-6">
@@ -777,9 +779,14 @@ const CompaniesPageClient: React.FC = () => {
             data={companies}
             TABLE_HEAD={TABLE_HEAD}
             MENU_OPTIONS={MENU_OPTIONS}
-            custom_pagination={paginationConfig}
+            custom_pagination={{
+              total_count: totalCount,
+              rows_per_page: rowsPerPage,
+              page: currentPage,
+              handleChangePage,
+              onRowsPerPageChange,
+            }}
             totalPages={totalPages}
-            renderCell={renderCell}
             onRowClick={handleRowClick}
             loading={loading}
             emptyMessage="No companies found"
@@ -798,7 +805,13 @@ const CompaniesPageClient: React.FC = () => {
             getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}
             restoreLoading={restoreLoading}
             deleteLoading={permanentDeleteLoading}
-            pagination={paginationConfig}
+            pagination={{
+              total_count: totalCount,
+              rows_per_page: rowsPerPage,
+              page: currentPage,
+              handleChangePage,
+              onRowsPerPageChange,
+            }}
           />
         </TabsContent>
       </Tabs>

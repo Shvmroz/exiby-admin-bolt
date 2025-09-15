@@ -563,14 +563,6 @@ const OrganizationsPageClient: React.FC = () => {
     return Math.max(0, daysLeft);
   };
 
-  // Pagination for deleted organizations
-  const deletedPagination = {
-    total_count: totalCount,
-    rows_per_page: rowsPerPage,
-    page: currentPage,
-    handleChangePage,
-    onRowsPerPageChange,
-  };
 
   const handleApplyFilters = async () => {
     setFilterLoading(true);
@@ -743,7 +735,13 @@ const OrganizationsPageClient: React.FC = () => {
             data={organizations}
             TABLE_HEAD={TABLE_HEAD}
             MENU_OPTIONS={MENU_OPTIONS}
-            custom_pagination={deletedPagination}
+            custom_pagination={{
+              total_count: totalCount,
+              rows_per_page: rowsPerPage,
+              page: currentPage,
+              handleChangePage,
+              onRowsPerPageChange,
+            }}
             totalPages={totalPages}
             onRowClick={handleRowClick}
             loading={loading}
@@ -763,7 +761,13 @@ const OrganizationsPageClient: React.FC = () => {
             getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}
             restoreLoading={restoreLoading}
             deleteLoading={permanentDeleteLoading}
-            pagination={deletedPagination}
+            pagination={{
+              total_count: totalCount,
+              rows_per_page: rowsPerPage,
+              page: currentPage,
+              handleChangePage,
+              onRowsPerPageChange,
+            }}
           />
         </TabsContent>
       </Tabs>

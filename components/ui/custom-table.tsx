@@ -126,32 +126,35 @@ interface CustomTableProps {
   MENU_OPTIONS: MenuOption[];
   custom_pagination: PaginationConfig;
   totalPages: number;
-  renderCell?: (item: any, header: TableHeader) => React.ReactNode;
   onRowClick?: (item: any) => void;
+  renderCell?: (
+    item: any,
+    header: TableHeader,
+    index?: number
+  ) => React.ReactNode;
   loading?: boolean;
   emptyMessage?: string;
 }
 
 
 // ---------------- CustomTable Component ----------------
-const CustomTable: React.FC<CustomTableProps> = ({
-  data,
-  TABLE_HEAD,
-  MENU_OPTIONS,
-  custom_pagination,
-  totalPages,
-  renderCell,
-  onRowClick,
-  loading = false,
-  emptyMessage = "No data available",
-}) => {
-  const {
-    total_count,
-    rows_per_page,
-    page,
-    handleChangePage,
-    onRowsPerPageChange,
-  } = custom_pagination;
+  const CustomTable: React.FC<CustomTableProps> = ({
+    data,
+    TABLE_HEAD,
+    MENU_OPTIONS,
+    custom_pagination,
+    totalPages,
+    onRowClick,
+    loading = false,
+    emptyMessage = "No data available",
+  }) => {
+    const {
+      total_count,
+      rows_per_page,
+      page,
+      handleChangePage,
+      onRowsPerPageChange,
+    } = custom_pagination;
   
 
   const startItem = (page - 1) * rows_per_page + 1;
@@ -245,8 +248,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
-                      ) : renderCell ? (
-                        renderCell(item, header)
                       ) : header.renderData ? (
                         header.renderData(item, rowIndex)
                       ) : (
