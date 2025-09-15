@@ -126,6 +126,7 @@ interface CustomTableProps {
   MENU_OPTIONS: MenuOption[];
   custom_pagination: PaginationConfig;
   totalPages: number;
+  renderCell?: (item: any, header: TableHeader) => React.ReactNode;
   onRowClick?: (item: any) => void;
   loading?: boolean;
   emptyMessage?: string;
@@ -139,6 +140,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   MENU_OPTIONS,
   custom_pagination,
   totalPages,
+  renderCell,
   onRowClick,
   loading = false,
   emptyMessage = "No data available",
@@ -243,6 +245,8 @@ const CustomTable: React.FC<CustomTableProps> = ({
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
+                      ) : renderCell ? (
+                        renderCell(item, header)
                       ) : header.renderData ? (
                         header.renderData(item, rowIndex)
                       ) : (
