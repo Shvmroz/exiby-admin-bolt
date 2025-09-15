@@ -39,8 +39,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SoftDeleteTable from "@/components/ui/soft-delete-table";
 import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
 
 interface PaymentPlan {
@@ -166,11 +164,8 @@ const dummyData = {
 const PaymentPlansPageClient: React.FC = () => {
   const router = useRouter();
   const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>([]);
-  const [deletedPlans, setDeletedPlans] = useState<PaymentPlan[]>([]);
   const [loading, setLoading] = useState(false);
-  const [deletedLoading, setDeletedLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -184,8 +179,6 @@ const PaymentPlansPageClient: React.FC = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
-  const [restoreLoading, setRestoreLoading] = useState(false);
-  const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
@@ -334,24 +327,13 @@ const PaymentPlansPageClient: React.FC = () => {
   
 
   // Load payment plans
-  const loadPaymentPlans = async (includeDeleted = false) => {
-    if (includeDeleted) {
-      setDeletedLoading(true);
-    } else {
-      setLoading(true);
-    }
+  const loadPaymentPlans = async () => {
+    setLoading(true);
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Get active payment plans (exclude deleted ones)
-      const activePlans = dummyData.data.payment_plans.filter(plan => 
-        !deletedPlans.some(deleted => deleted._id === plan._id)
-      );
-      
-      let filteredData = includeDeleted
-        ? deletedPlans
-        : activePlans;
+      let filteredData = dummyData.data.payment_plans;
 
       if (searchQuery) {
         filteredData = filteredData.filter(
@@ -366,34 +348,22 @@ const PaymentPlansPageClient: React.FC = () => {
         );
       }
 
-      if (includeDeleted) {
-        setDeletedPlans(filteredData);
-      } else {
-        setPaymentPlans(filteredData);
-        setTotalCount(filteredData.length);
-        setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
-      }
+      setPaymentPlans(filteredData);
+      setTotalCount(filteredData.length);
+      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
     } catch (error) {
       console.error(
-        `Error loading ${includeDeleted ? "deleted" : "active"} payment plans:`,
+        "Error loading payment plans:",
         error
       );
     } finally {
-      if (includeDeleted) {
-        setDeletedLoading(false);
-      } else {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeTab === "all") {
-      loadPaymentPlans(false);
-    } else if (activeTab === "deleted") {
-      loadPaymentPlans(true);
-    }
-  }, [searchQuery, currentPage, rowsPerPage, activeTab]);
+    loadPaymentPlans();
+  }, [searchQuery, currentPage, rowsPerPage]);
 
   if (loading && paymentPlans.length === 0) {
     return <TableSkeleton rows={8} columns={8} showFilters={true} />;
@@ -415,14 +385,7 @@ const PaymentPlansPageClient: React.FC = () => {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Move to deleted plans (soft delete)
-      const deletedPlan = {
-        ...deleteDialog.plan,
-        deleted_at: new Date().toISOString(),
-        is_deleted: true,
-      };
-
-      setDeletedPlans((prev) => [deletedPlan, ...prev]); // ✅ adds in real-time
+      // Remove plan permanently
       setPaymentPlans((prev) =>
         prev.filter((plan) => plan._id !== deleteDialog.plan!._id)
       );
@@ -436,40 +399,6 @@ const PaymentPlansPageClient: React.FC = () => {
       console.error("Error deleting payment plan:", error);
     } finally {
       setDeleteLoading(false);
-    }
-  };
-
-  const handleRestore = async (plan: PaymentPlan) => {
-    setRestoreLoading(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Remove deleted_at and is_deleted properties
-      const { deleted_at, is_deleted, ...restoredPlan } = plan;
-
-      // Move back to active plans
-      setPaymentPlans((prev) => [restoredPlan, ...prev]);
-      setDeletedPlans((prev) => prev.filter((p) => p._id !== plan._id));
-    } catch (error) {
-      console.error("Error restoring payment plan:", error);
-    } finally {
-      setRestoreLoading(false);
-    }
-  };
-
-  const handlePermanentDelete = async (plan: PaymentPlan) => {
-    setPermanentDeleteLoading(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Remove from deleted plans permanently
-      setDeletedPlans((prev) => prev.filter((p) => p._id !== plan._id));
-    } catch (error) {
-      console.error("Error permanently deleting payment plan:", error);
-    } finally {
-      setPermanentDeleteLoading(false);
     }
   };
 
@@ -528,48 +457,19 @@ const PaymentPlansPageClient: React.FC = () => {
     setBillingCycleFilter("all");
     setPopularOnly(false);
     
-    // Get active payment plans (exclude deleted ones)
-    const activePlans = dummyData.data.payment_plans.filter(plan => 
-      !deletedPlans.some(deleted => deleted._id === plan._id)
-    );
-    setPaymentPlans(activePlans);
-    setTotalCount(activePlans.length);
-    setTotalPages(Math.ceil(activePlans.length / rowsPerPage));
+    setPaymentPlans(dummyData.data.payment_plans);
+    setTotalCount(dummyData.data.payment_plans.length);
+    setTotalPages(Math.ceil(dummyData.data.payment_plans.length / rowsPerPage));
     setFilterDrawerOpen(false);
     setFilterLoading(false);
   };
-
-  // Helper functions for soft delete table
-  const getItemName = (plan: PaymentPlan) => plan.plan_name;
-
-  const getDeletedAt = (plan: PaymentPlan) => plan.deleted_at || "";
-
-  const getDaysUntilPermanentDelete = (plan: PaymentPlan) => {
-    if (!plan.deleted_at) return 30;
-
-    const deletedDate = new Date(plan.deleted_at);
-    const permanentDeleteDate = new Date(
-      deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000
-    ); // 30 days
-    const now = new Date();
-    const daysLeft = Math.ceil(
-      (permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
-    );
-
-    return Math.max(0, daysLeft);
-  };
-
 
   const handleApplyFilters = async () => {
     setFilterLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
       
-      // Get active payment plans (exclude deleted ones)
-      const activePlans = dummyData.data.payment_plans.filter(plan => 
-        !deletedPlans.some(deleted => deleted._id === plan._id)
-      );
-      let filteredData = activePlans;
+      let filteredData = dummyData.data.payment_plans;
 
       if (statusFilter !== "all") {
         const isActive = statusFilter === "active";
@@ -726,71 +626,29 @@ const PaymentPlansPageClient: React.FC = () => {
       </div>
 
       {/* Payment Plans Table */}
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-6"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="all">
-            All Plans ({paymentPlans.length})
-          </TabsTrigger>
-          <TabsTrigger
-            className="data-[state=active]:text-red-500"
-            value="deleted"
-          >
-            Deleted Plans ({deletedPlans.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-6">
-          <CustomTable
-            data={paymentPlans}
-            TABLE_HEAD={TABLE_HEAD}
-            MENU_OPTIONS={MENU_OPTIONS}
-            custom_pagination={{
-              total_count: totalCount,
-              rows_per_page: rowsPerPage,
-              page: currentPage,
-              handleChangePage,
-              onRowsPerPageChange,
-            }}
-            totalPages={totalPages}
-            loading={loading}
-            emptyMessage="No payment plans found"
-          />
-        </TabsContent>
-
-        <TabsContent value="deleted" className="space-y-6">
-          <SoftDeleteTable
-            data={deletedPlans}
-            loading={deletedLoading}
-            emptyMessage="No deleted payment plans found"
-            onRestore={handleRestore}
-            onPermanentDelete={handlePermanentDelete}
-            getItemName={getItemName}
-            getDeletedAt={getDeletedAt}
-            getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}
-            restoreLoading={restoreLoading}
-            deleteLoading={permanentDeleteLoading}
-            pagination={{
-              total_count: totalCount,
-              rows_per_page: rowsPerPage,
-              page: currentPage,
-              handleChangePage,
-              onRowsPerPageChange,
-            }}
-          />
-        </TabsContent>
-      </Tabs>
+      <CustomTable
+        data={paymentPlans}
+        TABLE_HEAD={TABLE_HEAD}
+        MENU_OPTIONS={MENU_OPTIONS}
+        custom_pagination={{
+          total_count: totalCount,
+          rows_per_page: rowsPerPage,
+          page: currentPage,
+          handleChangePage,
+          onRowsPerPageChange,
+        }}
+        totalPages={totalPages}
+        loading={loading}
+        emptyMessage="No payment plans found"
+      />
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ open, plan: null })}
-        title="Move to Deleted Plans"
-        content={`Are you sure you want to move "${deleteDialog.plan?.plan_name}" to deleted plans? You can restore it within 30 days before it's permanently deleted.`}
-        confirmButtonText="Move to Deleted"
+        title="Delete Payment Plan"
+        content={`Are you sure you want to delete "${deleteDialog.plan?.plan_name}"? This action cannot be undone.`}
+        confirmButtonText="Delete"
         onConfirm={confirmDelete}
         loading={deleteLoading}
       />
