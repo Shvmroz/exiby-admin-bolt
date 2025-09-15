@@ -278,16 +278,6 @@ const CompaniesPageClient: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Table helpers
-  const handleChangePage = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  const onRowsPerPageChange = (newLimit: number) => {
-    setRowsPerPage(newLimit);
-    setCurrentPage(1); // reset to first page
-  };
-
   // Load companies
   const loadCompanies = async (includeDeleted = false) => {
     if (includeDeleted) {
@@ -543,23 +533,6 @@ const CompaniesPageClient: React.FC = () => {
     }
   };
 
-  const handleDetailEdit = (updatedCompany: Company) => {
-    // Update local state
-    setCompanies(prev =>
-      prev.map(company => company._id === updatedCompany._id ? updatedCompany : company)
-    );
-  };
-
-  const handleDetailDelete = (deletedCompany: Company) => {
-    // Remove from local state
-    setCompanies(prev => 
-      prev.filter(company => company._id !== deletedCompany._id)
-    );
-    
-    // Update pagination total
-    setPagination(prev => ({ ...prev, total: prev.total - 1 }));
-  };
-
   // Helper functions for soft delete table
   const getItemName = (company: Company) => company.orgn_user.name;
   const getDeletedAt = (company: Company) => company.deleted_at || '';
@@ -574,8 +547,18 @@ const CompaniesPageClient: React.FC = () => {
     return Math.max(0, daysLeft);
   };
 
-  // Pagination for deleted companies
-  const deletedPagination = {
+  // Table helpers
+  const handleChangePage = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const onRowsPerPageChange = (newLimit: number) => {
+    setRowsPerPage(newLimit);
+    setCurrentPage(1); // reset to first page
+  };
+
+  // Pagination configuration
+  const paginationConfig = {
     total_count: totalCount,
     rows_per_page: rowsPerPage,
     page: currentPage,
@@ -710,7 +693,7 @@ const CompaniesPageClient: React.FC = () => {
     }
   };
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
+  const totalPages = Math.ceil(totalCount / rowsPerPage);
 
   return (
     <div className="space-y-6">
@@ -794,13 +777,10 @@ const CompaniesPageClient: React.FC = () => {
             data={companies}
             TABLE_HEAD={TABLE_HEAD}
             MENU_OPTIONS={MENU_OPTIONS}
-            custom_pagination={deletedPagination}
+            custom_pagination={paginationConfig}
             totalPages={totalPages}
-            handleChangePages={handleChangePage}
-            selected={selected}
-            setSelected={setSelected}
-            checkbox_selection={true}
             renderCell={renderCell}
+            onRowClick={handleRowClick}
             loading={loading}
             emptyMessage="No companies found"
           />
@@ -809,18 +789,16 @@ const CompaniesPageClient: React.FC = () => {
         <TabsContent value="deleted" className="space-y-6">
           <SoftDeleteTable
             data={deletedCompanies}
-            TABLE_HEAD={TABLE_HEAD}
             loading={deletedLoading}
             emptyMessage="No deleted companies found"
             onRestore={handleRestore}
             onPermanentDelete={handlePermanentDelete}
-            renderCell={renderCell}
             getItemName={getItemName}
             getDeletedAt={getDeletedAt}
             getDaysUntilPermanentDelete={getDaysUntilPermanentDelete}
             restoreLoading={restoreLoading}
             deleteLoading={permanentDeleteLoading}
-            pagination={deletedPagination}
+            pagination={paginationConfig}
           />
         </TabsContent>
       </Tabs>
@@ -858,8 +836,6 @@ const CompaniesPageClient: React.FC = () => {
         <CompanyDetailView
           company={detailView.company}
           onClose={() => setDetailView({ open: false, company: null })}
-          onEdit={handleDetailEdit}
-          onDelete={handleDetailDelete}
         />
       )}
 
