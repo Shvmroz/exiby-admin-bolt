@@ -96,7 +96,7 @@ const TableCell = React.forwardRef<
 ));
 TableCell.displayName = "TableCell";
 
-// ---------------- CustomTable Props ----------------
+// ---------------- CustomTable Props ----------------// ---------------- CustomTable Props ----------------
 export interface TableHeader {
   key: string;
   label: string;
@@ -125,9 +125,7 @@ interface CustomTableProps {
   TABLE_HEAD: TableHeader[];
   MENU_OPTIONS: MenuOption[];
   custom_pagination: PaginationConfig;
-  pageCount: number;
   totalPages: number;
-  handleChangePages: (page: number) => void;
   onRowClick?: (item: any) => void;
   renderCell?: (
     item: any,
@@ -138,27 +136,26 @@ interface CustomTableProps {
   emptyMessage?: string;
 }
 
+
 // ---------------- CustomTable Component ----------------
-const CustomTable: React.FC<CustomTableProps> = ({
-  data,
-  TABLE_HEAD,
-  MENU_OPTIONS,
-  custom_pagination,
-  pageCount,
-  totalPages,
-  handleChangePages,
-  onRowClick,
-  renderCell,
-  loading = false,
-  emptyMessage = "No data available",
-}) => {
-  const {
-    total_count,
-    rows_per_page,
-    page,
-    handleChangePage,
-    onRowsPerPageChange,
-  } = custom_pagination;
+  const CustomTable: React.FC<CustomTableProps> = ({
+    data,
+    TABLE_HEAD,
+    MENU_OPTIONS,
+    custom_pagination,
+    totalPages,
+    onRowClick,
+    loading = false,
+    emptyMessage = "No data available",
+  }) => {
+    const {
+      total_count,
+      rows_per_page,
+      page,
+      handleChangePage,
+      onRowsPerPageChange,
+    } = custom_pagination;
+  
 
   const startItem = (page - 1) * rows_per_page + 1;
   const endItem = Math.min(page * rows_per_page, total_count);

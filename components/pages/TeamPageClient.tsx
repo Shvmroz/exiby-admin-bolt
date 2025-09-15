@@ -84,21 +84,30 @@ const TeamPageClient: React.FC = () => {
   const [filterLoading, setFilterLoading] = useState(false);
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Pagination & API meta
-  const [pagination, setPagination] = useState({
-    current_page: 1,
-    limit: 20,
-    total_count: 0,
-    total_pages: 1,
-  });
 
   const [filtersApplied, setFiltersApplied] = useState({
     search: "",
     sort_by: "createdAt",
     sort_order: "desc",
     page: 1,
-    limit: 20,
+    limit: 50,
   });
+  // Local pagination (handled fully by frontend)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+  // API meta (comes only from server)
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+   // Table helpers
+   const handleChangePage = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const onRowsPerPageChange = (newLimit: number) => {
+    setRowsPerPage(newLimit);
+    setCurrentPage(1); // reset to first page
+  };
 
   const TABLE_HEAD: TableHeader[] = [
     {
@@ -151,7 +160,8 @@ const TeamPageClient: React.FC = () => {
     {
       key: "status",
       label: "Status",
-      renderData: (row) => (row.status !== undefined ? getStatusBadge(row.status) : null),
+      renderData: (row) =>
+        row.status !== undefined ? getStatusBadge(row.status) : null,
     },
     {
       key: "createdAt",
@@ -169,11 +179,7 @@ const TeamPageClient: React.FC = () => {
     },
   ];
 
-  // Table helpers
-  const handleChangePage = (newPage: number) =>
-    setPagination((prev) => ({ ...prev, current_page: newPage }));
-  const onRowsPerPageChange = (newLimit: number) =>
-    setPagination((prev) => ({ ...prev, limit: newLimit, current_page: 1 }));
+ 
 
   const handleDelete = (member: TeamMember) => {
     setDeleteDialog({ open: true, member });
@@ -284,21 +290,16 @@ const TeamPageClient: React.FC = () => {
 
   const getAllTeamList = async () => {
     setLoading(true);
-
+  
     try {
-      const result = await _admin_team_list_api(
-        pagination.current_page,
-        pagination.limit
-      );
-
+      const result = await _admin_team_list_api(currentPage, rowsPerPage);
+  
       if (result?.code === 200) {
         setTeamMembers(result.data.admins || []);
-        setPagination({
-          current_page: result.data.current_page || 1,
-          limit: result.data.limit || 20,
-          total_count: result.data.total_count || 0,
-          total_pages: result.data.total_pages || 1,
-        });
+  
+        setTotalCount(result.data.total_count);
+        setTotalPages(result.data.total_pages);
+  
         setFiltersApplied(result.data.filters_applied || filtersApplied);
       } else {
         enqueueSnackbar(result?.message || "Failed to load team members", {
@@ -314,6 +315,7 @@ const TeamPageClient: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   const getAppliedFiltersCount = () =>
     (statusFilter !== "all" ? 1 : 0) + (activeOnly ? 1 : 0);
@@ -399,12 +401,9 @@ const TeamPageClient: React.FC = () => {
     );
   };
 
-  const totalPages = pagination.total_pages;
-
-
   useEffect(() => {
     getAllTeamList();
-  }, [pagination.total_pages, pagination.limit]);
+  }, [currentPage, rowsPerPage]);
 
   if (loading && teamMembers.length === 0) {
     return <TableSkeleton rows={8} columns={5} showFilters={true} />;
@@ -491,15 +490,13 @@ const TeamPageClient: React.FC = () => {
         TABLE_HEAD={TABLE_HEAD}
         MENU_OPTIONS={MENU_OPTIONS}
         custom_pagination={{
-          total_count: pagination.total_count,
-          rows_per_page: pagination.limit,
-          page: pagination.current_page,
+          total_count: totalCount,
+          rows_per_page: rowsPerPage,
+          page: currentPage,
           handleChangePage,
           onRowsPerPageChange,
         }}
-        pageCount={pagination.limit}
         totalPages={totalPages}
-        handleChangePages={handleChangePage}
         loading={loading}
         emptyMessage="No team members found"
       />
