@@ -27,20 +27,23 @@ interface PaymentPlan {
   billing_cycle: string;
   price: number;
   currency: string;
+  setup_fee: number;
   max_events: number;
   max_attendees: number;
   max_companies: number;
   is_active: boolean;
   is_popular: boolean;
   trial_days: number;
-  target_audience?: string;
+  target_audience: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface PaymentPlanEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   plan: PaymentPlan | null;
-  onSaveEdit: (plan: any) => void;
+  onSave: (plan: any) => void;
   loading?: boolean;
 }
 
@@ -48,7 +51,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
   open,
   onOpenChange,
   plan,
-  onSaveEdit,
+  onSave,
   loading = false,
 }) => {
   const { darkMode } = useAppContext();
@@ -59,17 +62,20 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
     billing_cycle: 'monthly',
     price: 0,
     currency: 'USD',
+    setup_fee: 0,
     max_events: 0,
     max_attendees: 0,
     max_companies: 0,
     is_active: true,
     is_popular: false,
     trial_days: 14,
+    target_audience: '',
   });
 
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
   const billingCycles = ['monthly', 'yearly', 'quarterly'];
   const planTypes = ['recurring', 'one-time'];
+  const targetAudiences = ['Small Business', 'Medium Business', 'Large Organizations', 'Enterprise', 'Startups'];
 
   useEffect(() => {
     if (plan) {
@@ -80,12 +86,14 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
         billing_cycle: plan.billing_cycle,
         price: plan.price,
         currency: plan.currency,
+        setup_fee: plan.setup_fee,
         max_events: plan.max_events,
         max_attendees: plan.max_attendees,
         max_companies: plan.max_companies,
         is_active: plan.is_active,
         is_popular: plan.is_popular,
         trial_days: plan.trial_days,
+        target_audience: plan.target_audience,
       });
     }
   }, [plan]);
@@ -97,7 +105,7 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
         ...plan,
         ...formData,
       };
-       onSaveEdit(updatedPlan);
+       onSave(updatedPlan);
     }
   };
 
@@ -165,6 +173,26 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
                   borderColor: darkMode ? '#4b5563' : '#d1d5db'
                 }}
                 required
+              />
+            </div>
+
+            {/* Setup Fee */}
+            <div>
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                Setup Fee
+              </label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.setup_fee}
+                onChange={(e) => setFormData({ ...formData, setup_fee: parseFloat(e.target.value) || 0 })}
+                placeholder="0.00"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
 
@@ -347,6 +375,40 @@ const PaymentPlanEditDialog: React.FC<PaymentPlanEditDialogProps> = ({
                   borderColor: darkMode ? '#4b5563' : '#d1d5db'
                 }}
               />
+            </div>
+
+            {/* Target Audience */}
+            <div>
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                Target Audience
+              </label>
+              <Select
+                value={formData.target_audience}
+                onValueChange={(value) => setFormData({ ...formData, target_audience: value })}
+              >
+                <SelectTrigger
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
+                  <SelectValue placeholder="Select target audience" />
+                </SelectTrigger>
+                <SelectContent
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
+                  {targetAudiences.map(audience => (
+                    <SelectItem key={audience} value={audience}>
+                      {audience}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

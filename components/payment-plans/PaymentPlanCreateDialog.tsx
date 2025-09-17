@@ -39,17 +39,20 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
     billing_cycle: 'monthly',
     price: 0,
     currency: 'USD',
+    setup_fee: 0,
     max_events: 0,
     max_attendees: 0,
     max_companies: 0,
     is_active: true,
     is_popular: false,
     trial_days: 14,
+    target_audience: '',
   });
 
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
   const billingCycles = ['monthly', 'yearly', 'quarterly'];
   const planTypes = ['recurring', 'one-time'];
+  const targetAudiences = ['Small Business', 'Medium Business', 'Large Organizations', 'Enterprise', 'Startups'];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +60,8 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
     const newPlan = {
       _id: `plan_${Date.now()}`,
       ...formData,
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     onSave(newPlan);
@@ -70,12 +74,14 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
       billing_cycle: 'monthly',
       price: 0,
       currency: 'USD',
+      setup_fee: 0,
       max_events: 0,
       max_attendees: 0,
       max_companies: 0,
       is_active: true,
       is_popular: false,
       trial_days: 14,
+      target_audience: '',
     });
   };
 
@@ -146,6 +152,26 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
                   borderColor: darkMode ? '#4b5563' : '#d1d5db'
                 }}
                 required
+              />
+            </div>
+
+            {/* Setup Fee */}
+            <div>
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                Setup Fee
+              </label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.setup_fee}
+                onChange={(e) => setFormData({ ...formData, setup_fee: parseFloat(e.target.value) || 0 })}
+                placeholder="0.00"
+                style={{
+                  backgroundColor: darkMode ? '#374151' : '#ffffff',
+                  color: darkMode ? '#ffffff' : '#000000',
+                  borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                }}
               />
             </div>
 
@@ -332,6 +358,41 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
                 }}
               />
             </div>
+
+            {/* Target Audience */}
+            <div>
+              <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                Target Audience *
+              </label>
+              <Select
+                value={formData.target_audience}
+                onValueChange={(value) => setFormData({ ...formData, target_audience: value })}
+                required
+              >
+                <SelectTrigger
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
+                  <SelectValue placeholder="Select target audience" />
+                </SelectTrigger>
+                <SelectContent
+                  style={{
+                    backgroundColor: darkMode ? '#374151' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000',
+                    borderColor: darkMode ? '#4b5563' : '#d1d5db'
+                  }}
+                >
+                  {targetAudiences.map(audience => (
+                    <SelectItem key={audience} value={audience}>
+                      {audience}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Description */}
@@ -401,7 +462,7 @@ const PaymentPlanCreateDialog: React.FC<PaymentPlanCreateDialogProps> = ({
         </Button>
         <Button
           form="payment-plan-create-form"
-          type="submit"
+            loading || !formData.plan_name || formData.price <= 0 || !formData.target_audience
           disabled={loading || !formData.plan_name || formData.price <= 0}
           className="bg-[#0077ED] hover:bg-[#0066CC] text-white dark:text-white"
         >
