@@ -31,15 +31,11 @@ import PaymentFilters from "@/components/payment-plans/PaymentFilters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CsvExportDialog from "@/components/ui/csv-export-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Badge } from "@/components/ui/badge";
 import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
+import { useSnackbar } from "notistack";
+import { _payment_plans_list_api } from "@/DAL/paymentPlanAPI";
 
 interface PaymentPlan {
   _id: string;
@@ -61,108 +57,9 @@ interface PaymentPlan {
   is_deleted?: boolean;
 }
 
-// Dummy data
-const dummyData = {
-  data: {
-    payment_plans: [
-      {
-        _id: "plan_123",
-        plan_name: "Starter Plan",
-        description:
-          "Perfect for small organizations getting started with event management",
-        plan_type: "recurring",
-        billing_cycle: "monthly",
-        price: 29,
-        currency: "USD",
-        max_events: 5,
-        max_attendees: 500,
-        max_companies: 10,
-        is_active: true,
-        is_popular: false,
-        trial_days: 14,
-        target_audience: "Small Organizations",
-        created_at: "2025-08-15T10:30:00.000Z",
-      },
-      {
-        _id: "plan_124",
-        plan_name: "Professional Plan",
-        description:
-          "Ideal for growing organizations with moderate event needs",
-        plan_type: "recurring",
-        billing_cycle: "monthly",
-        price: 99,
-        currency: "USD",
-        max_events: 20,
-        max_attendees: 2000,
-        max_companies: 50,
-        is_active: true,
-        is_popular: true,
-        trial_days: 14,
-        target_audience: "Medium Organizations",
-        created_at: "2025-08-10T14:20:00.000Z",
-      },
-      {
-        _id: "plan_125",
-        plan_name: "Enterprise Plan",
-        description:
-          "Perfect for large organizations with extensive event requirements",
-        plan_type: "recurring",
-        billing_cycle: "monthly",
-        price: 299,
-        currency: "USD",
-        max_events: 50,
-        max_attendees: 10000,
-        max_companies: 500,
-        is_active: true,
-        is_popular: false,
-        trial_days: 14,
-        target_audience: "Large Organizations",
-        created_at: "2025-08-05T09:15:00.000Z",
-      },
-      {
-        _id: "plan_126",
-        plan_name: "Basic Plan",
-        description: "Entry-level plan for testing and small events",
-        plan_type: "recurring",
-        billing_cycle: "monthly",
-        price: 9,
-        currency: "USD",
-        max_events: 2,
-        max_attendees: 100,
-        max_companies: 5,
-        is_active: false,
-        is_popular: false,
-        trial_days: 7,
-        target_audience: "Individuals",
-        created_at: "2025-07-28T16:45:00.000Z",
-      },
-      {
-        _id: "plan_127",
-        plan_name: "Annual Starter",
-        description: "Starter plan with annual billing for better savings",
-        plan_type: "recurring",
-        billing_cycle: "yearly",
-        price: 290,
-        currency: "USD",
-        max_events: 5,
-        max_attendees: 500,
-        max_companies: 10,
-        is_active: true,
-        is_popular: false,
-        trial_days: 30,
-        target_audience: "Small Organizations",
-        created_at: "2025-07-20T11:30:00.000Z",
-      },
-    ],
-    deleted_plans: [],
-    total: 5,
-  },
-};
-
-
-
 const PaymentPlansPageClient: React.FC = () => {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
   const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -186,9 +83,23 @@ const PaymentPlansPageClient: React.FC = () => {
   // Local pagination (handled fully by frontend)
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  // API meta (comes only from server)
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+
+  // filter states
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
+
+  const [filtersApplied, setFiltersApplied] = useState({
+    search: "",
+    sort_by: "createdAt",
+    sort_order: "desc",
+    page: 1,
+    limit: 50,
+  });
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [filterLoading, setFilterLoading] = useState(false);
 
   // Table helpers
   const handleChangePage = (newPage: number) => {
@@ -199,13 +110,6 @@ const PaymentPlansPageClient: React.FC = () => {
     setRowsPerPage(newLimit);
     setCurrentPage(1); // reset to first page
   };
-  // filter states
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [billingCycleFilter, setBillingCycleFilter] = useState("all");
-  const [popularOnly, setPopularOnly] = useState(false);
-  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
-  const [filterLoading, setFilterLoading] = useState(false);
 
   const TABLE_HEAD: TableHeader[] = [
     {
@@ -324,45 +228,53 @@ const PaymentPlansPageClient: React.FC = () => {
       width: "w-12",
     },
   ];
-  
 
   // Load payment plans
-  const loadPaymentPlans = async () => {
+  const getPaymentPlansList = async (
+    searchQuery?: string,
+    filters?: { status?: string; created_from?: string; created_to?: string }
+  ) => {
     setLoading(true);
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const apiFilters = {
+        status: filters?.status ?? "",
+        created_from: filters?.created_from ?? "",
+        created_to: filters?.created_to ?? "",
+      };
 
-      let filteredData = dummyData.data.payment_plans;
-
-      if (searchQuery) {
-        filteredData = filteredData.filter(
-          (plan) =>
-            plan.plan_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            plan.description
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase()) ||
-            plan.target_audience
-              ?.toLowerCase()
-              .includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setPaymentPlans(filteredData);
-      setTotalCount(filteredData.length);
-      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
-    } catch (error) {
-      console.error(
-        "Error loading payment plans:",
-        error
+      // Call API with search query and filters
+      const result = await _payment_plans_list_api(
+        currentPage,
+        rowsPerPage,
+        searchQuery || "",
+        apiFilters
       );
+
+      if (result?.code === 200) {
+        setPaymentPlans(result.data.payment_plans || []);
+        setTotalCount(result.data.total_count);
+        setTotalPages(result.data.total_pages);
+        // setFiltersApplied(result.data.filters_applied || filtersApplied);
+      } else {
+        enqueueSnackbar(
+          result?.message || "Failed to load list of payment plans",
+          {
+            variant: "error",
+          }
+        );
+        setPaymentPlans([]);
+      }
+    } catch (err) {
+      console.error(err);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
+      setPaymentPlans([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadPaymentPlans();
+    getPaymentPlansList();
   }, [searchQuery, currentPage, rowsPerPage]);
 
   if (loading && paymentPlans.length === 0) {
@@ -391,7 +303,7 @@ const PaymentPlansPageClient: React.FC = () => {
       );
 
       // Update total count
-      setTotalCount(prev => prev - 1);
+      setTotalCount((prev) => prev - 1);
       setTotalPages(Math.ceil((totalCount - 1) / rowsPerPage));
 
       setDeleteDialog({ open: false, plan: null });
@@ -429,7 +341,7 @@ const PaymentPlansPageClient: React.FC = () => {
 
       // Add to local state
       setPaymentPlans((prev) => [newPlan, ...prev]);
-      setTotalCount(prev => prev + 1);
+      setTotalCount((prev) => prev + 1);
       setTotalPages(Math.ceil((totalCount + 1) / rowsPerPage));
 
       setCreateDialog(false);
@@ -440,35 +352,34 @@ const PaymentPlansPageClient: React.FC = () => {
     }
   };
 
-  // Helper to count active filters
+
+  // filters
+  const isDateRangeInvalid = Boolean(
+    createdFrom && createdTo && new Date(createdTo) < new Date(createdFrom)
+  );
+
+
   const getAppliedFiltersCount = () => {
     let count = 0;
-    if (statusFilter !== "all") count++;
-    if (typeFilter !== "all") count++;
-    if (billingCycleFilter !== "all") count++;
-    if (popularOnly) count++;
+    if (statusFilter !== "all") count += 1;
+    if (createdFrom) count += 1;
+    if (createdTo) count += 1;
     return count;
   };
 
   const handleClearFilters = () => {
-    // Reset all filters
     setStatusFilter("all");
-    setTypeFilter("all");
-    setBillingCycleFilter("all");
-    setPopularOnly(false);
-    
-    setPaymentPlans(dummyData.data.payment_plans);
-    setTotalCount(dummyData.data.payment_plans.length);
-    setTotalPages(Math.ceil(dummyData.data.payment_plans.length / rowsPerPage));
+    setCreatedFrom("");
+    setCreatedTo("");
+    getAllTeamList();
     setFilterDrawerOpen(false);
-    setFilterLoading(false);
   };
 
   const handleApplyFilters = async () => {
     setFilterLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      
+
       let filteredData = dummyData.data.payment_plans;
 
       if (statusFilter !== "all") {
@@ -557,9 +468,6 @@ const PaymentPlansPageClient: React.FC = () => {
       currency: currency,
     }).format(amount);
   };
-
-  
-
 
   return (
     <div className="space-y-6">
@@ -688,14 +596,13 @@ const PaymentPlansPageClient: React.FC = () => {
         loading={filterLoading}
       >
         <PaymentFilters
-          popularOnly={popularOnly}
-          setPopularOnly={setPopularOnly}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          typeFilter={typeFilter}
-          setTypeFilter={setTypeFilter}
-          billingCycleFilter={billingCycleFilter}
-          setBillingCycleFilter={setBillingCycleFilter}
+          createdFrom={createdFrom}
+          setCreatedFrom={setCreatedFrom}
+          createdTo={createdTo}
+          setCreatedTo={setCreatedTo}
+          isDateRangeInvalid={isDateRangeInvalid}
         />
       </CustomDrawer>
     </div>

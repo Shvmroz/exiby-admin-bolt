@@ -14,7 +14,7 @@ export async function invokeApi({
     method,
     url: baseUrl + path,
     headers: {
-    //   "x-sh-key": secretKey,
+      //   "x-sh-key": secretKey,
       ...headers,
     },
   };
@@ -44,13 +44,19 @@ export async function invokeApi({
 
     return results.data;
   } catch (error) {
-    console.log("<===Api-Error===>", error.response.data);
-
-    if (error.response.status === 401) {
-      localStorage.clear();
-      // window.location.reload();
+    console.log("<===Api-Error===>", error);
+    if (error.response) {
+      if (error.response.status === 401) {
+        localStorage.clear();
+        // window.location.reload();
+      }
+      return error.response.data;
+    } else {
+      return {
+        code: 0,
+        message: error.message || "Network error. Please try again.",
+        data: null,
+      };
     }
-
-    return error.response.data;
   }
 }
