@@ -24,9 +24,21 @@ export const _organizations_list_api = async (page, limit, search = "", filters 
     return invokeApi(requestObj);
 };
 
-export const _add_organizations_api = async (data) => {
+
+export const _organization_detail_view_api = async (rowID) => {
     const requestObj = {
-        // path: `api/admin/add_admin_team`,
+        path: `api/admin/organizations/${rowID}`,
+        method: "GET",
+        headers: {
+            "x-sh-auth": localStorage.getItem("authToken"),
+        },
+    };
+    return invokeApi(requestObj);
+};
+
+export const _add_organization_api = async (data) => {
+    const requestObj = {
+        path: `api/organization/profile`,
         method: "POST",
         postData: data,
         headers: {
@@ -38,7 +50,7 @@ export const _add_organizations_api = async (data) => {
 
 export const _edit_organizations_api = async (rowID, data) => {
     const requestObj = {
-        // path: `api/admin/update_admin_team/${rowID}`,
+        path: `api/organization/profile/${rowID}`,
         method: "PUT",
         headers: {
             "x-sh-auth": localStorage.getItem("authToken"),
@@ -47,13 +59,14 @@ export const _edit_organizations_api = async (rowID, data) => {
     };
     return invokeApi(requestObj);
 };
-export const _delete_organizations_api = async (rowID) => {
-    const requestObj = {
-        // path: `api/admin/delete_admin_team/${rowID}`,
-        method: "DELETE",
-        headers: {
-            "x-sh-auth": localStorage.getItem("authToken"),
-        },
-    };
-    return invokeApi(requestObj);
-};
+
+// export const _delete_organizations_api = async (rowID) => {
+//     const requestObj = {
+//         // path: `api/admin/delete_admin_team/${rowID}`,
+//         method: "DELETE",
+//         headers: {
+//             "x-sh-auth": localStorage.getItem("authToken"),
+//         },
+//     };
+//     return invokeApi(requestObj);
+// };

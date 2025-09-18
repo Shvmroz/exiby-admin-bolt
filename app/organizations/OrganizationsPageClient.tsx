@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Building2,
   Search,
@@ -15,26 +15,29 @@ import {
   Users,
   DollarSign,
   Building,
-} from 'lucide-react';
-import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-table';
-import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
-import OrganizationEditDialog from '@/components/organizations/OrganizationEditDialog';
-import OrganizationCreateDialog from '@/components/organizations/OrganizationCreateDialog';
-import OrganizationDetailView from '@/components/organizations/OrganizationDetailView';
-import CustomDrawer from '@/components/ui/custom-drawer';
-import OrganizationFilters from '@/components/organizations/OrganizationFilters';
-import SoftDeleteTable from '@/components/ui/soft-delete-table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import CsvExportDialog from '@/components/ui/csv-export-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
-import { useSnackbar } from 'notistack';
+} from "lucide-react";
+import CustomTable, {
+  TableHeader,
+  MenuOption,
+} from "@/components/ui/custom-table";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
+import OrganizationDetailView from "@/components/organizations/OrganizationDetailView";
+import CustomDrawer from "@/components/ui/custom-drawer";
+import OrganizationFilters from "@/components/organizations/OrganizationFilters";
+import SoftDeleteTable from "@/components/ui/soft-delete-table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import CsvExportDialog from "@/components/ui/csv-export-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
+import { useSnackbar } from "notistack";
 import {
-  _add_organizations_api,
+  _add_organization_api,
+  _edit_organizations_api,
   _organizations_list_api,
 } from "@/DAL/organizationAPI";
+import OrganizationAddEditDialog from "@/components/organizations/OrganizationAddEditDialog";
 
 interface Organization {
   _id: string;
@@ -66,13 +69,15 @@ const OrganizationsPageClient: React.FC = () => {
 
   // State
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [deletedOrganizations, setDeletedOrganizations] = useState<Organization[]>([]);
+  const [deletedOrganizations, setDeletedOrganizations] = useState<
+    Organization[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [deletedLoading, setDeletedLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
   const [rowData, setRowData] = useState<Organization | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -94,12 +99,13 @@ const OrganizationsPageClient: React.FC = () => {
   const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
 
   // Filter states
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [activeOnly, setActiveOnly] = useState(false);
-  const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState('all');
-  const [createdFrom, setCreatedFrom] = useState('');
-  const [createdTo, setCreatedTo] = useState('');
+  const [subscriptionStatusFilter, setSubscriptionStatusFilter] =
+    useState("all");
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
 
@@ -113,9 +119,9 @@ const OrganizationsPageClient: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [filtersApplied, setFiltersApplied] = useState({
-    search: '',
-    sort_by: 'created_at',
-    sort_order: 'desc',
+    search: "",
+    sort_by: "created_at",
+    sort_order: "desc",
     page: 1,
     limit: 50,
   });
@@ -150,62 +156,75 @@ const OrganizationsPageClient: React.FC = () => {
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-gray-900 dark:text-white">
-              {organization.orgn_user.name}
+              {organization.orgn_user?.name || "-"}
             </div>
-            <div className="text-sm text-gray-700 dark:text-gray-300 truncate">
-              {organization.bio.description}
+
+            <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              {organization.bio?.description
+                ? (() => {
+                    const plainText = organization.bio?.description.replace(
+                      /<[^>]+>/g,
+                      ""
+                    ); // remove HTML tags
+                    return plainText.length > 50
+                      ? `${plainText.substring(0, 50)}...`
+                      : plainText;
+                  })()
+                : "No description"}
             </div>
-            {organization.bio.website && (
-              <a
-                href={organization.bio.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center text-xs text-[#0077ED] dark:text-[#4A9AFF] hover:text-[#0066CC] dark:hover:text-[#6BB6FF] mt-1"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ExternalLink className="w-3 h-3 mr-1" />
-                Website
-              </a>
-            )}
           </div>
         </div>
       ),
     },
     {
-      key: "category",
-      label: "Category",
+      key: "website",
+      label: "Website",
+      renderData: (organization) =>
+        organization.bio?.website ? (
+          <a
+            href={organization.bio.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center text-xs text-[#0077ED] dark:text-[#4A9AFF] hover:text-[#0066CC] dark:hover:text-[#6BB6FF] mt-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink className="w-3 h-3 mr-1" />
+            Website
+          </a>
+        ) : (
+          "N/A"
+        ),
+    },
+    {
+      key: "industry",
+      label: "Industry",
       renderData: (organization) => (
-        <div className="flex items-center space-x-2">
-          {organization.category === "organization" ? (
-            <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          ) : (
-            <Building className="w-4 h-4 text-green-600 dark:text-green-400" />
-          )}
-          <span className="font-medium text-gray-900 dark:text-white capitalize">
-            {organization.category}
-          </span>
-        </div>
+        <span className="text-sm text-gray-900 dark:text-white capitalize">
+          {organization.bio?.industry || "N/A"}
+        </span>
       ),
+    },
+    {
+      key: "status",
+      label: "Status",
+      renderData: (organization) =>
+        organization.status ? (
+          <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-800 dark:text-green-100 rounded">
+            Active
+          </span>
+        ) : (
+          <span className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-800 dark:text-red-100 rounded">
+            Inactive
+          </span>
+        ),
     },
     {
       key: "subscription_status",
-      label: "Status",
-      renderData: (organization) => getStatusBadge(organization.subscription_status),
+      label: "Subscription",
+      renderData: (organization) =>
+        getStatusBadge(organization.subscription_status),
     },
-    {
-      key: "subscription_period",
-      label: "Subscription Period",
-      renderData: (organization) => (
-        <div className="text-sm">
-          <div className="text-gray-900 dark:text-white">
-            {formatDate(organization.subscription_start)}
-          </div>
-          <div className="text-gray-600 dark:text-gray-300">
-            to {formatDate(organization.subscription_end)}
-          </div>
-        </div>
-      ),
-    },
+
     {
       key: "total_events",
       label: "Events",
@@ -237,7 +256,7 @@ const OrganizationsPageClient: React.FC = () => {
         <div className="flex items-center space-x-2">
           <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
           <span className="font-medium text-green-600 dark:text-green-400">
-            ${organization.total_revenue.toLocaleString()}
+            ${organization.total_revenue?.toLocaleString() || 0}
           </span>
         </div>
       ),
@@ -249,9 +268,18 @@ const OrganizationsPageClient: React.FC = () => {
         <div className="flex items-center space-x-2">
           <Users className="w-4 h-4 text-orange-600 dark:text-orange-400" />
           <span className="font-medium text-gray-900 dark:text-white">
-            {organization.total_attendees.toLocaleString()}
+            {organization.total_attendees?.toLocaleString() || 0}
           </span>
         </div>
+      ),
+    },
+    {
+      key: "created_at",
+      label: "Created At",
+      renderData: (organization) => (
+        <span className="text-sm text-gray-700 dark:text-gray-300">
+          {formatDate(organization.created_at)}
+        </span>
       ),
     },
     {
@@ -263,7 +291,11 @@ const OrganizationsPageClient: React.FC = () => {
   ];
 
   // Load organizations
-  const getListOrganizations = async (searchQuery = '', filters = {}, includeDeleted = false) => {
+  const getListOrganizations = async (
+    searchQuery = "",
+    filters = {},
+    includeDeleted = false
+  ) => {
     if (includeDeleted) {
       setDeletedLoading(true);
     } else {
@@ -271,8 +303,13 @@ const OrganizationsPageClient: React.FC = () => {
     }
 
     try {
-      const result = await _organizations_list_api(currentPage, rowsPerPage, searchQuery, filters);
-      
+      const result = await _organizations_list_api(
+        currentPage,
+        rowsPerPage,
+        searchQuery,
+        filters
+      );
+
       if (result?.code === 200) {
         if (includeDeleted) {
           setDeletedOrganizations(result.data.organizations || []);
@@ -283,8 +320,8 @@ const OrganizationsPageClient: React.FC = () => {
           setFiltersApplied(result.data.filters_applied || {});
         }
       } else {
-        enqueueSnackbar(result?.message || 'Failed to load organizations', {
-          variant: 'error',
+        enqueueSnackbar(result?.message || "Failed to load organizations", {
+          variant: "error",
         });
         if (includeDeleted) {
           setDeletedOrganizations([]);
@@ -294,7 +331,7 @@ const OrganizationsPageClient: React.FC = () => {
       }
     } catch (err) {
       console.error(err);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      enqueueSnackbar("Something went wrong", { variant: "error" });
       if (includeDeleted) {
         setDeletedOrganizations([]);
       } else {
@@ -310,14 +347,12 @@ const OrganizationsPageClient: React.FC = () => {
   };
 
   useEffect(() => {
-    if (activeTab === 'all') {
+    if (activeTab === "all") {
       getListOrganizations();
-    } else if (activeTab === 'deleted') {
-      getListOrganizations('', {}, true);
+    } else if (activeTab === "deleted") {
+      getListOrganizations("", {}, true);
     }
   }, [currentPage, rowsPerPage, activeTab]);
-
-
 
   const handleEdit = (organization: Organization) => {
     setEditDialog({ open: true, organization });
@@ -336,9 +371,12 @@ const OrganizationsPageClient: React.FC = () => {
     try {
       // TODO: Replace with actual API call
       // const result = await _delete_organization_api(rowData._id);
-      
+
       // Simulate API response
-      const result = { code: 200, message: 'Organization moved to deleted successfully' };
+      const result = {
+        code: 200,
+        message: "Organization moved to deleted successfully",
+      };
 
       if (result?.code === 200) {
         // Move to deleted organizations (soft delete)
@@ -348,24 +386,24 @@ const OrganizationsPageClient: React.FC = () => {
           is_deleted: true,
         };
 
-        setDeletedOrganizations(prev => [deletedOrganization, ...prev]);
-        setOrganizations(prev => 
-          prev.filter(org => org._id !== rowData._id)
+        setDeletedOrganizations((prev) => [deletedOrganization, ...prev]);
+        setOrganizations((prev) =>
+          prev.filter((org) => org._id !== rowData._id)
         );
-        
+
         setDeleteDialog({ open: false, organization: null });
         setRowData(null);
-        enqueueSnackbar('Organization moved to deleted successfully', {
-          variant: 'success',
+        enqueueSnackbar("Organization moved to deleted successfully", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar(result?.message || 'Failed to delete organization', {
-          variant: 'error',
+        enqueueSnackbar(result?.message || "Failed to delete organization", {
+          variant: "error",
         });
       }
     } catch (error) {
-      console.error('Error deleting organization:', error);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      console.error("Error deleting organization:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
       setDeleteLoading(false);
     }
@@ -373,65 +411,45 @@ const OrganizationsPageClient: React.FC = () => {
 
   const handleSaveEdit = async (data: Partial<Organization>) => {
     if (!rowData?._id) return;
-    
-    setEditLoading(true);
-    try {
-      // TODO: Replace with actual API call
-      // const result = await _edit_organization_api(rowData._id, data);
-      
-      // Simulate API response
-      const result = { 
-        code: 200, 
-        message: 'Organization updated successfully',
-        data: { ...rowData, ...data }
-      };
 
-      if (result?.code === 200) {
-        setEditDialog({ open: false, organization: null });
-        setRowData(null);
-        setOrganizations(prev =>
-          prev.map(org => org._id === rowData._id ? { ...org, ...data } : org)
-        );
-        enqueueSnackbar('Organization updated successfully', {
-          variant: 'success',
-        });
-      } else {
-        enqueueSnackbar(result?.message || 'Failed to update organization', {
-          variant: 'error',
-        });
-      }
-    } catch (error) {
-      console.error('Error updating organization:', error);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
-    } finally {
+    setEditLoading(true);
+    const result = await _edit_organizations_api(rowData._id, data);
+
+    if (result?.code === 200) {
+      setEditDialog({ open: false, organization: null });
+      setRowData(null);
       setEditLoading(false);
+      setOrganizations((prev) =>
+        prev.map((org) => (org._id === rowData._id ? { ...org, ...data } : org))
+      );
+      enqueueSnackbar("Organization updated successfully", {
+        variant: "success",
+      });
+    } else {
+      setEditLoading(false);
+      enqueueSnackbar(result?.message || "Failed to update organization", {
+        variant: "error",
+      });
     }
+    setEditLoading(false);
   };
 
   const handleAddNewOrganization = async (data: Partial<Organization>) => {
     setAddLoading(true);
-    try {
-      // TODO: Replace with actual API call
-      const result = await _add_organizations_api(data);
-      
-
-      if (result?.code === 200) {
-        // setOrganizations(prev => [result.data, ...prev]);
-        setCreateDialog(false);
-        enqueueSnackbar('Organization created successfully', {
-          variant: 'success',
-        });
-      } else {
-        enqueueSnackbar(result?.message || 'Failed to create organization', {
-          variant: 'error',
-        });
-      }
-    } catch (error) {
-      console.error('Error creating organization:', error);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
-    } finally {
+    const result = await _add_organization_api(data);
+    if (result?.code === 200) {
+      setOrganizations((prev) => [result.data, ...prev]);
+      setCreateDialog(false);
+      enqueueSnackbar("Organization created successfully", {
+        variant: "success",
+      });
+    } else {
+      enqueueSnackbar(result?.message || "Failed to create organization", {
+        variant: "error",
+      });
       setAddLoading(false);
     }
+    setAddLoading(false);
   };
 
   const handleRestore = async (organization: Organization) => {
@@ -439,25 +457,31 @@ const OrganizationsPageClient: React.FC = () => {
     try {
       // TODO: Replace with actual API call
       // const result = await _restore_organization_api(organization._id);
-      
+
       // Simulate API response
-      const result = { code: 200, message: 'Organization restored successfully' };
+      const result = {
+        code: 200,
+        message: "Organization restored successfully",
+      };
 
       if (result?.code === 200) {
-        const { deleted_at, is_deleted, ...restoredOrganization } = organization;
-        setOrganizations(prev => [restoredOrganization, ...prev]);
-        setDeletedOrganizations(prev => prev.filter(org => org._id !== organization._id));
-        enqueueSnackbar('Organization restored successfully', {
-          variant: 'success',
+        const { deleted_at, is_deleted, ...restoredOrganization } =
+          organization;
+        setOrganizations((prev) => [restoredOrganization, ...prev]);
+        setDeletedOrganizations((prev) =>
+          prev.filter((org) => org._id !== organization._id)
+        );
+        enqueueSnackbar("Organization restored successfully", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar(result?.message || 'Failed to restore organization', {
-          variant: 'error',
+        enqueueSnackbar(result?.message || "Failed to restore organization", {
+          variant: "error",
         });
       }
     } catch (error) {
-      console.error('Error restoring organization:', error);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      console.error("Error restoring organization:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
       setRestoreLoading(false);
     }
@@ -468,23 +492,28 @@ const OrganizationsPageClient: React.FC = () => {
     try {
       // TODO: Replace with actual API call
       // const result = await _permanent_delete_organization_api(organization._id);
-      
+
       // Simulate API response
-      const result = { code: 200, message: 'Organization permanently deleted' };
+      const result = { code: 200, message: "Organization permanently deleted" };
 
       if (result?.code === 200) {
-        setDeletedOrganizations(prev => prev.filter(org => org._id !== organization._id));
-        enqueueSnackbar('Organization permanently deleted', {
-          variant: 'success',
+        setDeletedOrganizations((prev) =>
+          prev.filter((org) => org._id !== organization._id)
+        );
+        enqueueSnackbar("Organization permanently deleted", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar(result?.message || 'Failed to permanently delete organization', {
-          variant: 'error',
-        });
+        enqueueSnackbar(
+          result?.message || "Failed to permanently delete organization",
+          {
+            variant: "error",
+          }
+        );
       }
     } catch (error) {
-      console.error('Error permanently deleting organization:', error);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      console.error("Error permanently deleting organization:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
       setPermanentDeleteLoading(false);
     }
@@ -506,9 +535,9 @@ const OrganizationsPageClient: React.FC = () => {
 
   const getAppliedFiltersCount = () => {
     let count = 0;
-    if (statusFilter !== 'all') count++;
-    if (categoryFilter !== 'all') count++;
-    if (subscriptionStatusFilter !== 'all') count++;
+    if (statusFilter !== "all") count++;
+    if (categoryFilter !== "all") count++;
+    if (subscriptionStatusFilter !== "all") count++;
     if (activeOnly) count++;
     if (createdFrom || createdTo) count += 1;
 
@@ -516,12 +545,12 @@ const OrganizationsPageClient: React.FC = () => {
   };
 
   const handleClearFilters = () => {
-    setStatusFilter('all');
-    setCategoryFilter('all');
-    setSubscriptionStatusFilter('all');
+    setStatusFilter("all");
+    setCategoryFilter("all");
+    setSubscriptionStatusFilter("all");
     setActiveOnly(false);
-    setCreatedFrom('');
-    setCreatedTo('');
+    setCreatedFrom("");
+    setCreatedTo("");
     setFilterDrawerOpen(false);
     getListOrganizations();
   };
@@ -529,26 +558,27 @@ const OrganizationsPageClient: React.FC = () => {
   const handleApplyFilters = () => {
     const filters: { [key: string]: string } = {};
 
-    if (statusFilter === 'active') filters.status = 'true';
-    else if (statusFilter === 'inactive') filters.status = 'false';
+    if (statusFilter === "active") filters.status = "true";
+    else if (statusFilter === "inactive") filters.status = "false";
 
-    if (categoryFilter !== 'all') filters.category = categoryFilter;
-    if (subscriptionStatusFilter !== 'all') filters.subscription_status = subscriptionStatusFilter;
-    if (activeOnly) filters.active_only = 'true';
+    if (categoryFilter !== "all") filters.category = categoryFilter;
+    if (subscriptionStatusFilter !== "all")
+      filters.subscription_status = subscriptionStatusFilter;
+    if (activeOnly) filters.active_only = "true";
     if (createdFrom) filters.created_from = createdFrom;
     if (createdTo) filters.created_to = createdTo;
 
-       //  Check if there are any applied filters
-       const hasFilters =
-       Object.keys(filters).length > 0 &&
-       Object.values(filters).some((val) => val && val !== "");
- 
-     if (!hasFilters) {
-       enqueueSnackbar("Please select at least one filter", {
-         variant: "warning",
-       });
-       return;
-     }
+    //  Check if there are any applied filters
+    const hasFilters =
+      Object.keys(filters).length > 0 &&
+      Object.values(filters).some((val) => val && val !== "");
+
+    if (!hasFilters) {
+      enqueueSnackbar("Please select at least one filter", {
+        variant: "warning",
+      });
+      return;
+    }
 
     getListOrganizations(searchQuery, filters);
     setFilterDrawerOpen(false);
@@ -556,54 +586,72 @@ const OrganizationsPageClient: React.FC = () => {
 
   // Helper functions for soft delete table
   const getItemName = (org: Organization) => org.orgn_user.name;
-  const getDeletedAt = (org: Organization) => org.deleted_at || '';
+  const getDeletedAt = (org: Organization) => org.deleted_at || "";
   const getDaysUntilPermanentDelete = (org: Organization) => {
     if (!org.deleted_at) return 30;
-    
+
     const deletedDate = new Date(org.deleted_at);
-    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const permanentDeleteDate = new Date(
+      deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000
+    );
     const now = new Date();
-    const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
-    
+    const daysLeft = Math.ceil(
+      (permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+    );
+
     return Math.max(0, daysLeft);
   };
 
   const MENU_OPTIONS: MenuOption[] = [
     {
-      label: 'Edit',
+      label: "Edit",
       action: handleEdit,
       icon: <Edit className="w-4 h-4" />,
     },
     {
-      label: 'Delete',
+      label: "Delete",
       action: handleDelete,
       icon: <Trash2 className="w-4 h-4" />,
-      variant: 'destructive',
+      variant: "destructive",
     },
   ];
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      active: { label: 'Active', className: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' },
-      inactive: { label: 'Inactive', className: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' },
-      pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' },
-      expired: { label: 'Expired', className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400' },
+      active: {
+        label: "Active",
+        className:
+          "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+      },
+      inactive: {
+        label: "Inactive",
+        className:
+          "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
+      },
+      pending: {
+        label: "Pending",
+        className:
+          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+      },
+      expired: {
+        label: "Expired",
+        className:
+          "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400",
+      },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.inactive;
-    
-    return (
-      <Badge className={config.className}>
-        {config.label}
-      </Badge>
-    );
+    const config =
+      statusConfig[status as keyof typeof statusConfig] ||
+      statusConfig.inactive;
+
+    return <Badge className={config.className}>{config.label}</Badge>;
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -656,12 +704,12 @@ const OrganizationsPageClient: React.FC = () => {
                   className="pl-10 pr-24"
                 />
               </div>
-              {filtersApplied?.search && filtersApplied.search !== '' ? (
+              {filtersApplied?.search && filtersApplied.search !== "" ? (
                 <Button
                   onClick={() => {
-                    setSearchQuery('');
+                    setSearchQuery("");
                     setCurrentPage(1);
-                    getListOrganizations('');
+                    getListOrganizations("");
                   }}
                   variant="outline"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -671,7 +719,7 @@ const OrganizationsPageClient: React.FC = () => {
               ) : (
                 <Button
                   onClick={handleSearch}
-                  disabled={searchQuery === ''}
+                  disabled={searchQuery === ""}
                   variant="outline"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
@@ -699,12 +747,19 @@ const OrganizationsPageClient: React.FC = () => {
       </div>
 
       {/* Organizations Table */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="all">
             All Organizations ({organizations.length})
           </TabsTrigger>
-          <TabsTrigger className="data-[state=active]:text-red-500" value="deleted">
+          <TabsTrigger
+            className="data-[state=active]:text-red-500"
+            value="deleted"
+          >
             Deleted Organizations ({deletedOrganizations.length})
           </TabsTrigger>
         </TabsList>
@@ -762,20 +817,19 @@ const OrganizationsPageClient: React.FC = () => {
         loading={deleteLoading}
       />
 
-      {/* Edit Organization Dialog */}
-      <OrganizationEditDialog
+      {/* Add/Edit Organization Dialog */}
+      <OrganizationAddEditDialog
         open={editDialog.open}
         onOpenChange={(open) => {
           setEditDialog({ open, organization: null });
           if (!open) setRowData(null);
         }}
-        organization={rowData}
+        organization={rowData} // pass for edit
         onSave={handleSaveEdit}
         loading={editLoading}
       />
-
-      {/* Create Organization Dialog */}
-      <OrganizationCreateDialog
+      {/* Add */}
+      <OrganizationAddEditDialog
         open={createDialog}
         onOpenChange={setCreateDialog}
         onSave={handleAddNewOrganization}
@@ -785,7 +839,8 @@ const OrganizationsPageClient: React.FC = () => {
       {/* Organization Detail View */}
       {detailView.open && detailView.organization && (
         <OrganizationDetailView
-          organization={detailView.organization}
+          open={detailView.open}
+          organizationId={detailView.organization._id}
           onClose={() => setDetailView({ open: false, organization: null })}
         />
       )}

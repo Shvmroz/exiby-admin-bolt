@@ -136,26 +136,24 @@ interface CustomTableProps {
   emptyMessage?: string;
 }
 
-
 // ---------------- CustomTable Component ----------------
-  const CustomTable: React.FC<CustomTableProps> = ({
-    data,
-    TABLE_HEAD,
-    MENU_OPTIONS,
-    custom_pagination,
-    totalPages,
-    onRowClick,
-    loading = false,
-    emptyMessage = "No data available",
-  }) => {
-    const {
-      total_count,
-      rows_per_page,
-      page,
-      handleChangePage,
-      onRowsPerPageChange,
-    } = custom_pagination;
-  
+const CustomTable: React.FC<CustomTableProps> = ({
+  data,
+  TABLE_HEAD,
+  MENU_OPTIONS,
+  custom_pagination,
+  totalPages,
+  onRowClick,
+  loading = false,
+  emptyMessage = "No data available",
+}) => {
+  const {
+    total_count,
+    rows_per_page,
+    page,
+    handleChangePage,
+    onRowsPerPageChange,
+  } = custom_pagination;
 
   const startItem = (page - 1) * rows_per_page + 1;
   const endItem = Math.min(page * rows_per_page, total_count);
@@ -208,7 +206,10 @@ interface CustomTableProps {
               data.map((item, rowIndex) => (
                 <TableRow
                   key={item._id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  className={cn(
+                    "hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors",
+                    onRowClick && "cursor-pointer"
+                  )}
                   onClick={() => onRowClick?.(item)}
                 >
                   {TABLE_HEAD.map((header) => (

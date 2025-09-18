@@ -1,197 +1,68 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Building2,
   Globe,
   Calendar,
   Users,
   DollarSign,
-  CreditCard,
-  ExternalLink,
-  CheckCircle,
-  Clock,
-  XCircle,
   Building,
   X,
-  TrendingUp,
-  Activity,
-  BarChart3,
-  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
-import { useAppContext } from '@/contexts/AppContext';
-
-interface PaymentPlan {
-  plan_name: string;
-}
-
-interface CurrentSubscription {
-  organization_name: string;
-  payment_plan: PaymentPlan;
-  billing_cycle: string;
-  current_price: number;
-  start_date: string;
-  end_date: string;
-  status: string;
-  auto_renew: boolean;
-  next_billing_date: string;
-}
-
-interface SubscriptionHistory {
-  payment_plan: PaymentPlan;
-  billing_cycle: string;
-  price: number;
-  start_date: string;
-  end_date: string;
-  status: string;
-}
-
-interface MonthlyBreakdown {
-  month: string;
-  events: number;
-  revenue: number;
-  attendees: number;
-}
-
-interface TopEvent {
-  title: string;
-  attendees: number;
-  revenue: number;
-}
-
-interface OrganizationStats {
-  total_events: number;
-  active_events: number;
-  completed_events: number;
-  total_revenue: number;
-  total_attendees: number;
-  total_companies: number;
-  monthly_breakdown: MonthlyBreakdown[];
-  top_events: TopEvent[];
-}
-
-interface Organization {
-  _id: string;
-  orgn_user: {
-    _id: string;
-    name: string;
-  };
-  bio: {
-    description: string;
-    website: string;
-  };
-  category: string;
-  subscription_status: string;
-  subscription_start: string;
-  subscription_end: string;
-  status: boolean;
-  total_events: number;
-  total_companies: number;
-  total_revenue: number;
-  total_attendees: number;
-  created_at: string;
-  current_subscription?: CurrentSubscription;
-  subscription_history?: SubscriptionHistory[];
-  organization_stats?: OrganizationStats;
-}
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import IconButton from "@mui/material/IconButton";
+import { useAppContext } from "@/contexts/AppContext";
+import { _organization_detail_view_api } from "@/DAL/organizationAPI";
+import { useSnackbar } from "notistack";
+import Spinner from "../ui/spinner";
 
 interface OrganizationDetailViewProps {
-  organization: Organization;
+  open: boolean;
   onClose: () => void;
+  organizationId: string;
 }
 
-// Mock data for demonstration
-const mockCurrentSubscription: CurrentSubscription = {
-  organization_name: "TechCorp Events",
-  payment_plan: { plan_name: "Professional Plan" },
-  billing_cycle: "monthly",
-  current_price: 299,
-  start_date: "2025-01-01T00:00:00.000Z",
-  end_date: "2025-02-01T00:00:00.000Z",
-  status: "active",
-  auto_renew: true,
-  next_billing_date: "2025-02-01T00:00:00.000Z",
-};
-
-const mockSubscriptionHistory: SubscriptionHistory[] = [
-  {
-    payment_plan: { plan_name: "Professional Plan" },
-    billing_cycle: "monthly",
-    price: 299,
-    start_date: "2025-01-01T00:00:00.000Z",
-    end_date: "2025-02-01T00:00:00.000Z",
-    status: "active",
-  },
-  {
-    payment_plan: { plan_name: "Basic Plan" },
-    billing_cycle: "monthly",
-    price: 99,
-    start_date: "2024-12-01T00:00:00.000Z",
-    end_date: "2025-01-01T00:00:00.000Z",
-    status: "completed",
-  },
-  {
-    payment_plan: { plan_name: "Starter Plan" },
-    billing_cycle: "monthly",
-    price: 49,
-    start_date: "2024-11-01T00:00:00.000Z",
-    end_date: "2024-12-01T00:00:00.000Z",
-    status: "completed",
-  },
-];
-
-const mockOrganizationStats: OrganizationStats = {
-  total_events: 25,
-  active_events: 8,
-  completed_events: 17,
-  total_revenue: 125000,
-  total_attendees: 5000,
-  total_companies: 150,
-  monthly_breakdown: [
-    { month: "2025-01", events: 5, revenue: 25000, attendees: 1200 },
-    { month: "2024-12", events: 8, revenue: 35000, attendees: 1800 },
-    { month: "2024-11", events: 6, revenue: 28000, attendees: 1400 },
-    { month: "2024-10", events: 4, revenue: 18000, attendees: 900 },
-    { month: "2024-09", events: 2, revenue: 19000, attendees: 700 },
-  ],
-  top_events: [
-    { title: "Annual Tech Summit 2024", attendees: 850, revenue: 42500 },
-    { title: "Innovation Workshop Series", attendees: 650, revenue: 32500 },
-    {
-      title: "Digital Transformation Conference",
-      attendees: 500,
-      revenue: 25000,
-    },
-    { title: "Startup Pitch Competition", attendees: 400, revenue: 20000 },
-    { title: "AI & Machine Learning Expo", attendees: 350, revenue: 17500 },
-  ],
-};
-
-const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
-  organization,
+const OrganizationDetailView = ({
+  open,
   onClose,
-}) => {
+  organizationId,
+}: OrganizationDetailViewProps) => {
+  const { enqueueSnackbar } = useSnackbar();
   const { darkMode } = useAppContext();
+  const [organization, setOrganization] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  // Use mock data for demonstration
-  const currentSubscription =
-    organization.current_subscription || mockCurrentSubscription;
-  const subscriptionHistory =
-    organization.subscription_history || mockSubscriptionHistory;
-  const organizationStats =
-    organization.organization_stats || mockOrganizationStats;
+  const getOrgDetail = async (id: string) => {
+    setLoading(true);
+    const result = await _organization_detail_view_api(id);
+    if (result?.code === 200) {
+      setOrganization(result?.data);
+      setLoading(false);
+    } else {
+      setLoading(false);
+
+      enqueueSnackbar(result?.message || "Failed to fetch organization", {
+        variant: "error",
+      });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (open && organizationId) {
+      getOrgDetail(organizationId);
+    }
+  }, [open, organizationId]);
 
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
+    const statusConfig: any = {
       active: {
         label: "Active",
         className:
@@ -202,93 +73,36 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
         className:
           "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
       },
-      pending: {
-        label: "Pending",
-        className:
-          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
-      },
-      expired: {
-        label: "Expired",
-        className:
-          "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400",
-      },
-      completed: {
-        label: "Completed",
-        className:
-          "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
-      },
     };
 
-    const config =
-      statusConfig[status as keyof typeof statusConfig] ||
-      statusConfig.inactive;
-
+    const config = statusConfig[status] || statusConfig.inactive;
     return <Badge className={config.className}>{config.label}</Badge>;
   };
 
-  const getSubscriptionStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case "active":
-        return <Clock className="w-4 h-4 text-blue-500" />;
-      case "failed":
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      default:
-        return <Clock className="w-4 h-4 text-gray-500" />;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
-
-  const formatMonth = (monthString: string) => {
-    const [year, month] = monthString.split("-");
-    return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString(
-      "en-US",
-      {
-        year: "numeric",
-        month: "short",
-      }
-    );
-  };
+  if (!organization) return null;
 
   return (
-    <Dialog 
-      open 
-      onClose={onClose} 
-      maxWidth="md" 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#000000',
-        }
+          backgroundColor: darkMode ? "#1f2937" : "#ffffff",
+          color: darkMode ? "#ffffff" : "#000000",
+        },
       }}
     >
       <DialogTitle>
-        <div className="flex items-center justify-between" style={{ color: darkMode ? '#ffffff' : '#000000' }}>
+        <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-xl flex items-center justify-center">
               <Building2 className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {organization.orgn_user.name}
-              </h1>
-            </div>
+            <h1 className="text-2xl font-bold">
+              {organization.orgn_user?.name}
+            </h1>
           </div>
           <IconButton onClick={onClose}>
             <X className="w-5 h-5 text-foreground" />
@@ -296,463 +110,275 @@ const OrganizationDetailView: React.FC<OrganizationDetailViewProps> = ({
         </div>
       </DialogTitle>
 
-      <DialogContent
-        sx={{ paddingTop: 2, paddingBottom: 4 }}
-        dividers
-        className="flex flex-col h-[80vh]"
-        style={{ 
-          backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-          color: darkMode ? '#ffffff' : '#000000',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
-        }}
-      >
-        {/* Tabs stay at top */}
-        <Tabs defaultValue="overview" className="flex flex-col flex-1">
-          <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="subscription">Subscription</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="events">Top Events</TabsTrigger>
-          </TabsList>
-
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto space-y-6 mt-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-            <TabsContent value="overview" className="space-y-6">
-              {/* Organization Info */}
-              <div className="lg:flex lg:gap-6">
-                {/* Left side: Stats */}
-                <div className="lg:flex-1">
-                  <Card className="h-full flex flex-col">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4">
-                          <div>
-                            <p className="text-gray-800 dark:text-gray-200 font-bold mt-2">
-                              {organization.orgn_user.name}
-                            </p>
-                            <p className="text-gray-700 dark:text-gray-300 text-sm mt-2">
-                              {organization.bio.description}
-                            </p>
-                            {organization.bio.website && (
-                              <a
-                                href={organization.bio.website}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center text-[#0077ED] dark:text-[#4A9AFF] hover:text-[#0066CC] dark:hover:text-[#6BB6FF] mt-2 text-sm"
-                              >
-                                <Globe className="w-4 h-4 mr-1" />
-                                Visit Website
-                                <ExternalLink className="w-3 h-3 ml-1" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end space-y-2">
-                          {getStatusBadge(organization.subscription_status)}
-                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
-                            {organization.category === "organization" ? (
-                              <Building2 className="w-3 h-3 mr-1" />
-                            ) : (
-                              <Building className="w-3 h-3 mr-1" />
-                            )}
-                            {organization.category}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-
-                    <CardContent className="flex-1">
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 h-full">
-                        {/* =========== Stats cards ============ */}
-                        {/* Total Events */}
-                        <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                          <Calendar className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-gray-900 dark:text-white">
-                            {organizationStats.total_events}
-                          </div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Total Events
-                          </div>
-                        </div>
-                        {/* Active Events */}
-                        <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <Activity className="w-6 h-6 text-green-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-gray-900 dark:text-white">
-                            {organizationStats.active_events}
-                          </div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Active Events
-                          </div>
-                        </div>
-                        {/* Completed Events */}
-                        <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                          <CheckCircle className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-gray-900 dark:text-white">
-                            {organizationStats.completed_events}
-                          </div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Completed Events
-                          </div>
-                        </div>
-                        {/* Companies */}
-                        <div className="text-center p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-                          <Building className="w-6 h-6 text-indigo-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-gray-900 dark:text-white">
-                            {organizationStats.total_companies}
-                          </div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Companies
-                          </div>
-                        </div>
-                        {/* Revenue */}
-                        <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <DollarSign className="w-6 h-6 text-green-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-gray-900 dark:text-white">
-                            {formatCurrency(organizationStats.total_revenue)}
-                          </div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Revenue
-                          </div>
-                        </div>
-                        {/* Attendees */}
-                        <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                          <Users className="w-6 h-6 text-orange-600 mx-auto mb-2" />
-                          <div className="text-lg font-bold text-gray-900 dark:text-white">
-                            {organizationStats.total_attendees.toLocaleString()}
-                          </div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Attendees
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Right side: Current Subscription */}
-                <div className="lg:w-1/3">
-                  <Card className="h-full flex flex-col">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center text-lg">
-                        <CreditCard className="w-5 h-5 mr-2 text-[#0077ED]" />
-                        Current Subscription
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 flex-1">
-                      <div>
-                        <div className="text-sm text-gray-700 dark:text-gray-300">
-                          Plan
-                        </div>
-                        <div className="font-semibold text-gray-900 dark:text-white">
-                          {currentSubscription.payment_plan.plan_name}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-700 dark:text-gray-300">
-                          Price
-                        </div>
-                        <div className="font-semibold text-gray-900 dark:text-white">
-                          {formatCurrency(currentSubscription.current_price)}/
-                          {currentSubscription.billing_cycle}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-700 dark:text-gray-300">
-                          Status
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          {getStatusBadge(currentSubscription.status)}
-                          {currentSubscription.auto_renew && (
-                            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
-                              <RefreshCw className="w-3 h-3 mr-1" /> Auto-renew
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-700 dark:text-gray-300">
-                          Next Billing
-                        </div>
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {formatDate(currentSubscription.next_billing_date)}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="subscription" className="space-y-6">
-              {/* Current Subscription Details */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Current Subscription</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                        Plan Name
-                      </label>
-                      <div className="text-gray-900 dark:text-white capitalize">
-                        {currentSubscription.payment_plan.plan_name}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                        Billing Cycle
-                      </label>
-                      <div className="text-gray-900 dark:text-white capitalize">
-                        {currentSubscription.billing_cycle}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                        Current Price
-                      </label>
-                      <div className="text-gray-900 dark:text-white font-semibold">
-                        {formatCurrency(currentSubscription.current_price)}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                        Start Date
-                      </label>
-                      <div className="text-gray-900 dark:text-white">
-                        {formatDate(currentSubscription.start_date)}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                        End Date
-                      </label>
-                      <div className="text-gray-900 dark:text-white">
-                        {formatDate(currentSubscription.end_date)}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
-                        Auto Renew
-                      </label>
-                      <div className="text-gray-900 dark:text-white">
-                        {currentSubscription.auto_renew
-                          ? "Enabled"
-                          : "Disabled"}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Subscription History */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Subscription History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {subscriptionHistory.map((subscription, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                      >
-                        <div className="flex items-center space-x-4">
-                          {getSubscriptionStatusIcon(subscription.status)}
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">
-                              {subscription.payment_plan.plan_name}
-                            </div>
-                            <div className="text-sm text-gray-700 dark:text-gray-300">
-                              {formatDate(subscription.start_date)} -{" "}
-                              {formatDate(subscription.end_date)}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {formatCurrency(subscription.price)}/
-                            {subscription.billing_cycle}
-                          </div>
-                          <div className="text-sm mt-1">
-                            {getStatusBadge(subscription.status)}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="analytics" className="space-y-6">
-              {/* Monthly Performance */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-lg">
-                    <BarChart3 className="w-5 h-5 mr-2 text-[#0077ED]" />
-                    Monthly Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {organizationStats.monthly_breakdown.map((month, index) => (
-                      <div
-                        key={index}
-                        className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
-                      >
-                        <div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Month
-                          </div>
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {formatMonth(month.month)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Events
-                          </div>
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {month.events}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Revenue
-                          </div>
-                          <div className="font-semibold text-green-600 dark:text-green-400">
-                            {formatCurrency(month.revenue)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            Attendees
-                          </div>
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {month.attendees.toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-gray-900 dark:text-white">
-                        {organizationStats.total_events > 0
-                          ? Math.round(
-                              organizationStats.total_attendees /
-                                organizationStats.total_events
-                            )
-                          : 0}
-                      </div>
-                      <div className="text-sm text-gray-700 dark:text-gray-300">
-                        Avg. Attendees per Event
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-gray-900 dark:text-white">
-                        {organizationStats.total_events > 0
-                          ? formatCurrency(
-                              organizationStats.total_revenue /
-                                organizationStats.total_events
-                            )
-                          : "$0"}
-                      </div>
-                      <div className="text-sm text-gray-700 dark:text-gray-300">
-                        Avg. Revenue per Event
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-gray-900 dark:text-white">
-                        {organizationStats.total_events > 0
-                          ? Math.round(
-                              organizationStats.total_companies /
-                                organizationStats.total_events
-                            )
-                          : 0}
-                      </div>
-                      <div className="text-sm text-gray-700 dark:text-gray-300">
-                        Avg. Companies per Event
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="events" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-lg">
-                    <TrendingUp className="w-5 h-5 mr-2 text-[#0077ED]" />
-                    Top Performing Events
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {organizationStats.top_events.map((event, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-8 h-8 bg-gradient-to-r from-[#0077ED] to-[#4A9AFF] rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">
-                              {event.title}
-                            </div>
-                            <div className="text-sm text-gray-700 dark:text-gray-300">
-                              {event.attendees} attendees
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold text-green-600 dark:text-green-400">
-                            {formatCurrency(event.revenue)}
-                          </div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            {formatCurrency(event.revenue / event.attendees)}{" "}
-                            per attendee
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+      <DialogContent dividers>
+        {loading && (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Spinner />
           </div>
-        </Tabs>
+        )}
+        {!loading && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                {/* --- Social Links --- */}
+                <div className="flex items-center space-x-4">
+                  {/* Facebook */}
+                  {organization.social_links?.facebook ? (
+                    <a
+                      href={organization.social_links.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:scale-110 transition-transform"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2v-3h2v-2c0-2 1.2-3.1 3-3.1.9 0 1.8.1 1.8.1v2h-1c-1 0-1.3.6-1.3 1.2v1.8h2.6l-.4 3h-2.2v7A10 10 0 0 0 22 12" />
+                      </svg>
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2v-3h2v-2c0-2 1.2-3.1 3-3.1.9 0 1.8.1 1.8.1v2h-1c-1 0-1.3.6-1.3 1.2v1.8h2.6l-.4 3h-2.2v7A10 10 0 0 0 22 12" />
+                      </svg>
+                    </span>
+                  )}
+
+                  {/* Twitter */}
+                  {organization.social_links?.twitter ? (
+                    <a
+                      href={organization.social_links.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sky-500 hover:scale-110 transition-transform"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.3 4.3 0 0 0 1.88-2.37 8.6 8.6 0 0 1-2.72 1.04A4.3 4.3 0 0 0 16.1 4c-2.4 0-4.3 2-4.3 4.4 0 .35.04.7.12 1A12.2 12.2 0 0 1 3.1 5.2a4.4 4.4 0 0 0-.6 2.2c0 1.5.75 2.8 1.9 3.6a4.2 4.2 0 0 1-2-.6v.1c0 2.1 1.4 3.9 3.3 4.3a4.3 4.3 0 0 1-2 .1c.6 1.9 2.3 3.3 4.3 3.3A8.7 8.7 0 0 1 2 19.5a12.1 12.1 0 0 0 6.6 2c7.9 0 12.3-6.7 12.3-12.5v-.6A8.7 8.7 0 0 0 22.5 6h-.04z" />
+                      </svg>
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.3 4.3 0 0 0 1.88-2.37 8.6 8.6 0 0 1-2.72 1.04A4.3 4.3 0 0 0 16.1 4c-2.4 0-4.3 2-4.3 4.4 0 .35.04.7.12 1A12.2 12.2 0 0 1 3.1 5.2a4.4 4.4 0 0 0-.6 2.2c0 1.5.75 2.8 1.9 3.6a4.2 4.2 0 0 1-2-.6v.1c0 2.1 1.4 3.9 3.3 4.3a4.3 4.3 0 0 1-2 .1c.6 1.9 2.3 3.3 4.3 3.3A8.7 8.7 0 0 1 2 19.5a12.1 12.1 0 0 0 6.6 2c7.9 0 12.3-6.7 12.3-12.5v-.6A8.7 8.7 0 0 0 22.5 6h-.04z" />
+                      </svg>
+                    </span>
+                  )}
+
+                  {/* LinkedIn */}
+                  {organization.social_links?.linkedin ? (
+                    <a
+                      href={organization.social_links.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-700 hover:scale-110 transition-transform"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M4.98 3.5C3.33 3.5 2 4.85 2 6.48s1.33 2.98 2.98 2.98c1.64 0 2.98-1.34 2.98-2.98S6.62 3.5 4.98 3.5zM3 21h4v-11H3v11zm7-11h3.6v1.5h.1c.5-.9 1.7-1.9 3.5-1.9 3.7 0 4.4 2.4 4.4 5.6V21h-4v-5.2c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9V21h-4v-11z" />
+                      </svg>
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M4.98 3.5C3.33 3.5 2 4.85 2 6.48s1.33 2.98 2.98 2.98c1.64 0 2.98-1.34 2.98-2.98S6.62 3.5 4.98 3.5zM3 21h4v-11H3v11zm7-11h3.6v1.5h.1c.5-.9 1.7-1.9 3.5-1.9 3.7 0 4.4 2.4 4.4 5.6V21h-4v-5.2c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9V21h-4v-11z" />
+                      </svg>
+                    </span>
+                  )}
+
+                  {/* Instagram */}
+                  {organization.social_links?.instagram ? (
+                    <a
+                      href={organization.social_links.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-pink-500 hover:scale-110 transition-transform"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M7 2C4.2 2 2 4.2 2 7v10c0 2.8 2.2 5 5 5h10c2.8 0 5-2.2 5-5V7c0-2.8-2.2-5-5-5H7zm10 2c1.6 0 3 1.4 3 3v10c0 1.6-1.4 3-3 3H7c-1.6 0-3-1.4-3-3V7c0-1.6 1.4-3 3-3h10zm-5 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm4.5-2.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z" />
+                      </svg>
+                    </a>
+                  ) : (
+                    <span className="text-gray-400">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M7 2C4.2 2 2 4.2 2 7v10c0 2.8 2.2 5 5 5h10c2.8 0 5-2.2 5-5V7c0-2.8-2.2-5-5-5H7zm10 2c1.6 0 3 1.4 3 3v10c0 1.6-1.4 3-3 3H7c-1.6 0-3-1.4-3-3V7c0-1.6 1.4-3 3-3h10zm-5 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm4.5-2.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z" />
+                      </svg>
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs text-gray-500">Subscription:</span>
+                    {getStatusBadge(
+                      organization.subscription_status || "inactive"
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs text-gray-500">Organization:</span>
+                    {getStatusBadge(organization.status || "inactive")}
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent>
+              {/* --- Totals Section --- */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 mb-6">
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Calendar className="w-6 h-6 mx-auto mb-2 text-purple-500" />
+                  <div className="font-bold">
+                    {organization.total_events ?? "N/A"}
+                  </div>
+                  <div className="text-sm">Total Events</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Building className="w-6 h-6 mx-auto mb-2 text-indigo-500" />
+                  <div className="font-bold">
+                    {organization.total_companies ?? "N/A"}
+                  </div>
+                  <div className="text-sm">Companies</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <DollarSign className="w-6 h-6 mx-auto mb-2 text-green-500" />
+                  <div className="font-bold">
+                    {organization.total_revenue !== undefined
+                      ? `$${organization.total_revenue.toLocaleString()}`
+                      : "N/A"}
+                  </div>
+                  <div className="text-sm">Revenue</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Users className="w-6 h-6 mx-auto mb-2 text-orange-500" />
+                  <div className="font-bold">
+                    {organization.total_attendees !== undefined
+                      ? organization.total_attendees.toLocaleString()
+                      : "N/A"}
+                  </div>
+                  <div className="text-sm">Attendees</div>
+                </div>
+              </div>
+
+              <div className="mt-2 mb-2 text-sm">
+                <span className="font-semibold">Description:</span>{" "}
+                {organization.bio?.description &&
+                organization.bio.description.replace(/<[^>]+>/g, "").trim() ? (
+                  organization.bio.description.replace(/<[^>]+>/g, "").trim()
+                ) : (
+                  <span className="text-gray-500 dark:text-gray-400">
+                    No description available
+                  </span>
+                )}
+              </div>
+
+              <p className="text-sm mb-2">
+                <span className="font-semibold">Website:</span>{" "}
+                {organization.bio?.website ? (
+                  <a
+                    href={organization.bio.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-blue-600 dark:text-blue-400"
+                  >
+                    <Globe className="w-4 h-4 mr-1" />
+                    {organization.bio.website}
+                  </a>
+                ) : (
+                  <span className="text-gray-500 dark:text-gray-400">
+                    No website available
+                  </span>
+                )}
+              </p>
+
+              <p className="text-sm mb-2">
+                <span className="font-semibold">Industry:</span>{" "}
+                {organization.bio?.industry ? (
+                  organization.bio.industry
+                ) : (
+                  <span className="text-gray-500 dark:text-gray-400">
+                    No industry available
+                  </span>
+                )}
+              </p>
+
+              {/* --- Monthly Stats --- */}
+              <div className="mt-4">
+                <h3 className="text-md font-semibold mb-2">Monthly Stats</h3>
+                {organization.monthly_stats &&
+                Object.keys(organization.monthly_stats).length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {Object.entries(organization.monthly_stats).map(
+                      ([month, value]: [string, any]) => (
+                        <div
+                          key={month}
+                          className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                        >
+                          <p className="font-bold">{value ?? "N/A"}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {month}
+                          </p>
+                        </div>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No monthly stats available
+                  </p>
+                )}
+              </div>
+              <div className="mt-6 flex justify-end">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <span className="font-semibold text-gray-800 dark:text-gray-200">
+                    Created At:
+                  </span>{" "}
+                  {organization.created_at
+                    ? new Date(organization.created_at).toLocaleString()
+                    : "N/A"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </DialogContent>
 
       <DialogActions>
-        <Button 
-          onClick={onClose} 
-          className="px-6"
-          style={{ 
-            backgroundColor: darkMode ? '#374151' : '#f9fafb',
-            color: darkMode ? '#f3f4f6' : '#374151'
-          }}
-        >
-          Close
-        </Button>
+        <Button onClick={onClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );

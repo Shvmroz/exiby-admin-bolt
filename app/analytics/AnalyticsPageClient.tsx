@@ -172,7 +172,7 @@ const AnalyticsPageClient: React.FC = () => {
 
   React.useEffect(() => {
     // Simulate loading
-    const timer = setTimeout(() => setLoading(false), 1200);
+    const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 

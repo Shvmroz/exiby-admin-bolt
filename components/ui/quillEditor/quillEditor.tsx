@@ -6,8 +6,8 @@ import 'react-quill/dist/quill.snow.css';
 import '@/components/ui/quillEditor/quillEditor.css';
 
 interface QuillEditorProps {
-  value: string;
-  onChange: (value: string) => void;
+  value?: string;
+  onChange?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -25,8 +25,8 @@ const ReactQuill = dynamic(() => import('react-quill'), {
 });
 
 const QuillEditor: React.FC<QuillEditorProps> = ({
-  value,
-  onChange,
+  value = '',                  // default empty string
+  onChange = () => {},          // default noop
   placeholder = 'Enter description...',
   disabled = false,
   className = '',
