@@ -29,10 +29,10 @@ import SoftDeleteTable from '@/components/ui/soft-delete-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
-
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
+import { useSnackbar } from 'notistack';
 
 interface Company {
   _id: string;
@@ -61,170 +61,20 @@ interface Company {
   is_deleted?: boolean;
 }
 
-// Dummy data
-const dummyData = {
-  data: {
-    companies: [
-      {
-        _id: "comp_789",
-        orgn_user: {
-          _id: "orguser_456",
-          name: "Microsoft Corp"
-        },
-        bio: {
-          description: "Technology solutions provider",
-          industry: "Technology"
-        },
-        social_links: {
-          website: "https://microsoft.com",
-          linkedin: "https://linkedin.com/company/microsoft"
-        },
-        contact: {
-          email: "events@microsoft.com",
-          phone: "+1-555-0123"
-        },
-        qr_code: {},
-        status: true,
-        total_events: 15,
-        total_payments: 45000,
-        created_at: "2025-07-10T14:20:00.000Z"
-      },
-      {
-        _id: "comp_790",
-        orgn_user: {
-          _id: "orguser_457",
-          name: "Google LLC"
-        },
-        bio: {
-          description: "Search and cloud computing services",
-          industry: "Technology"
-        },
-        social_links: {
-          website: "https://google.com",
-          linkedin: "https://linkedin.com/company/google"
-        },
-        contact: {
-          email: "partnerships@google.com",
-          phone: "+1-555-0124"
-        },
-        qr_code: {},
-        status: true,
-        total_events: 22,
-        total_payments: 67000,
-        created_at: "2025-07-08T09:15:00.000Z"
-      },
-      {
-        _id: "comp_791",
-        orgn_user: {
-          _id: "orguser_458",
-          name: "Apple Inc"
-        },
-        bio: {
-          description: "Consumer electronics and software",
-          industry: "Technology"
-        },
-        social_links: {
-          website: "https://apple.com",
-          linkedin: "https://linkedin.com/company/apple"
-        },
-        contact: {
-          email: "events@apple.com",
-          phone: "+1-555-0125"
-        },
-        qr_code: {},
-        status: true,
-        total_events: 18,
-        total_payments: 89000,
-        created_at: "2025-07-05T16:30:00.000Z"
-      },
-      {
-        _id: "comp_792",
-        orgn_user: {
-          _id: "orguser_459",
-          name: "Amazon Web Services"
-        },
-        bio: {
-          description: "Cloud computing platform",
-          industry: "Technology"
-        },
-        social_links: {
-          website: "https://aws.amazon.com",
-          linkedin: "https://linkedin.com/company/amazon-web-services"
-        },
-        contact: {
-          email: "events@aws.amazon.com",
-          phone: "+1-555-0126"
-        },
-        qr_code: {},
-        status: false,
-        total_events: 12,
-        total_payments: 34000,
-        created_at: "2025-06-28T11:45:00.000Z"
-      },
-      {
-        _id: "comp_793",
-        orgn_user: {
-          _id: "orguser_460",
-          name: "Tesla Motors"
-        },
-        bio: {
-          description: "Electric vehicles and clean energy",
-          industry: "Automotive"
-        },
-        social_links: {
-          website: "https://tesla.com",
-          linkedin: "https://linkedin.com/company/tesla-motors"
-        },
-        contact: {
-          email: "corporate@tesla.com",
-          phone: "+1-555-0127"
-        },
-        qr_code: {},
-        status: true,
-        total_events: 8,
-        total_payments: 28000,
-        created_at: "2025-06-20T13:20:00.000Z"
-      },
-      {
-        _id: "comp_794",
-        orgn_user: {
-          _id: "orguser_461",
-          name: "Netflix Inc"
-        },
-        bio: {
-          description: "Streaming entertainment service",
-          industry: "Entertainment"
-        },
-        social_links: {
-          website: "https://netflix.com",
-          linkedin: "https://linkedin.com/company/netflix"
-        },
-        contact: {
-          email: "events@netflix.com",
-          phone: "+1-555-0128"
-        },
-        qr_code: {},
-        status: true,
-        total_events: 10,
-        total_payments: 38000,
-        created_at: "2025-06-15T08:10:00.000Z"
-      }
-    ],
-    total: 300,
-    page: 1,
-    limit: 20
-  }
-};
-
-
 const CompaniesPageClient: React.FC = () => {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // State
   const [companies, setCompanies] = useState<Company[]>([]);
   const [deletedCompanies, setDeletedCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletedLoading, setDeletedLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [rowData, setRowData] = useState<Company | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     company: Company | null;
@@ -238,9 +88,9 @@ const CompaniesPageClient: React.FC = () => {
     open: boolean;
     company: Company | null;
   }>({ open: false, company: null });
+
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
 
@@ -248,20 +98,37 @@ const CompaniesPageClient: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [industryFilter, setIndustryFilter] = useState('all');
   const [activeOnly, setActiveOnly] = useState(false);
+  const [createdFrom, setCreatedFrom] = useState('');
+  const [createdTo, setCreatedTo] = useState('');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Local pagination (handled fully by frontend)
+  // Local pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  // API meta (comes only from server)
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
+  const [filtersApplied, setFiltersApplied] = useState({
+    search: '',
+    sort_by: 'created_at',
+    sort_order: 'desc',
+    page: 1,
+    limit: 50,
+  });
 
+  // Table helpers
+  const handleChangePage = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const onRowsPerPageChange = (newLimit: number) => {
+    setRowsPerPage(newLimit);
+    setCurrentPage(1);
+  };
 
   const TABLE_HEAD: TableHeader[] = [
     {
@@ -380,9 +247,9 @@ const CompaniesPageClient: React.FC = () => {
       width: "w-12",
     },
   ];
-  
 
-  const loadCompanies = async (includeDeleted = false) => {
+  // Load companies
+  const getListCompanies = async (searchQuery = '', filters = {}, includeDeleted = false) => {
     if (includeDeleted) {
       setDeletedLoading(true);
     } else {
@@ -390,45 +257,47 @@ const CompaniesPageClient: React.FC = () => {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // TODO: Replace with actual API call
+      // const result = await _companies_list_api(currentPage, rowsPerPage, searchQuery, filters);
       
-      // Get active companies (exclude deleted ones)
-      const activeCompanies = dummyData.data.companies.filter(company => 
-        !deletedCompanies.some(deleted => deleted._id === company._id)
-      );
-      
-      // Filter data based on search and status
-      let filteredData = includeDeleted
-        ? deletedCompanies
-        : activeCompanies;
-      
-      if (searchQuery) {
-        filteredData = filteredData.filter(company =>
-          company.orgn_user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          company.bio.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          company.bio.industry.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-      
-      if (statusFilter !== 'all') {
-        const isActive = statusFilter === 'active';
-        filteredData = filteredData.filter(company => company.status === isActive);
-      }
-      
-      if (industryFilter !== 'all') {
-        filteredData = filteredData.filter(company => company.bio.industry === industryFilter);
-      }
+      // Simulate API response structure
+      const result = {
+        code: 200,
+        data: {
+          companies: [],
+          total_count: 0,
+          total_pages: 1,
+          filters_applied: filters,
+        }
+      };
 
-      if (includeDeleted) {
-        setDeletedCompanies(filteredData);
+      if (result?.code === 200) {
+        if (includeDeleted) {
+          setDeletedCompanies(result.data.companies || []);
+        } else {
+          setCompanies(result.data.companies || []);
+          setTotalCount(result.data.total_count || 0);
+          setTotalPages(result.data.total_pages || 1);
+          setFiltersApplied(result.data.filters_applied || {});
+        }
       } else {
-        setCompanies(filteredData);
-        setTotalCount(filteredData.length);
-        setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
+        enqueueSnackbar(result?.message || 'Failed to load companies', {
+          variant: 'error',
+        });
+        if (includeDeleted) {
+          setDeletedCompanies([]);
+        } else {
+          setCompanies([]);
+        }
       }
-    } catch (error) {
-      console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} companies:`, error);
+    } catch (err) {
+      console.error(err);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      if (includeDeleted) {
+        setDeletedCompanies([]);
+      } else {
+        setCompanies([]);
+      }
     } finally {
       if (includeDeleted) {
         setDeletedLoading(false);
@@ -440,11 +309,11 @@ const CompaniesPageClient: React.FC = () => {
 
   useEffect(() => {
     if (activeTab === 'all') {
-      loadCompanies(false);
+      getListCompanies();
     } else if (activeTab === 'deleted') {
-      loadCompanies(true);
+      getListCompanies('', {}, true);
     }
-  }, [searchQuery, currentPage, rowsPerPage, activeTab]);
+  }, [currentPage, rowsPerPage, activeTab]);
 
   if (loading && companies.length === 0) {
     return <TableSkeleton rows={8} columns={7} showFilters={true} />;
@@ -452,58 +321,148 @@ const CompaniesPageClient: React.FC = () => {
 
   const handleEdit = (company: Company) => {
     setEditDialog({ open: true, company });
+    setRowData(company);
   };
 
   const handleDelete = (company: Company) => {
     setDeleteDialog({ open: true, company });
+    setRowData(company);
   };
 
-  const confirmDelete = async () => {
-    if (!deleteDialog.company) return;
-    
+  const handleConfirmDelete = async () => {
+    if (!rowData?._id) return;
+
     setDeleteLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _delete_company_api(rowData._id);
       
-      // Move to deleted companies (soft delete)
-      const deletedCompany = {
-        ...deleteDialog.company,
-        deleted_at: new Date().toISOString(),
-        is_deleted: true,
-      };
+      // Simulate API response
+      const result = { code: 200, message: 'Company moved to deleted successfully' };
 
-      setDeletedCompanies(prev => [deletedCompany, ...prev]);
-      setCompanies(prev => 
-        prev.filter(company => company._id !== deleteDialog.company!._id)
-      );
-      
-      // Update total count
-      setTotalCount(prev => prev - 1);
-      setTotalPages(Math.ceil((totalCount - 1) / rowsPerPage));
-      
-      setDeleteDialog({ open: false, company: null });
+      if (result?.code === 200) {
+        const deletedCompany = {
+          ...rowData,
+          deleted_at: new Date().toISOString(),
+          is_deleted: true,
+        };
+
+        setDeletedCompanies(prev => [deletedCompany, ...prev]);
+        setCompanies(prev => 
+          prev.filter(company => company._id !== rowData._id)
+        );
+        
+        setDeleteDialog({ open: false, company: null });
+        setRowData(null);
+        enqueueSnackbar('Company moved to deleted successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to delete company', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error deleting company:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleSaveEdit = async (data: Partial<Company>) => {
+    if (!rowData?._id) return;
+    
+    setEditLoading(true);
+    try {
+      // TODO: Replace with actual API call
+      // const result = await _edit_company_api(rowData._id, data);
+      
+      // Simulate API response
+      const result = { 
+        code: 200, 
+        message: 'Company updated successfully',
+        data: { ...rowData, ...data }
+      };
+
+      if (result?.code === 200) {
+        setEditDialog({ open: false, company: null });
+        setRowData(null);
+        setCompanies(prev =>
+          prev.map(company => company._id === rowData._id ? { ...company, ...data } : company)
+        );
+        enqueueSnackbar('Company updated successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to update company', {
+          variant: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error updating company:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleAddNewCompany = async (data: Partial<Company>) => {
+    setAddLoading(true);
+    try {
+      // TODO: Replace with actual API call
+      // const result = await _add_company_api(data);
+      
+      // Simulate API response
+      const result = {
+        code: 200,
+        message: 'Company created successfully',
+        data: { _id: `comp_${Date.now()}`, ...data }
+      };
+
+      if (result?.code === 200) {
+        setCompanies(prev => [result.data, ...prev]);
+        setCreateDialog(false);
+        enqueueSnackbar('Company created successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to create company', {
+          variant: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating company:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
+    } finally {
+      setAddLoading(false);
     }
   };
 
   const handleRestore = async (company: Company) => {
     setRestoreLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _restore_company_api(company._id);
+      
+      // Simulate API response
+      const result = { code: 200, message: 'Company restored successfully' };
 
-      // Remove deleted_at and is_deleted properties
-      const { deleted_at, is_deleted, ...restoredCompany } = company;
-
-      // Move back to active companies
-      setCompanies(prev => [restoredCompany, ...prev]);
-      setDeletedCompanies(prev => prev.filter(c => c._id !== company._id));
+      if (result?.code === 200) {
+        const { deleted_at, is_deleted, ...restoredCompany } = company;
+        setCompanies(prev => [restoredCompany, ...prev]);
+        setDeletedCompanies(prev => prev.filter(c => c._id !== company._id));
+        enqueueSnackbar('Company restored successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to restore company', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error restoring company:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
       setRestoreLoading(false);
     }
@@ -512,53 +471,27 @@ const CompaniesPageClient: React.FC = () => {
   const handlePermanentDelete = async (company: Company) => {
     setPermanentDeleteLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _permanent_delete_company_api(company._id);
+      
+      // Simulate API response
+      const result = { code: 200, message: 'Company permanently deleted' };
 
-      // Remove from deleted companies permanently
-      setDeletedCompanies(prev => prev.filter(c => c._id !== company._id));
+      if (result?.code === 200) {
+        setDeletedCompanies(prev => prev.filter(c => c._id !== company._id));
+        enqueueSnackbar('Company permanently deleted', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to permanently delete company', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error permanently deleting company:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
       setPermanentDeleteLoading(false);
-    }
-  };
-
-  const handleSaveEdit = async (updatedCompany: Company) => {
-    setEditLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Update local state
-      setCompanies(prev =>
-        prev.map(company => company._id === updatedCompany._id ? updatedCompany : company)
-      );
-      
-      setEditDialog({ open: false, company: null });
-    } catch (error) {
-      console.error('Error updating company:', error);
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handleCreate = async (newCompany: Company) => {
-    setCreateLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Add to local state
-      setCompanies(prev => [newCompany, ...prev]);
-      setTotalCount(prev => prev + 1);
-      setTotalPages(Math.ceil((totalCount + 1) / rowsPerPage));
-      
-      setCreateDialog(false);
-    } catch (error) {
-      console.error('Error creating company:', error);
-    } finally {
-      setCreateLoading(false);
     }
   };
 
@@ -566,74 +499,49 @@ const CompaniesPageClient: React.FC = () => {
     setDetailView({ open: true, company });
   };
 
-  // Helper to count active filters
+  const handleSearch = () => {
+    setCurrentPage(1);
+    getListCompanies(searchQuery);
+  };
+
+  // Filter functions
+  const isDateRangeInvalid = Boolean(
+    createdFrom && createdTo && new Date(createdTo) < new Date(createdFrom)
+  );
+
   const getAppliedFiltersCount = () => {
     let count = 0;
     if (statusFilter !== 'all') count++;
     if (industryFilter !== 'all') count++;
     if (activeOnly) count++;
+    if (createdFrom) count++;
+    if (createdTo) count++;
     return count;
   };
 
   const handleClearFilters = () => {
-    // Reset all filters
     setStatusFilter('all');
     setIndustryFilter('all');
     setActiveOnly(false);
-    
-    // Get active companies (exclude deleted ones)
-    const activeCompanies = dummyData.data.companies.filter(company => 
-      !deletedCompanies.some(deleted => deleted._id === company._id)
-    );
-    setCompanies(activeCompanies);
-    setTotalCount(activeCompanies.length);
-    setTotalPages(Math.ceil(activeCompanies.length / rowsPerPage));
+    setCreatedFrom('');
+    setCreatedTo('');
     setFilterDrawerOpen(false);
-    setFilterLoading(false);
+    getListCompanies();
   };
 
-  const handleApplyFilters = async () => {
-    setFilterLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Get active companies (exclude deleted ones)
-      const activeCompanies = dummyData.data.companies.filter(company => 
-        !deletedCompanies.some(deleted => deleted._id === company._id)
-      );
-      let filteredData = activeCompanies;
+  const handleApplyFilters = () => {
+    const filters: { [key: string]: string } = {};
 
-      if (statusFilter !== 'all') {
-        const isActive = statusFilter === 'active';
-        filteredData = filteredData.filter(company => company.status === isActive);
-      }
+    if (statusFilter === 'active') filters.status = 'true';
+    else if (statusFilter === 'inactive') filters.status = 'false';
 
-      if (industryFilter !== 'all') {
-        filteredData = filteredData.filter(company => company.bio.industry === industryFilter);
-      }
+    if (industryFilter !== 'all') filters.industry = industryFilter;
+    if (activeOnly) filters.active_only = 'true';
+    if (createdFrom) filters.created_from = createdFrom;
+    if (createdTo) filters.created_to = createdTo;
 
-      if (activeOnly) {
-        filteredData = filteredData.filter(company => company.status);
-      }
-
-      // Apply search query if exists
-      if (searchQuery) {
-        filteredData = filteredData.filter(company =>
-          company.orgn_user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          company.bio.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          company.bio.industry.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setCompanies(filteredData);
-      setTotalCount(filteredData.length);
-      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
-      setFilterDrawerOpen(false);
-    } catch (error) {
-      console.error('Error applying filters:', error);
-    } finally {
-      setFilterLoading(false);
-    }
+    getListCompanies(searchQuery, filters);
+    setFilterDrawerOpen(false);
   };
 
   // Helper functions for soft delete table
@@ -643,24 +551,12 @@ const CompaniesPageClient: React.FC = () => {
     if (!company.deleted_at) return 30;
     
     const deletedDate = new Date(company.deleted_at);
-    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000);
     const now = new Date();
     const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
     
     return Math.max(0, daysLeft);
   };
-
-  // Table helpers
-  const handleChangePage = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  const onRowsPerPageChange = (newLimit: number) => {
-    setRowsPerPage(newLimit);
-    setCurrentPage(1); // reset to first page
-  };
-
-
 
   const MENU_OPTIONS: MenuOption[] = [
     {
@@ -696,7 +592,6 @@ const CompaniesPageClient: React.FC = () => {
     });
   };
 
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -710,7 +605,7 @@ const CompaniesPageClient: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-        <Button
+          <Button
             onClick={() => setExportDialog(true)}
             variant="outline"
             className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -725,7 +620,6 @@ const CompaniesPageClient: React.FC = () => {
             <Plus className="w-4 h-4 mr-2" />
             Add Company
           </Button>
-        
         </div>
       </div>
 
@@ -733,32 +627,54 @@ const CompaniesPageClient: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search companies..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            <div className="relative w-full flex">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search companies..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-24"
+                />
+              </div>
+              {filtersApplied?.search && filtersApplied.search !== '' ? (
+                <Button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setCurrentPage(1);
+                    getListCompanies('');
+                  }}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Clear
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSearch}
+                  disabled={searchQuery === ''}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Search
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => setFilterDrawerOpen(true)}
-                variant="outline"
-                className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-                {getAppliedFiltersCount() > 0 && (
-                  <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
-                    {getAppliedFiltersCount()}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+            <Button
+              onClick={() => setFilterDrawerOpen(true)}
+              variant="outline"
+              className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Filters
+              {getAppliedFiltersCount() > 0 && (
+                <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
+                  {getAppliedFiltersCount()}
+                </Badge>
+              )}
+            </Button>
           </div>
         </div>
       </div>
@@ -823,15 +739,18 @@ const CompaniesPageClient: React.FC = () => {
         title="Move to Deleted Companies"
         content={`Are you sure you want to move "${deleteDialog.company?.orgn_user.name}" to deleted companies? You can restore it within 30 days before it's permanently deleted.`}
         confirmButtonText="Move to Deleted"
-        onConfirm={confirmDelete}
+        onConfirm={handleConfirmDelete}
         loading={deleteLoading}
       />
 
       {/* Edit Company Dialog */}
       <CompanyEditDialog
         open={editDialog.open}
-        onOpenChange={(open) => setEditDialog({ open, company: null })}
-        company={editDialog.company}
+        onOpenChange={(open) => {
+          setEditDialog({ open, company: null });
+          if (!open) setRowData(null);
+        }}
+        company={rowData}
         onSave={handleSaveEdit}
         loading={editLoading}
       />
@@ -840,8 +759,8 @@ const CompaniesPageClient: React.FC = () => {
       <CompanyCreateDialog
         open={createDialog}
         onOpenChange={setCreateDialog}
-        onSave={handleCreate}
-        loading={createLoading}
+        onSave={handleAddNewCompany}
+        loading={addLoading}
       />
 
       {/* Company Detail View */}
@@ -868,6 +787,7 @@ const CompaniesPageClient: React.FC = () => {
         onClear={handleClearFilters}
         onFilter={handleApplyFilters}
         loading={filterLoading}
+        applyButtonDisabled={isDateRangeInvalid}
       >
         <CompanyFilters
           statusFilter={statusFilter}

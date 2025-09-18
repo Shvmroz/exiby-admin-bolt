@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { CheckCircle, XCircle, Calendar, DollarSign, Globe, MapPin } from "lucide-react";
 
@@ -20,6 +21,11 @@ interface EventFiltersProps {
   setPaidOnlyFilter: (value: boolean) => void;
   publicOnlyFilter: boolean;
   setPublicOnlyFilter: (value: boolean) => void;
+  createdFrom?: string;
+  setCreatedFrom?: (value: string) => void;
+  createdTo?: string;
+  setCreatedTo?: (value: string) => void;
+  isDateRangeInvalid?: boolean;
 }
 
 const EventFilters: React.FC<EventFiltersProps> = ({
@@ -31,6 +37,11 @@ const EventFilters: React.FC<EventFiltersProps> = ({
   setPaidOnlyFilter,
   publicOnlyFilter,
   setPublicOnlyFilter,
+  createdFrom,
+  setCreatedFrom,
+  createdTo,
+  setCreatedTo,
+  isDateRangeInvalid,
 }) => {
   return (
     <div className="space-y-6">
@@ -133,6 +144,33 @@ const EventFilters: React.FC<EventFiltersProps> = ({
           </SelectContent>
         </Select>
       </div>
+
+      {/* Date Range Filter */}
+      {setCreatedFrom && setCreatedTo && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Created From
+          </label>
+          <Input
+            type="date"
+            value={createdFrom}
+            onChange={(e) => setCreatedFrom(e.target.value)}
+          />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Created To
+          </label>
+          <Input
+            type="date"
+            value={createdTo}
+            onChange={(e) => setCreatedTo(e.target.value)}
+          />
+          {isDateRangeInvalid && (
+            <p className="text-xs text-red-500 mt-1">
+              End date cannot be earlier than start date
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

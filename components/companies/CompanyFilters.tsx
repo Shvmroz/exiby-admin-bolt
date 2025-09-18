@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { CheckCircle, XCircle, Building } from "lucide-react";
 
@@ -18,6 +19,11 @@ interface CompanyFiltersProps {
   setIndustryFilter: (value: string) => void;
   activeOnly: boolean;
   setActiveOnly: (value: boolean) => void;
+  createdFrom?: string;
+  setCreatedFrom?: (value: string) => void;
+  createdTo?: string;
+  setCreatedTo?: (value: string) => void;
+  isDateRangeInvalid?: boolean;
 }
 
 const CompanyFilters: React.FC<CompanyFiltersProps> = ({
@@ -27,6 +33,11 @@ const CompanyFilters: React.FC<CompanyFiltersProps> = ({
   setIndustryFilter,
   activeOnly,
   setActiveOnly,
+  createdFrom,
+  setCreatedFrom,
+  createdTo,
+  setCreatedTo,
+  isDateRangeInvalid,
 }) => {
   const industries = [
     'Technology',
@@ -103,6 +114,33 @@ const CompanyFilters: React.FC<CompanyFiltersProps> = ({
           </SelectContent>
         </Select>
       </div>
+
+      {/* Date Range Filter */}
+      {setCreatedFrom && setCreatedTo && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Created From
+          </label>
+          <Input
+            type="date"
+            value={createdFrom}
+            onChange={(e) => setCreatedFrom(e.target.value)}
+          />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Created To
+          </label>
+          <Input
+            type="date"
+            value={createdTo}
+            onChange={(e) => setCreatedTo(e.target.value)}
+          />
+          {isDateRangeInvalid && (
+            <p className="text-xs text-red-500 mt-1">
+              End date cannot be earlier than start date
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

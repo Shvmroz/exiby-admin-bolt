@@ -27,16 +27,10 @@ import SoftDeleteTable from '@/components/ui/soft-delete-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
+import { useSnackbar } from 'notistack';
 
 interface Organization {
   _id: string;
@@ -62,102 +56,20 @@ interface Organization {
   is_deleted?: boolean;
 }
 
-// Dummy data
-const dummyData = {
-  data: {
-    organizations: [
-      {
-        _id: "org_123",
-        orgn_user: { _id: "orguser_456", name: "TechCorp Events" },
-        bio: { description: "Leading tech event organizer", website: "https://techcorp.com" },
-        category: "organization",
-        subscription_status: "active",
-        subscription_start: "2025-08-01T00:00:00.000Z",
-        subscription_end: "2025-09-01T00:00:00.000Z",
-        status: true,
-        total_events: 25,
-        total_companies: 150,
-        total_revenue: 125000,
-        total_attendees: 5000,
-        created_at: "2025-07-15T10:30:00.000Z"
-      },
-      {
-        _id: "org_124",
-        orgn_user: { _id: "orguser_457", name: "Innovation Labs" },
-        bio: { description: "Cutting-edge innovation events", website: "https://innovationlabs.io" },
-        category: "company",
-        subscription_status: "active",
-        subscription_start: "2025-07-15T00:00:00.000Z",
-        subscription_end: "2025-08-15T00:00:00.000Z",
-        status: true,
-        total_events: 18,
-        total_companies: 89,
-        total_revenue: 95000,
-        total_attendees: 3200,
-        created_at: "2025-07-10T14:20:00.000Z"
-      },
-      {
-        _id: "org_125",
-        orgn_user: { _id: "orguser_458", name: "StartupHub" },
-        bio: { description: "Startup networking and pitch events", website: "https://startuphub.com" },
-        category: "organization",
-        subscription_status: "inactive",
-        subscription_start: "2025-06-01T00:00:00.000Z",
-        subscription_end: "2025-07-01T00:00:00.000Z",
-        status: false,
-        total_events: 12,
-        total_companies: 45,
-        total_revenue: 67000,
-        total_attendees: 1800,
-        created_at: "2025-06-05T09:15:00.000Z"
-      },
-      {
-        _id: "org_126",
-        orgn_user: { _id: "orguser_459", name: "Digital Summit Co" },
-        bio: { description: "Digital transformation conferences", website: "https://digitalsummit.co" },
-        category: "company",
-        subscription_status: "active",
-        subscription_start: "2025-07-20T00:00:00.000Z",
-        subscription_end: "2025-08-20T00:00:00.000Z",
-        status: true,
-        total_events: 15,
-        total_companies: 78,
-        total_revenue: 89000,
-        total_attendees: 2500,
-        created_at: "2025-07-01T16:45:00.000Z"
-      },
-      {
-        _id: "org_127",
-        orgn_user: { _id: "orguser_460", name: "Event Masters" },
-        bio: { description: "Professional event management services", website: "https://eventmasters.com" },
-        category: "organization",
-        subscription_status: "pending",
-        subscription_start: "2025-08-10T00:00:00.000Z",
-        subscription_end: "2025-09-10T00:00:00.000Z",
-        status: true,
-        total_events: 8,
-        total_companies: 32,
-        total_revenue: 45000,
-        total_attendees: 1200,
-        created_at: "2025-07-25T11:30:00.000Z"
-      }
-    ],
-    total: 150,
-    page: 1,
-    limit: 20
-  }
-};
-
-
-
 const OrganizationsPageClient: React.FC = () => {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // State
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [deletedOrganizations, setDeletedOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(false);
   const [deletedLoading, setDeletedLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [rowData, setRowData] = useState<Organization | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     organization: Organization | null;
@@ -171,9 +83,9 @@ const OrganizationsPageClient: React.FC = () => {
     open: boolean;
     organization: Organization | null;
   }>({ open: false, organization: null });
+
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [permanentDeleteLoading, setPermanentDeleteLoading] = useState(false);
 
@@ -182,18 +94,27 @@ const OrganizationsPageClient: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [activeOnly, setActiveOnly] = useState(false);
   const [subscriptionStatusFilter, setSubscriptionStatusFilter] = useState('all');
+  const [createdFrom, setCreatedFrom] = useState('');
+  const [createdTo, setCreatedTo] = useState('');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Local pagination (handled fully by frontend)
+  // Local pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  // API meta (comes only from server)
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [filtersApplied, setFiltersApplied] = useState({
+    search: '',
+    sort_by: 'created_at',
+    sort_order: 'desc',
+    page: 1,
+    limit: 50,
+  });
 
   // Table helpers
   const handleChangePage = (newPage: number) => {
@@ -202,7 +123,7 @@ const OrganizationsPageClient: React.FC = () => {
 
   const onRowsPerPageChange = (newLimit: number) => {
     setRowsPerPage(newLimit);
-    setCurrentPage(1); // reset to first page
+    setCurrentPage(1);
   };
 
   const TABLE_HEAD: TableHeader[] = [
@@ -336,10 +257,9 @@ const OrganizationsPageClient: React.FC = () => {
       width: "w-12",
     },
   ];
-  
 
   // Load organizations
-  const loadOrganizations = async (includeDeleted = false) => {
+  const getListOrganizations = async (searchQuery = '', filters = {}, includeDeleted = false) => {
     if (includeDeleted) {
       setDeletedLoading(true);
     } else {
@@ -347,43 +267,47 @@ const OrganizationsPageClient: React.FC = () => {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // TODO: Replace with actual API call
+      // const result = await _organizations_list_api(currentPage, rowsPerPage, searchQuery, filters);
       
-      // Get active organizations (exclude deleted ones)
-      const activeOrganizations = dummyData.data.organizations.filter(org => 
-        !deletedOrganizations.some(deleted => deleted._id === org._id)
-      );
-      
-      // Filter data based on search and status
-      let filteredData = includeDeleted
-        ? deletedOrganizations
-        : activeOrganizations;
-      
-      if (searchQuery) {
-        filteredData = filteredData.filter(org =>
-          org.orgn_user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          org.bio.description.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-      
-      if (statusFilter !== 'all') {
-        filteredData = filteredData.filter(org => org.subscription_status === statusFilter);
-      }
-      
-      if (categoryFilter !== 'all') {
-        filteredData = filteredData.filter(org => org.category === categoryFilter);
-      }
+      // Simulate API response structure
+      const result = {
+        code: 200,
+        data: {
+          organizations: [],
+          total_count: 0,
+          total_pages: 1,
+          filters_applied: filters,
+        }
+      };
 
-      if (includeDeleted) {
-        setDeletedOrganizations(filteredData);
+      if (result?.code === 200) {
+        if (includeDeleted) {
+          setDeletedOrganizations(result.data.organizations || []);
+        } else {
+          setOrganizations(result.data.organizations || []);
+          setTotalCount(result.data.total_count || 0);
+          setTotalPages(result.data.total_pages || 1);
+          setFiltersApplied(result.data.filters_applied || {});
+        }
       } else {
-        setOrganizations(filteredData);
-        setTotalCount(filteredData.length);
-        setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
+        enqueueSnackbar(result?.message || 'Failed to load organizations', {
+          variant: 'error',
+        });
+        if (includeDeleted) {
+          setDeletedOrganizations([]);
+        } else {
+          setOrganizations([]);
+        }
       }
-    } catch (error) {
-      console.error(`Error loading ${includeDeleted ? 'deleted' : 'active'} organizations:`, error);
+    } catch (err) {
+      console.error(err);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      if (includeDeleted) {
+        setDeletedOrganizations([]);
+      } else {
+        setOrganizations([]);
+      }
     } finally {
       if (includeDeleted) {
         setDeletedLoading(false);
@@ -395,11 +319,11 @@ const OrganizationsPageClient: React.FC = () => {
 
   useEffect(() => {
     if (activeTab === 'all') {
-      loadOrganizations(false);
+      getListOrganizations();
     } else if (activeTab === 'deleted') {
-      loadOrganizations(true);
+      getListOrganizations('', {}, true);
     }
-  }, [searchQuery, currentPage, rowsPerPage, activeTab]);
+  }, [currentPage, rowsPerPage, activeTab]);
 
   if (loading && organizations.length === 0) {
     return <TableSkeleton rows={8} columns={8} showFilters={true} />;
@@ -407,58 +331,149 @@ const OrganizationsPageClient: React.FC = () => {
 
   const handleEdit = (organization: Organization) => {
     setEditDialog({ open: true, organization });
+    setRowData(organization);
   };
 
   const handleDelete = (organization: Organization) => {
     setDeleteDialog({ open: true, organization });
+    setRowData(organization);
   };
 
-  const confirmDelete = async () => {
-    if (!deleteDialog.organization) return;
-    
+  const handleConfirmDelete = async () => {
+    if (!rowData?._id) return;
+
     setDeleteLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _delete_organization_api(rowData._id);
       
-      // Move to deleted organizations (soft delete)
-      const deletedOrganization = {
-        ...deleteDialog.organization,
-        deleted_at: new Date().toISOString(),
-        is_deleted: true,
-      };
+      // Simulate API response
+      const result = { code: 200, message: 'Organization moved to deleted successfully' };
 
-      setDeletedOrganizations(prev => [deletedOrganization, ...prev]);
-      setOrganizations(prev => 
-        prev.filter(org => org._id !== deleteDialog.organization!._id)
-      );
-      
-      // Update total count
-      setTotalCount(prev => prev - 1);
-      setTotalPages(Math.ceil((totalCount - 1) / rowsPerPage));
-      
-      setDeleteDialog({ open: false, organization: null });
+      if (result?.code === 200) {
+        // Move to deleted organizations (soft delete)
+        const deletedOrganization = {
+          ...rowData,
+          deleted_at: new Date().toISOString(),
+          is_deleted: true,
+        };
+
+        setDeletedOrganizations(prev => [deletedOrganization, ...prev]);
+        setOrganizations(prev => 
+          prev.filter(org => org._id !== rowData._id)
+        );
+        
+        setDeleteDialog({ open: false, organization: null });
+        setRowData(null);
+        enqueueSnackbar('Organization moved to deleted successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to delete organization', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error deleting organization:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleSaveEdit = async (data: Partial<Organization>) => {
+    if (!rowData?._id) return;
+    
+    setEditLoading(true);
+    try {
+      // TODO: Replace with actual API call
+      // const result = await _edit_organization_api(rowData._id, data);
+      
+      // Simulate API response
+      const result = { 
+        code: 200, 
+        message: 'Organization updated successfully',
+        data: { ...rowData, ...data }
+      };
+
+      if (result?.code === 200) {
+        setEditDialog({ open: false, organization: null });
+        setRowData(null);
+        setOrganizations(prev =>
+          prev.map(org => org._id === rowData._id ? { ...org, ...data } : org)
+        );
+        enqueueSnackbar('Organization updated successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to update organization', {
+          variant: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error updating organization:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleAddNewOrganization = async (data: Partial<Organization>) => {
+    setAddLoading(true);
+    try {
+      // TODO: Replace with actual API call
+      // const result = await _add_organization_api(data);
+      
+      // Simulate API response
+      const result = {
+        code: 200,
+        message: 'Organization created successfully',
+        data: { _id: `org_${Date.now()}`, ...data }
+      };
+
+      if (result?.code === 200) {
+        setOrganizations(prev => [result.data, ...prev]);
+        setCreateDialog(false);
+        enqueueSnackbar('Organization created successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to create organization', {
+          variant: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error creating organization:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
+    } finally {
+      setAddLoading(false);
     }
   };
 
   const handleRestore = async (organization: Organization) => {
     setRestoreLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _restore_organization_api(organization._id);
+      
+      // Simulate API response
+      const result = { code: 200, message: 'Organization restored successfully' };
 
-      // Remove deleted_at and is_deleted properties
-      const { deleted_at, is_deleted, ...restoredOrganization } = organization;
-
-      // Move back to active organizations
-      setOrganizations(prev => [restoredOrganization, ...prev]);
-      setDeletedOrganizations(prev => prev.filter(org => org._id !== organization._id));
+      if (result?.code === 200) {
+        const { deleted_at, is_deleted, ...restoredOrganization } = organization;
+        setOrganizations(prev => [restoredOrganization, ...prev]);
+        setDeletedOrganizations(prev => prev.filter(org => org._id !== organization._id));
+        enqueueSnackbar('Organization restored successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to restore organization', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error restoring organization:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
       setRestoreLoading(false);
     }
@@ -467,53 +482,27 @@ const OrganizationsPageClient: React.FC = () => {
   const handlePermanentDelete = async (organization: Organization) => {
     setPermanentDeleteLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _permanent_delete_organization_api(organization._id);
+      
+      // Simulate API response
+      const result = { code: 200, message: 'Organization permanently deleted' };
 
-      // Remove from deleted organizations permanently
-      setDeletedOrganizations(prev => prev.filter(org => org._id !== organization._id));
+      if (result?.code === 200) {
+        setDeletedOrganizations(prev => prev.filter(org => org._id !== organization._id));
+        enqueueSnackbar('Organization permanently deleted', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to permanently delete organization', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error permanently deleting organization:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
       setPermanentDeleteLoading(false);
-    }
-  };
-
-  const handleSaveEdit = async (updatedOrganization: Organization) => {
-    setEditLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Update local state
-      setOrganizations(prev =>
-        prev.map(org => org._id === updatedOrganization._id ? updatedOrganization : org)
-      );
-      
-      setEditDialog({ open: false, organization: null });
-    } catch (error) {
-      console.error('Error updating organization:', error);
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handleCreate = async (newOrganization: Organization) => {
-    setCreateLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Add to local state
-      setOrganizations(prev => [newOrganization, ...prev]);
-      setTotalCount(prev => prev + 1);
-      setTotalPages(Math.ceil((totalCount + 1) / rowsPerPage));
-      
-      setCreateDialog(false);
-    } catch (error) {
-      console.error('Error creating organization:', error);
-    } finally {
-      setCreateLoading(false);
     }
   };
 
@@ -521,32 +510,52 @@ const OrganizationsPageClient: React.FC = () => {
     setDetailView({ open: true, organization });
   };
 
-  // Helper to count active filters
+  const handleSearch = () => {
+    setCurrentPage(1);
+    getListOrganizations(searchQuery);
+  };
+
+  // Filter functions
+  const isDateRangeInvalid = Boolean(
+    createdFrom && createdTo && new Date(createdTo) < new Date(createdFrom)
+  );
+
   const getAppliedFiltersCount = () => {
     let count = 0;
     if (statusFilter !== 'all') count++;
     if (categoryFilter !== 'all') count++;
     if (subscriptionStatusFilter !== 'all') count++;
     if (activeOnly) count++;
+    if (createdFrom) count++;
+    if (createdTo) count++;
     return count;
   };
 
   const handleClearFilters = () => {
-    // Reset all filters
     setStatusFilter('all');
     setCategoryFilter('all');
     setSubscriptionStatusFilter('all');
     setActiveOnly(false);
-    
-    // Get active organizations (exclude deleted ones)
-    const activeOrganizations = dummyData.data.organizations.filter(org => 
-      !deletedOrganizations.some(deleted => deleted._id === org._id)
-    );
-    setOrganizations(activeOrganizations);
-    setTotalCount(activeOrganizations.length);
-    setTotalPages(Math.ceil(activeOrganizations.length / rowsPerPage));
+    setCreatedFrom('');
+    setCreatedTo('');
     setFilterDrawerOpen(false);
-    setFilterLoading(false);
+    getListOrganizations();
+  };
+
+  const handleApplyFilters = () => {
+    const filters: { [key: string]: string } = {};
+
+    if (statusFilter === 'active') filters.status = 'true';
+    else if (statusFilter === 'inactive') filters.status = 'false';
+
+    if (categoryFilter !== 'all') filters.category = categoryFilter;
+    if (subscriptionStatusFilter !== 'all') filters.subscription_status = subscriptionStatusFilter;
+    if (activeOnly) filters.active_only = 'true';
+    if (createdFrom) filters.created_from = createdFrom;
+    if (createdTo) filters.created_to = createdTo;
+
+    getListOrganizations(searchQuery, filters);
+    setFilterDrawerOpen(false);
   };
 
   // Helper functions for soft delete table
@@ -556,59 +565,11 @@ const OrganizationsPageClient: React.FC = () => {
     if (!org.deleted_at) return 30;
     
     const deletedDate = new Date(org.deleted_at);
-    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const permanentDeleteDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000);
     const now = new Date();
     const daysLeft = Math.ceil((permanentDeleteDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
     
     return Math.max(0, daysLeft);
-  };
-
-
-  const handleApplyFilters = async () => {
-    setFilterLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Get active organizations (exclude deleted ones)
-      const activeOrganizations = dummyData.data.organizations.filter(org => 
-        !deletedOrganizations.some(deleted => deleted._id === org._id)
-      );
-      let filteredData = activeOrganizations;
-
-      if (statusFilter !== 'all') {
-        const isActive = statusFilter === 'active';
-        filteredData = filteredData.filter(org => org.status === isActive);
-      }
-
-      if (categoryFilter !== 'all') {
-        filteredData = filteredData.filter(org => org.category === categoryFilter);
-      }
-
-      if (subscriptionStatusFilter !== 'all') {
-        filteredData = filteredData.filter(org => org.subscription_status === subscriptionStatusFilter);
-      }
-
-      if (activeOnly) {
-        filteredData = filteredData.filter(org => org.status);
-      }
-
-      // Apply search query if exists
-      if (searchQuery) {
-        filteredData = filteredData.filter(org =>
-          org.orgn_user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          org.bio.description.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setOrganizations(filteredData);
-      setTotalCount(filteredData.length);
-      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
-      setFilterDrawerOpen(false);
-    } catch (error) {
-      console.error('Error applying filters:', error);
-    } finally {
-      setFilterLoading(false);
-    }
   };
 
   const MENU_OPTIONS: MenuOption[] = [
@@ -650,9 +611,6 @@ const OrganizationsPageClient: React.FC = () => {
     });
   };
 
-  
-
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -666,7 +624,7 @@ const OrganizationsPageClient: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-3">
-        <Button
+          <Button
             onClick={() => setExportDialog(true)}
             variant="outline"
             className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -681,7 +639,6 @@ const OrganizationsPageClient: React.FC = () => {
             <Plus className="w-4 h-4 mr-2" />
             Add Organization
           </Button>
-       
         </div>
       </div>
 
@@ -689,32 +646,54 @@ const OrganizationsPageClient: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-600">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <Input
-                placeholder="Search organizations..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            <div className="relative w-full flex">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search organizations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-24"
+                />
+              </div>
+              {filtersApplied?.search && filtersApplied.search !== '' ? (
+                <Button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setCurrentPage(1);
+                    getListOrganizations('');
+                  }}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Clear
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSearch}
+                  disabled={searchQuery === ''}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Search
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => setFilterDrawerOpen(true)}
-                variant="outline"
-                className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-                {getAppliedFiltersCount() > 0 && (
-                  <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
-                    {getAppliedFiltersCount()}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+            <Button
+              onClick={() => setFilterDrawerOpen(true)}
+              variant="outline"
+              className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Filters
+              {getAppliedFiltersCount() > 0 && (
+                <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
+                  {getAppliedFiltersCount()}
+                </Badge>
+              )}
+            </Button>
           </div>
         </div>
       </div>
@@ -779,15 +758,18 @@ const OrganizationsPageClient: React.FC = () => {
         title="Move to Deleted Organizations"
         content={`Are you sure you want to move "${deleteDialog.organization?.orgn_user.name}" to deleted organizations? You can restore it within 30 days before it's permanently deleted.`}
         confirmButtonText="Move to Deleted"
-        onConfirm={confirmDelete}
+        onConfirm={handleConfirmDelete}
         loading={deleteLoading}
       />
 
       {/* Edit Organization Dialog */}
       <OrganizationEditDialog
         open={editDialog.open}
-        onOpenChange={(open) => setEditDialog({ open, organization: null })}
-        organization={editDialog.organization}
+        onOpenChange={(open) => {
+          setEditDialog({ open, organization: null });
+          if (!open) setRowData(null);
+        }}
+        organization={rowData}
         onSave={handleSaveEdit}
         loading={editLoading}
       />
@@ -796,8 +778,8 @@ const OrganizationsPageClient: React.FC = () => {
       <OrganizationCreateDialog
         open={createDialog}
         onOpenChange={setCreateDialog}
-        onSave={handleCreate}
-        loading={createLoading}
+        onSave={handleAddNewOrganization}
+        loading={addLoading}
       />
 
       {/* Organization Detail View */}
@@ -805,7 +787,6 @@ const OrganizationsPageClient: React.FC = () => {
         <OrganizationDetailView
           organization={detailView.organization}
           onClose={() => setDetailView({ open: false, organization: null })}
-      
         />
       )}
 
@@ -825,6 +806,7 @@ const OrganizationsPageClient: React.FC = () => {
         onClear={handleClearFilters}
         onFilter={handleApplyFilters}
         loading={filterLoading}
+        applyButtonDisabled={isDateRangeInvalid}
       >
         <OrganizationFilters
           statusFilter={statusFilter}

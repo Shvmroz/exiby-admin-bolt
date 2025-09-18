@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input';
 import CsvExportDialog from '@/components/ui/csv-export-dialog';
 import { Badge } from '@/components/ui/badge';
 import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
+import { useSnackbar } from 'notistack';
 
 interface Event {
   _id: string;
@@ -58,146 +59,15 @@ interface Event {
   created_at: string;
 }
 
-// Dummy data
-const dummyData = {
-  data: {
-    events: [
-      {
-        _id: "event_123",
-        title: "Annual Tech Conference 2024",
-        description: "Join us for the biggest tech conference of the year featuring keynote speakers, workshops, and networking opportunities.",
-        startAt: "2025-12-15T09:00:00.000Z",
-        endAt: "2025-12-15T18:00:00.000Z",
-        venue: {
-          type: "hybrid",
-          address: "123 Convention Center Drive",
-          city: "San Francisco",
-          state: "California",
-          country: "USA",
-          postal_code: "94102",
-          virtual_link: "https://zoom.us/j/1234567890",
-          platform: "Zoom"
-        },
-        status: "published",
-        ticketPrice: 299.99,
-        currency: "USD",
-        isPaidEvent: true,
-        max_attendees: 500,
-        registration_deadline: "2025-12-10T23:59:59.000Z",
-        is_public: true,
-        created_at: "2025-08-15T10:30:00.000Z"
-      },
-      {
-        _id: "event_124",
-        title: "Digital Marketing Workshop",
-        description: "Learn the latest digital marketing strategies and tools from industry experts.",
-        startAt: "2025-11-20T14:00:00.000Z",
-        endAt: "2025-11-20T17:00:00.000Z",
-        venue: {
-          type: "physical",
-          address: "456 Business Plaza",
-          city: "New York",
-          state: "New York",
-          country: "USA",
-          postal_code: "10001",
-          virtual_link: "",
-          platform: ""
-        },
-        status: "draft",
-        ticketPrice: 149.99,
-        currency: "USD",
-        isPaidEvent: true,
-        max_attendees: 100,
-        registration_deadline: "2025-11-15T23:59:59.000Z",
-        is_public: false,
-        created_at: "2025-08-10T14:20:00.000Z"
-      },
-      {
-        _id: "event_125",
-        title: "Free Startup Networking Event",
-        description: "Connect with fellow entrepreneurs and investors in this free networking event.",
-        startAt: "2025-10-30T18:00:00.000Z",
-        endAt: "2025-10-30T21:00:00.000Z",
-        venue: {
-          type: "virtual",
-          address: "",
-          city: "",
-          state: "",
-          country: "",
-          postal_code: "",
-          virtual_link: "https://meet.google.com/abc-defg-hij",
-          platform: "Google Meet"
-        },
-        status: "published",
-        ticketPrice: 0,
-        currency: "USD",
-        isPaidEvent: false,
-        max_attendees: 200,
-        registration_deadline: "2025-10-28T23:59:59.000Z",
-        is_public: true,
-        created_at: "2025-08-05T09:15:00.000Z"
-      },
-      {
-        _id: "event_126",
-        title: "AI & Machine Learning Summit",
-        description: "Explore the latest developments in artificial intelligence and machine learning.",
-        startAt: "2025-11-05T10:00:00.000Z",
-        endAt: "2025-11-06T16:00:00.000Z",
-        venue: {
-          type: "hybrid",
-          address: "789 Tech Hub",
-          city: "Austin",
-          state: "Texas",
-          country: "USA",
-          postal_code: "73301",
-          virtual_link: "https://teams.microsoft.com/l/meetup-join/xyz",
-          platform: "Microsoft Teams"
-        },
-        status: "published",
-        ticketPrice: 399.99,
-        currency: "USD",
-        isPaidEvent: true,
-        max_attendees: 300,
-        registration_deadline: "2025-11-01T23:59:59.000Z",
-        is_public: true,
-        created_at: "2025-07-28T16:45:00.000Z"
-      },
-      {
-        _id: "event_127",
-        title: "Web Development Bootcamp",
-        description: "Intensive 3-day bootcamp covering modern web development technologies.",
-        startAt: "2025-09-15T09:00:00.000Z",
-        endAt: "2025-09-17T17:00:00.000Z",
-        venue: {
-          type: "physical",
-          address: "321 Learning Center",
-          city: "Seattle",
-          state: "Washington",
-          country: "USA",
-          postal_code: "98101",
-          virtual_link: "",
-          platform: ""
-        },
-        status: "cancelled",
-        ticketPrice: 599.99,
-        currency: "USD",
-        isPaidEvent: true,
-        max_attendees: 50,
-        registration_deadline: "2025-09-10T23:59:59.000Z",
-        is_public: true,
-        created_at: "2025-07-20T11:30:00.000Z"
-      }
-    ],
-    total: 5
-  }
-};
-
-
-
 const EventsPageClient: React.FC = () => {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // State
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [rowData, setRowData] = useState<Event | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -216,25 +86,33 @@ const EventsPageClient: React.FC = () => {
   
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
   const [venueTypeFilter, setVenueTypeFilter] = useState('all');
   const [paidOnlyFilter, setPaidOnlyFilter] = useState(false);
   const [publicOnlyFilter, setPublicOnlyFilter] = useState(false);
+  const [createdFrom, setCreatedFrom] = useState('');
+  const [createdTo, setCreatedTo] = useState('');
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Local pagination (handled fully by frontend)
+  // Local pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  // API meta (comes only from server)
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [filtersApplied, setFiltersApplied] = useState({
+    search: '',
+    sort_by: 'created_at',
+    sort_order: 'desc',
+    page: 1,
+    limit: 50,
+  });
 
   // Table helpers
   const handleChangePage = (newPage: number) => {
@@ -243,38 +121,51 @@ const EventsPageClient: React.FC = () => {
 
   const onRowsPerPageChange = (newLimit: number) => {
     setRowsPerPage(newLimit);
-    setCurrentPage(1); // reset to first page
+    setCurrentPage(1);
   };
+
   // Load events
-  const loadEvents = async () => {
+  const getListEvents = async (searchQuery = '', filters = {}) => {
     setLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // TODO: Replace with actual API call
+      // const result = await _events_list_api(currentPage, rowsPerPage, searchQuery, filters);
       
-      let filteredData = dummyData.data.events;
-      
-      if (searchQuery) {
-        filteredData = filteredData.filter(event =>
-          event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.venue.city.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+      // Simulate API response structure
+      const result = {
+        code: 200,
+        data: {
+          events: [],
+          total_count: 0,
+          total_pages: 1,
+          filters_applied: filters,
+        }
+      };
+
+      if (result?.code === 200) {
+        setEvents(result.data.events || []);
+        setTotalCount(result.data.total_count || 0);
+        setTotalPages(result.data.total_pages || 1);
+        setFiltersApplied(result.data.filters_applied || {});
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to load events', {
+          variant: 'error',
+        });
+        setEvents([]);
       }
-      
-      setEvents(filteredData);
-      setTotalCount(filteredData.length);
-      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
-    } catch (error) {
-      console.error('Error loading events:', error);
+    } catch (err) {
+      console.error(err);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      setEvents([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadEvents();
-  }, [searchQuery, currentPage, rowsPerPage]);
+    getListEvents();
+  }, [currentPage, rowsPerPage]);
 
   if (loading && events.length === 0) {
     return <TableSkeleton rows={8} columns={7} showFilters={true} />;
@@ -282,63 +173,113 @@ const EventsPageClient: React.FC = () => {
 
   const handleEdit = (event: Event) => {
     setEditDialog({ open: true, event });
+    setRowData(event);
   };
 
   const handleDelete = (event: Event) => {
     setDeleteDialog({ open: true, event });
+    setRowData(event);
   };
 
-  const confirmDelete = async () => {
-    if (!deleteDialog.event) return;
-    
+  const handleConfirmDelete = async () => {
+    if (!rowData?._id) return;
+
     setDeleteLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _delete_event_api(rowData._id);
       
-      setEvents(prev => 
-        prev.filter(event => event._id !== deleteDialog.event!._id)
-      );
-      
-      setTotalCount(prev => prev - 1);
-      setTotalPages(Math.ceil((totalCount - 1) / rowsPerPage));
-      setDeleteDialog({ open: false, event: null });
+      // Simulate API response
+      const result = { code: 200, message: 'Event deleted successfully' };
+
+      if (result?.code === 200) {
+        setEvents(prev => 
+          prev.filter(event => event._id !== rowData._id)
+        );
+        setDeleteDialog({ open: false, event: null });
+        setRowData(null);
+        enqueueSnackbar('Event deleted successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to delete event', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error deleting event:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  const handleSaveEdit = async (updatedEvent: Event) => {
+  const handleSaveEdit = async (data: Partial<Event>) => {
+    if (!rowData?._id) return;
+    
     setEditLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _edit_event_api(rowData._id, data);
       
-      setEvents(prev =>
-        prev.map(event => event._id === updatedEvent._id ? updatedEvent : event)
-      );
-      
-      setEditDialog({ open: false, event: null });
+      // Simulate API response
+      const result = { 
+        code: 200, 
+        message: 'Event updated successfully',
+        data: { ...rowData, ...data }
+      };
+
+      if (result?.code === 200) {
+        setEditDialog({ open: false, event: null });
+        setRowData(null);
+        setEvents(prev =>
+          prev.map(event => event._id === rowData._id ? { ...event, ...data } : event)
+        );
+        enqueueSnackbar('Event updated successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to update event', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error updating event:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
       setEditLoading(false);
     }
   };
 
-  const handleCreate = async (newEvent: Event) => {
-    setCreateLoading(true);
+  const handleAddNewEvent = async (data: Partial<Event>) => {
+    setAddLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // TODO: Replace with actual API call
+      // const result = await _add_event_api(data);
       
-      setEvents(prev => [newEvent, ...prev]);
-      setTotalCount(prev => prev + 1);
-      setTotalPages(Math.ceil((totalCount + 1) / rowsPerPage));
-      setCreateDialog(false);
+      // Simulate API response
+      const result = {
+        code: 200,
+        message: 'Event created successfully',
+        data: { _id: `event_${Date.now()}`, ...data }
+      };
+
+      if (result?.code === 200) {
+        setEvents(prev => [result.data, ...prev]);
+        setCreateDialog(false);
+        enqueueSnackbar('Event created successfully', {
+          variant: 'success',
+        });
+      } else {
+        enqueueSnackbar(result?.message || 'Failed to create event', {
+          variant: 'error',
+        });
+      }
     } catch (error) {
       console.error('Error creating event:', error);
+      enqueueSnackbar('Something went wrong', { variant: 'error' });
     } finally {
-      setCreateLoading(false);
+      setAddLoading(false);
     }
   };
 
@@ -346,13 +287,24 @@ const EventsPageClient: React.FC = () => {
     setDetailView({ open: true, event });
   };
 
-  // Helper to count active filters
+  const handleSearch = () => {
+    setCurrentPage(1);
+    getListEvents(searchQuery);
+  };
+
+  // Filter functions
+  const isDateRangeInvalid = Boolean(
+    createdFrom && createdTo && new Date(createdTo) < new Date(createdFrom)
+  );
+
   const getAppliedFiltersCount = () => {
     let count = 0;
     if (statusFilter !== 'all') count++;
     if (venueTypeFilter !== 'all') count++;
     if (paidOnlyFilter) count++;
     if (publicOnlyFilter) count++;
+    if (createdFrom) count++;
+    if (createdTo) count++;
     return count;
   };
 
@@ -361,62 +313,27 @@ const EventsPageClient: React.FC = () => {
     setVenueTypeFilter('all');
     setPaidOnlyFilter(false);
     setPublicOnlyFilter(false);
-    
-    setEvents(dummyData.data.events);
-    setTotalCount(dummyData.data.events.length);
-    setTotalPages(Math.ceil(dummyData.data.events.length / rowsPerPage));
+    setCreatedFrom('');
+    setCreatedTo('');
     setFilterDrawerOpen(false);
-    setFilterLoading(false);
+    getListEvents();
   };
 
-  const handleApplyFilters = async () => {
-    setFilterLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      let filteredData = dummyData.data.events;
+  const handleApplyFilters = () => {
+    const filters: { [key: string]: string } = {};
 
-      if (statusFilter !== 'all') {
-        filteredData = filteredData.filter(event => event.status === statusFilter);
-      }
+    if (statusFilter !== 'all') filters.status = statusFilter;
+    if (venueTypeFilter !== 'all') filters.venue_type = venueTypeFilter;
+    if (paidOnlyFilter) filters.paid_only = 'true';
+    if (publicOnlyFilter) filters.public_only = 'true';
+    if (createdFrom) filters.created_from = createdFrom;
+    if (createdTo) filters.created_to = createdTo;
 
-      if (venueTypeFilter !== 'all') {
-        filteredData = filteredData.filter(event => event.venue.type === venueTypeFilter);
-      }
-
-      if (paidOnlyFilter) {
-        filteredData = filteredData.filter(event => event.isPaidEvent);
-      }
-
-      if (publicOnlyFilter) {
-        filteredData = filteredData.filter(event => event.is_public);
-      }
-
-      if (searchQuery) {
-        filteredData = filteredData.filter(event =>
-          event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          event.venue.city.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setEvents(filteredData);
-      setTotalCount(filteredData.length);
-      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
-      setFilterDrawerOpen(false);
-    } catch (error) {
-      console.error('Error applying filters:', error);
-    } finally {
-      setFilterLoading(false);
-    }
+    getListEvents(searchQuery, filters);
+    setFilterDrawerOpen(false);
   };
 
   const MENU_OPTIONS: MenuOption[] = [
-    // {
-    //   label: 'View',
-    //   action: (event) => setDetailView({ open: true, event }),
-    //   icon: <Eye className="w-4 h-4" />,
-    // },
     {
       label: 'Edit',
       action: handleEdit,
@@ -489,7 +406,6 @@ const EventsPageClient: React.FC = () => {
     }).format(amount);
   };
 
-  
   const TABLE_HEAD: TableHeader[] = [
     {
       key: "index",
@@ -615,7 +531,24 @@ const EventsPageClient: React.FC = () => {
     },
   ];
 
-  
+  const handleSearch = () => {
+    setCurrentPage(1);
+    getListEvents(searchQuery);
+  };
+
+  const MENU_OPTIONS: MenuOption[] = [
+    {
+      label: 'Edit',
+      action: handleEdit,
+      icon: <Edit className="w-4 h-4" />,
+    },
+    {
+      label: 'Delete',
+      action: handleDelete,
+      icon: <Trash2 className="w-4 h-4" />,
+      variant: 'destructive',
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -652,14 +585,38 @@ const EventsPageClient: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search events..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            <div className="relative w-full flex">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search events..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-24"
+                />
+              </div>
+              {filtersApplied?.search && filtersApplied.search !== '' ? (
+                <Button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setCurrentPage(1);
+                    getListEvents('');
+                  }}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Clear
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSearch}
+                  disabled={searchQuery === ''}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Search
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -705,15 +662,18 @@ const EventsPageClient: React.FC = () => {
         title="Delete Event"
         content={`Are you sure you want to delete "${deleteDialog.event?.title}"? This action cannot be undone.`}
         confirmButtonText="Delete"
-        onConfirm={confirmDelete}
+        onConfirm={handleConfirmDelete}
         loading={deleteLoading}
       />
 
       {/* Edit Event Dialog */}
       <EventEditDialog
         open={editDialog.open}
-        onOpenChange={(open) => setEditDialog({ open, event: null })}
-        event={editDialog.event}
+        onOpenChange={(open) => {
+          setEditDialog({ open, event: null });
+          if (!open) setRowData(null);
+        }}
+        event={rowData}
         onSave={handleSaveEdit}
         loading={editLoading}
       />
@@ -722,8 +682,8 @@ const EventsPageClient: React.FC = () => {
       <EventCreateDialog
         open={createDialog}
         onOpenChange={setCreateDialog}
-        onSave={handleCreate}
-        loading={createLoading}
+        onSave={handleAddNewEvent}
+        loading={addLoading}
       />
 
       {/* Event Detail View */}
@@ -750,6 +710,7 @@ const EventsPageClient: React.FC = () => {
         onClear={handleClearFilters}
         onFilter={handleApplyFilters}
         loading={filterLoading}
+        applyButtonDisabled={isDateRangeInvalid}
       >
         <EventFilters
           statusFilter={statusFilter}

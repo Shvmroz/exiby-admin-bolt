@@ -29,15 +29,9 @@ import EmailTemplateFilters from "@/components/email-templates/EmailTemplateFilt
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CsvExportDialog from "@/components/ui/csv-export-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
+import { useSnackbar } from "notistack";
 
 interface EmailTemplate {
   _id: string;
@@ -52,172 +46,17 @@ interface EmailTemplate {
   is_deleted?: boolean;
 }
 
-// Dummy data
-const dummyData = {
-  data: {
-    email_templates: [
-      {
-        _id: "template_123",
-        name: "Welcome Email",
-        subject: "Welcome to {{platform_name}}",
-        template_type: "user_registration",
-        content: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-              <h1 style="color: #0077ED; text-align: center; margin-bottom: 20px;">Welcome to {{platform_name}}!</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                We're excited to have you join our platform! Your account has been successfully created and you can now start exploring all the amazing features we have to offer.
-              </p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="{{login_url}}" style="background-color: #0077ED; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Get Started</a>
-              </div>
-              <p style="color: #666; font-size: 14px;">
-                If you have any questions, feel free to contact our support team.
-              </p>
-            </div>
-          </div>
-        `,
-        variables: ["platform_name", "user_name", "login_url"],
-        is_active: true,
-        created_at: "2025-08-15T10:30:00.000Z",
-      },
-      {
-        _id: "template_124",
-        name: "Event Registration Confirmed",
-        subject: "✅ Registration Confirmed for {{event_name}}",
-        template_type: "event_registration",
-        content: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f0f8ff;">
-            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; border-left: 5px solid #28a745;">
-              <h1 style="color: #28a745; text-align: center; margin-bottom: 20px;">Registration Confirmed!</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                Your registration for <strong>{{event_name}}</strong> on {{event_date}} has been confirmed.
-              </p>
-              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #0077ED; margin-bottom: 10px;">Event Details:</h3>
-                <div style="color: #333;">{{event_details}}</div>
-              </div>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                We look forward to seeing you at the event!
-              </p>
-            </div>
-          </div>
-        `,
-        variables: ["user_name", "event_name", "event_date", "event_details"],
-        is_active: true,
-        created_at: "2025-08-12T14:20:00.000Z",
-      },
-      {
-        _id: "template_125",
-        name: "Password Reset",
-        subject: "🔐 Reset Your Password",
-        template_type: "password_reset",
-        content: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff5f5;">
-            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; border-left: 5px solid #dc3545;">
-              <h1 style="color: #dc3545; text-align: center; margin-bottom: 20px;">Password Reset Request</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                We received a request to reset your password. Click the button below to create a new password:
-              </p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="{{reset_url}}" style="background-color: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
-              </div>
-              <p style="color: #666; font-size: 14px;">
-                This link will expire in 24 hours. If you didn't request this, please ignore this email.
-              </p>
-            </div>
-          </div>
-        `,
-        variables: ["user_name", "reset_url"],
-        is_active: true,
-        created_at: "2025-08-10T09:15:00.000Z",
-      },
-      {
-        _id: "template_126",
-        name: "Event Reminder",
-        subject: "⏰ Reminder: {{event_name}} is Tomorrow",
-        template_type: "event_reminder",
-        content: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff8e1;">
-            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; border-left: 5px solid #ffc107;">
-              <h1 style="color: #ffc107; text-align: center; margin-bottom: 20px;">Event Reminder</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                This is a friendly reminder that <strong>{{event_name}}</strong> is scheduled for tomorrow at {{event_time}}.
-              </p>
-              <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #ffeaa7;">
-                <h3 style="color: #856404; margin-bottom: 10px;">Event Information:</h3>
-                <p style="color: #856404; margin: 5px 0;"><strong>Date:</strong> {{event_date}}</p>
-                <p style="color: #856404; margin: 5px 0;"><strong>Time:</strong> {{event_time}}</p>
-                <p style="color: #856404; margin: 5px 0;"><strong>Location:</strong> {{event_location}}</p>
-              </div>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                Don't forget to bring your ticket and arrive 15 minutes early!
-              </p>
-            </div>
-          </div>
-        `,
-        variables: [
-          "user_name",
-          "event_name",
-          "event_time",
-          "event_date",
-          "event_location",
-        ],
-        is_active: true,
-        created_at: "2025-08-08T16:45:00.000Z",
-      },
-      {
-        _id: "template_127",
-        name: "Payment Receipt",
-        subject: "💳 Payment Receipt for {{event_name}}",
-        template_type: "payment_confirmation",
-        content: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f0f8ff;">
-            <div style="background-color: #ffffff; padding: 30px; border-radius: 10px; border-left: 5px solid #17a2b8;">
-              <h1 style="color: #17a2b8; text-align: center; margin-bottom: 20px;">Payment Received</h1>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">Hello {{user_name}},</p>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                Thank you for your payment! We have successfully received your payment for {{event_name}}.
-              </p>
-              <div style="background-color: #e7f3ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <h3 style="color: #0c5460; margin-bottom: 15px;">Payment Details:</h3>
-                <table style="width: 100%; color: #0c5460;">
-                  <tr><td><strong>Amount:</strong></td><td>{{payment_amount}}</td></tr>
-                  <tr><td><strong>Transaction ID:</strong></td><td>{{transaction_id}}</td></tr>
-                  <tr><td><strong>Payment Date:</strong></td><td>{{payment_date}}</td></tr>
-                  <tr><td><strong>Event:</strong></td><td>{{event_name}}</td></tr>
-                </table>
-              </div>
-              <p style="color: #333; font-size: 16px; line-height: 1.6;">
-                Your ticket has been sent to your email. See you at the event!
-              </p>
-            </div>
-          </div>
-        `,
-        variables: [
-          "user_name",
-          "event_name",
-          "payment_amount",
-          "transaction_id",
-          "payment_date",
-        ],
-        is_active: false,
-        created_at: "2025-08-05T11:30:00.000Z",
-      },
-    ],
-    total: 5,
-  },
-};
-
 const EmailTemplatesPageClient: React.FC = () => {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // State
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [rowData, setRowData] = useState<EmailTemplate | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     template: EmailTemplate | null;
@@ -231,26 +70,35 @@ const EmailTemplatesPageClient: React.FC = () => {
     open: boolean;
     template: EmailTemplate | null;
   }>({ open: false, template: null });
+
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [activeOnly, setActiveOnly] = useState(false);
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
 
   // CSV Export state
   const [exportDialog, setExportDialog] = useState(false);
 
-  // Local pagination (handled fully by frontend)
+  // Local pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  // API meta (comes only from server)
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [filtersApplied, setFiltersApplied] = useState({
+    search: "",
+    sort_by: "created_at",
+    sort_order: "desc",
+    page: 1,
+    limit: 50,
+  });
 
   // Table helpers
   const handleChangePage = (newPage: number) => {
@@ -259,60 +107,51 @@ const EmailTemplatesPageClient: React.FC = () => {
 
   const onRowsPerPageChange = (newLimit: number) => {
     setRowsPerPage(newLimit);
-    setCurrentPage(1); // reset to first page
+    setCurrentPage(1);
   };
+
   // Load email templates
-  const loadEmailTemplates = async () => {
+  const getListEmailTemplates = async (searchQuery = "", filters = {}) => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // TODO: Replace with actual API call
+      // const result = await _email_templates_list_api(currentPage, rowsPerPage, searchQuery, filters);
+      
+      // Simulate API response structure
+      const result = {
+        code: 200,
+        data: {
+          email_templates: [],
+          total_count: 0,
+          total_pages: 1,
+          filters_applied: filters,
+        }
+      };
 
-      let filteredData = dummyData.data.email_templates;
-
-      if (searchQuery) {
-        filteredData = filteredData.filter(
-          (template) =>
-            template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            template.subject
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase()) ||
-            template.template_type
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase())
-        );
+      if (result?.code === 200) {
+        setEmailTemplates(result.data.email_templates || []);
+        setTotalCount(result.data.total_count || 0);
+        setTotalPages(result.data.total_pages || 1);
+        setFiltersApplied(result.data.filters_applied || {});
+      } else {
+        enqueueSnackbar(result?.message || "Failed to load email templates", {
+          variant: "error",
+        });
+        setEmailTemplates([]);
       }
-
-      if (statusFilter !== "all") {
-        const isActive = statusFilter === "active";
-        filteredData = filteredData.filter(
-          (template) => template.is_active === isActive
-        );
-      }
-
-      if (typeFilter !== "all") {
-        filteredData = filteredData.filter(
-          (template) => template.template_type === typeFilter
-        );
-      }
-
-      setEmailTemplates(filteredData);
-      setTotalCount(filteredData.length);
-      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
-    } catch (error) {
-      console.error(
-        "Error loading email templates:",
-        error
-      );
+    } catch (err) {
+      console.error(err);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
+      setEmailTemplates([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadEmailTemplates();
-  }, [searchQuery, currentPage, rowsPerPage]);
+    getListEmailTemplates();
+  }, [currentPage, rowsPerPage]);
 
   if (loading && emailTemplates.length === 0) {
     return <TableSkeleton rows={8} columns={6} showFilters={true} />;
@@ -324,146 +163,159 @@ const EmailTemplatesPageClient: React.FC = () => {
 
   const handleEdit = (template: EmailTemplate) => {
     setEditDialog({ open: true, template });
+    setRowData(template);
   };
 
   const handleDelete = (template: EmailTemplate) => {
     setDeleteDialog({ open: true, template });
+    setRowData(template);
   };
 
-  const confirmDelete = async () => {
-    if (!deleteDialog.template) return;
+  const handleConfirmDelete = async () => {
+    if (!rowData?._id) return;
 
     setDeleteLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _delete_email_template_api(rowData._id);
+      
+      // Simulate API response
+      const result = { code: 200, message: 'Email template deleted successfully' };
 
-      // Remove template permanently
-      setEmailTemplates((prev) =>
-        prev.filter((template) => template._id !== deleteDialog.template!._id)
-      );
-
-      // Update total count
-      setTotalCount(prev => prev - 1);
-      setTotalPages(Math.ceil((totalCount - 1) / rowsPerPage));
-
-      setDeleteDialog({ open: false, template: null });
+      if (result?.code === 200) {
+        setEmailTemplates(prev =>
+          prev.filter(template => template._id !== rowData._id)
+        );
+        setDeleteDialog({ open: false, template: null });
+        setRowData(null);
+        enqueueSnackbar("Email template deleted successfully", {
+          variant: "success",
+        });
+      } else {
+        enqueueSnackbar(result?.message || "Failed to delete email template", {
+          variant: "error",
+        });
+      }
     } catch (error) {
       console.error("Error deleting email template:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  const handleSaveEdit = async (updatedTemplate: EmailTemplate) => {
+  const handleSaveEdit = async (data: Partial<EmailTemplate>) => {
+    if (!rowData?._id) return;
+    
     setEditLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // TODO: Replace with actual API call
+      // const result = await _edit_email_template_api(rowData._id, data);
+      
+      // Simulate API response
+      const result = { 
+        code: 200, 
+        message: 'Email template updated successfully',
+        data: { ...rowData, ...data }
+      };
 
-      // Update local state
-      setEmailTemplates((prev) =>
-        prev.map((template) =>
-          template._id === updatedTemplate._id ? updatedTemplate : template
-        )
-      );
-
-      setEditDialog({ open: false, template: null });
+      if (result?.code === 200) {
+        setEditDialog({ open: false, template: null });
+        setRowData(null);
+        setEmailTemplates(prev =>
+          prev.map(template => template._id === rowData._id ? { ...template, ...data } : template)
+        );
+        enqueueSnackbar("Email template updated successfully", {
+          variant: "success",
+        });
+      } else {
+        enqueueSnackbar(result?.message || "Failed to update email template", {
+          variant: "error",
+        });
+      }
     } catch (error) {
       console.error("Error updating email template:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
       setEditLoading(false);
     }
   };
 
-  const handleCreate = async (newTemplate: EmailTemplate) => {
-    setCreateLoading(true);
+  const handleAddNewTemplate = async (data: Partial<EmailTemplate>) => {
+    setAddLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // TODO: Replace with actual API call
+      // const result = await _add_email_template_api(data);
+      
+      // Simulate API response
+      const result = {
+        code: 200,
+        message: 'Email template created successfully',
+        data: { _id: `template_${Date.now()}`, ...data }
+      };
 
-      // Add to local state
-      setEmailTemplates((prev) => [newTemplate, ...prev]);
-      setTotalCount(prev => prev + 1);
-      setTotalPages(Math.ceil((totalCount + 1) / rowsPerPage));
-
-      setCreateDialog(false);
+      if (result?.code === 200) {
+        setEmailTemplates(prev => [result.data, ...prev]);
+        setCreateDialog(false);
+        enqueueSnackbar("Email template created successfully", {
+          variant: "success",
+        });
+      } else {
+        enqueueSnackbar(result?.message || "Failed to create email template", {
+          variant: "error",
+        });
+      }
     } catch (error) {
       console.error("Error creating email template:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
-      setCreateLoading(false);
+      setAddLoading(false);
     }
   };
 
-  // Helper to count active filters
+  const handleSearch = () => {
+    setCurrentPage(1);
+    getListEmailTemplates(searchQuery);
+  };
+
+  // Filter functions
+  const isDateRangeInvalid = Boolean(
+    createdFrom && createdTo && new Date(createdTo) < new Date(createdFrom)
+  );
+
   const getAppliedFiltersCount = () => {
     let count = 0;
     if (statusFilter !== "all") count++;
     if (typeFilter !== "all") count++;
     if (activeOnly) count++;
+    if (createdFrom) count++;
+    if (createdTo) count++;
     return count;
   };
 
   const handleClearFilters = () => {
-    // Reset all filters
     setStatusFilter("all");
     setTypeFilter("all");
     setActiveOnly(false);
-
-    setEmailTemplates(dummyData.data.email_templates);
-    setTotalCount(dummyData.data.email_templates.length);
-    setTotalPages(Math.ceil(dummyData.data.email_templates.length / rowsPerPage));
+    setCreatedFrom("");
+    setCreatedTo("");
     setFilterDrawerOpen(false);
-    setFilterLoading(false);
+    getListEmailTemplates();
   };
 
-  const handleApplyFilters = async () => {
-    setFilterLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+  const handleApplyFilters = () => {
+    const filters: { [key: string]: string } = {};
 
-      let filteredData = dummyData.data.email_templates;
+    if (statusFilter === "active") filters.status = "true";
+    else if (statusFilter === "inactive") filters.status = "false";
 
-      if (statusFilter !== "all") {
-        const isActive = statusFilter === "active";
-        filteredData = filteredData.filter(
-          (template) => template.is_active === isActive
-        );
-      }
+    if (typeFilter !== "all") filters.template_type = typeFilter;
+    if (activeOnly) filters.active_only = "true";
+    if (createdFrom) filters.created_from = createdFrom;
+    if (createdTo) filters.created_to = createdTo;
 
-      if (typeFilter !== "all") {
-        filteredData = filteredData.filter(
-          (template) => template.template_type === typeFilter
-        );
-      }
-
-      if (activeOnly) {
-        filteredData = filteredData.filter((template) => template.is_active);
-      }
-
-      // Apply search query if exists
-      if (searchQuery) {
-        filteredData = filteredData.filter(
-          (template) =>
-            template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            template.subject
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase()) ||
-            template.template_type
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase())
-        );
-      }
-
-      setEmailTemplates(filteredData);
-      setTotalCount(filteredData.length);
-      setTotalPages(Math.ceil(filteredData.length / rowsPerPage));
-      setFilterDrawerOpen(false);
-    } catch (error) {
-      console.error("Error applying filters:", error);
-    } finally {
-      setFilterLoading(false);
-    }
+    getListEmailTemplates(searchQuery, filters);
+    setFilterDrawerOpen(false);
   };
 
   const MENU_OPTIONS: MenuOption[] = [
@@ -573,7 +425,6 @@ const EmailTemplatesPageClient: React.FC = () => {
     },
   ];
 
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -609,32 +460,54 @@ const EmailTemplatesPageClient: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search email templates..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+            <div className="relative w-full flex">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search email templates..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-24"
+                />
+              </div>
+              {filtersApplied?.search && filtersApplied.search !== "" ? (
+                <Button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCurrentPage(1);
+                    getListEmailTemplates("");
+                  }}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Clear
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSearch}
+                  disabled={searchQuery === ""}
+                  variant="outline"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Search
+                </Button>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => setFilterDrawerOpen(true)}
-                variant="outline"
-                className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-                {getAppliedFiltersCount() > 0 && (
-                  <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
-                    {getAppliedFiltersCount()}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+            <Button
+              onClick={() => setFilterDrawerOpen(true)}
+              variant="outline"
+              className="relative border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Filters
+              {getAppliedFiltersCount() > 0 && (
+                <Badge className="absolute -top-2 -right-2 rounded-full bg-red-500 text-white text-xs px-2">
+                  {getAppliedFiltersCount()}
+                </Badge>
+              )}
+            </Button>
           </div>
         </div>
       </div>
@@ -666,15 +539,18 @@ const EmailTemplatesPageClient: React.FC = () => {
         title="Delete Email Template"
         content={`Are you sure you want to delete "${deleteDialog.template?.name}"? This action cannot be undone.`}
         confirmButtonText="Delete"
-        onConfirm={confirmDelete}
+        onConfirm={handleConfirmDelete}
         loading={deleteLoading}
       />
 
       {/* Edit Email Template Dialog */}
       <EmailTemplateEditDialog
         open={editDialog.open}
-        onOpenChange={(open) => setEditDialog({ open, template: null })}
-        template={editDialog.template}
+        onOpenChange={(open) => {
+          setEditDialog({ open, template: null });
+          if (!open) setRowData(null);
+        }}
+        template={rowData}
         onSave={handleSaveEdit}
         loading={editLoading}
       />
@@ -683,8 +559,8 @@ const EmailTemplatesPageClient: React.FC = () => {
       <EmailTemplateCreateDialog
         open={createDialog}
         onOpenChange={setCreateDialog}
-        onSave={handleCreate}
-        loading={createLoading}
+        onSave={handleAddNewTemplate}
+        loading={addLoading}
       />
 
       {/* Preview Email Template Dialog */}
@@ -710,6 +586,7 @@ const EmailTemplatesPageClient: React.FC = () => {
         onClear={handleClearFilters}
         onFilter={handleApplyFilters}
         loading={filterLoading}
+        applyButtonDisabled={isDateRangeInvalid}
       >
         <EmailTemplateFilters
           statusFilter={statusFilter}
