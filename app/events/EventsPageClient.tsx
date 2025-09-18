@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Calendar,
   Search,
@@ -18,20 +18,23 @@ import {
   CheckCircle,
   XCircle,
   Eye,
-} from 'lucide-react';
-import CustomTable, { TableHeader, MenuOption } from '@/components/ui/custom-table';
-import ConfirmDeleteDialog from '@/components/ui/confirm-delete-dialog';
-import EventEditDialog from '@/components/events/EventEditDialog';
-import EventCreateDialog from '@/components/events/EventCreateDialog';
-import EventDetailView from '@/components/events/EventDetailView';
-import CustomDrawer from '@/components/ui/custom-drawer';
-import EventFilters from '@/components/events/EventFilters';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import CsvExportDialog from '@/components/ui/csv-export-dialog';
-import { Badge } from '@/components/ui/badge';
-import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
-import { useSnackbar } from 'notistack';
+} from "lucide-react";
+import CustomTable, {
+  TableHeader,
+  MenuOption,
+} from "@/components/ui/custom-table";
+import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
+import EventEditDialog from "@/components/events/EventEditDialog";
+import EventCreateDialog from "@/components/events/EventCreateDialog";
+import EventDetailView from "@/components/events/EventDetailView";
+import CustomDrawer from "@/components/ui/custom-drawer";
+import EventFilters from "@/components/events/EventFilters";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import CsvExportDialog from "@/components/ui/csv-export-dialog";
+import { Badge } from "@/components/ui/badge";
+import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
+import { useSnackbar } from "notistack";
 
 interface Event {
   _id: string;
@@ -68,8 +71,8 @@ const EventsPageClient: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
   const [rowData, setRowData] = useState<Event | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     event: Event | null;
@@ -83,17 +86,17 @@ const EventsPageClient: React.FC = () => {
     open: boolean;
     event: Event | null;
   }>({ open: false, event: null });
-  
+
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
 
   // Filter states
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [venueTypeFilter, setVenueTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [venueTypeFilter, setVenueTypeFilter] = useState("all");
   const [paidOnlyFilter, setPaidOnlyFilter] = useState(false);
   const [publicOnlyFilter, setPublicOnlyFilter] = useState(false);
-  const [createdFrom, setCreatedFrom] = useState('');
-  const [createdTo, setCreatedTo] = useState('');
+  const [createdFrom, setCreatedFrom] = useState("");
+  const [createdTo, setCreatedTo] = useState("");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [filterLoading, setFilterLoading] = useState(false);
 
@@ -107,9 +110,9 @@ const EventsPageClient: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [filtersApplied, setFiltersApplied] = useState({
-    search: '',
-    sort_by: 'created_at',
-    sort_order: 'desc',
+    search: "",
+    sort_by: "created_at",
+    sort_order: "desc",
     page: 1,
     limit: 50,
   });
@@ -125,13 +128,13 @@ const EventsPageClient: React.FC = () => {
   };
 
   // Load events
-  const getListEvents = async (searchQuery = '', filters = {}) => {
+  const getListEvents = async (searchQuery = "", filters = {}) => {
     setLoading(true);
 
     try {
       // TODO: Replace with actual API call
       // const result = await _events_list_api(currentPage, rowsPerPage, searchQuery, filters);
-      
+
       // Simulate API response structure
       const result = {
         code: 200,
@@ -140,7 +143,7 @@ const EventsPageClient: React.FC = () => {
           total_count: 0,
           total_pages: 1,
           filters_applied: filters,
-        }
+        },
       };
 
       if (result?.code === 200) {
@@ -156,7 +159,7 @@ const EventsPageClient: React.FC = () => {
       }
     } catch (err) {
       console.error(err);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      enqueueSnackbar("Something went wrong", { variant: "error" });
       setEvents([]);
     } finally {
       setLoading(false);
@@ -188,27 +191,25 @@ const EventsPageClient: React.FC = () => {
     try {
       // TODO: Replace with actual API call
       // const result = await _delete_event_api(rowData._id);
-      
+
       // Simulate API response
-      const result = { code: 200, message: 'Event deleted successfully' };
+      const result = { code: 200, message: "Event deleted successfully" };
 
       if (result?.code === 200) {
-        setEvents(prev => 
-          prev.filter(event => event._id !== rowData._id)
-        );
+        setEvents((prev) => prev.filter((event) => event._id !== rowData._id));
         setDeleteDialog({ open: false, event: null });
         setRowData(null);
-        enqueueSnackbar('Event deleted successfully', {
-          variant: 'success',
+        enqueueSnackbar("Event deleted successfully", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar(result?.message || 'Failed to delete event', {
-          variant: 'error',
+        enqueueSnackbar(result?.message || "Failed to delete event", {
+          variant: "error",
         });
       }
     } catch (error) {
-      console.error('Error deleting event:', error);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      console.error("Error deleting event:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
       setDeleteLoading(false);
     }
@@ -216,36 +217,38 @@ const EventsPageClient: React.FC = () => {
 
   const handleSaveEdit = async (data: Partial<Event>) => {
     if (!rowData?._id) return;
-    
+
     setEditLoading(true);
     try {
       // TODO: Replace with actual API call
       // const result = await _edit_event_api(rowData._id, data);
-      
+
       // Simulate API response
-      const result = { 
-        code: 200, 
-        message: 'Event updated successfully',
-        data: { ...rowData, ...data }
+      const result = {
+        code: 200,
+        message: "Event updated successfully",
+        data: { ...rowData, ...data },
       };
 
       if (result?.code === 200) {
         setEditDialog({ open: false, event: null });
         setRowData(null);
-        setEvents(prev =>
-          prev.map(event => event._id === rowData._id ? { ...event, ...data } : event)
+        setEvents((prev) =>
+          prev.map((event) =>
+            event._id === rowData._id ? { ...event, ...data } : event
+          )
         );
-        enqueueSnackbar('Event updated successfully', {
-          variant: 'success',
+        enqueueSnackbar("Event updated successfully", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar(result?.message || 'Failed to update event', {
-          variant: 'error',
+        enqueueSnackbar(result?.message || "Failed to update event", {
+          variant: "error",
         });
       }
     } catch (error) {
-      console.error('Error updating event:', error);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      console.error("Error updating event:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
       setEditLoading(false);
     }
@@ -256,28 +259,28 @@ const EventsPageClient: React.FC = () => {
     try {
       // TODO: Replace with actual API call
       // const result = await _add_event_api(data);
-      
+
       // Simulate API response
       const result = {
         code: 200,
-        message: 'Event created successfully',
-        data: { _id: `event_${Date.now()}`, ...data }
+        message: "Event created successfully",
+        data: { _id: `event_${Date.now()}`, ...data },
       };
 
       if (result?.code === 200) {
         // setEvents(prev => [result.data, ...prev]);
         setCreateDialog(false);
-        enqueueSnackbar('Event created successfully', {
-          variant: 'success',
+        enqueueSnackbar("Event created successfully", {
+          variant: "success",
         });
       } else {
-        enqueueSnackbar(result?.message || 'Failed to create event', {
-          variant: 'error',
+        enqueueSnackbar(result?.message || "Failed to create event", {
+          variant: "error",
         });
       }
     } catch (error) {
-      console.error('Error creating event:', error);
-      enqueueSnackbar('Something went wrong', { variant: 'error' });
+      console.error("Error creating event:", error);
+      enqueueSnackbar("Something went wrong", { variant: "error" });
     } finally {
       setAddLoading(false);
     }
@@ -299,22 +302,22 @@ const EventsPageClient: React.FC = () => {
 
   const getAppliedFiltersCount = () => {
     let count = 0;
-    if (statusFilter !== 'all') count++;
-    if (venueTypeFilter !== 'all') count++;
+    if (statusFilter !== "all") count++;
+    if (venueTypeFilter !== "all") count++;
     if (paidOnlyFilter) count++;
     if (publicOnlyFilter) count++;
-    if (createdFrom) count++;
-    if (createdTo) count++;
+    if (createdFrom || createdTo) count += 1;
+
     return count;
   };
 
   const handleClearFilters = () => {
-    setStatusFilter('all');
-    setVenueTypeFilter('all');
+    setStatusFilter("all");
+    setVenueTypeFilter("all");
     setPaidOnlyFilter(false);
     setPublicOnlyFilter(false);
-    setCreatedFrom('');
-    setCreatedTo('');
+    setCreatedFrom("");
+    setCreatedTo("");
     setFilterDrawerOpen(false);
     getListEvents();
   };
@@ -322,12 +325,24 @@ const EventsPageClient: React.FC = () => {
   const handleApplyFilters = () => {
     const filters: { [key: string]: string } = {};
 
-    if (statusFilter !== 'all') filters.status = statusFilter;
-    if (venueTypeFilter !== 'all') filters.venue_type = venueTypeFilter;
-    if (paidOnlyFilter) filters.paid_only = 'true';
-    if (publicOnlyFilter) filters.public_only = 'true';
+    if (statusFilter !== "all") filters.status = statusFilter;
+    if (venueTypeFilter !== "all") filters.venue_type = venueTypeFilter;
+    if (paidOnlyFilter) filters.paid_only = "true";
+    if (publicOnlyFilter) filters.public_only = "true";
     if (createdFrom) filters.created_from = createdFrom;
     if (createdTo) filters.created_to = createdTo;
+
+    //  Check if there are any applied filters
+    const hasFilters =
+      Object.keys(filters).length > 0 &&
+      Object.values(filters).some((val) => val && val !== "");
+
+    if (!hasFilters) {
+      enqueueSnackbar("Please select at least one filter", {
+        variant: "warning",
+      });
+      return;
+    }
 
     getListEvents(searchQuery, filters);
     setFilterDrawerOpen(false);
@@ -335,44 +350,73 @@ const EventsPageClient: React.FC = () => {
 
   const MENU_OPTIONS: MenuOption[] = [
     {
-      label: 'Edit',
+      label: "Edit",
       action: handleEdit,
       icon: <Edit className="w-4 h-4" />,
     },
     {
-      label: 'Delete',
+      label: "Delete",
       action: handleDelete,
       icon: <Trash2 className="w-4 h-4" />,
-      variant: 'destructive',
+      variant: "destructive",
     },
   ];
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      published: { label: 'Published', className: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' },
-      draft: { label: 'Draft', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' },
-      cancelled: { label: 'Cancelled', className: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' },
-      completed: { label: 'Completed', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' },
+      published: {
+        label: "Published",
+        className:
+          "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+      },
+      draft: {
+        label: "Draft",
+        className:
+          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+      },
+      cancelled: {
+        label: "Cancelled",
+        className:
+          "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
+      },
+      completed: {
+        label: "Completed",
+        className:
+          "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+      },
     };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
-    
-    return (
-      <Badge className={config.className}>
-        {config.label}
-      </Badge>
-    );
+    const config =
+      statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+
+    return <Badge className={config.className}>{config.label}</Badge>;
   };
 
   const getVenueTypeBadge = (type: string) => {
     const typeConfig = {
-      physical: { label: 'Physical', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400', icon: <MapPin className="w-3 h-3 mr-1" /> },
-      virtual: { label: 'Virtual', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400', icon: <Globe className="w-3 h-3 mr-1" /> },
-      hybrid: { label: 'Hybrid', className: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400', icon: <Calendar className="w-3 h-3 mr-1" /> },
+      physical: {
+        label: "Physical",
+        className:
+          "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+        icon: <MapPin className="w-3 h-3 mr-1" />,
+      },
+      virtual: {
+        label: "Virtual",
+        className:
+          "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400",
+        icon: <Globe className="w-3 h-3 mr-1" />,
+      },
+      hybrid: {
+        label: "Hybrid",
+        className:
+          "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400",
+        icon: <Calendar className="w-3 h-3 mr-1" />,
+      },
     };
 
-    const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.physical;
-    
+    const config =
+      typeConfig[type as keyof typeof typeConfig] || typeConfig.physical;
+
     return (
       <Badge className={config.className}>
         {config.icon}
@@ -382,26 +426,26 @@ const EventsPageClient: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currency,
     }).format(amount);
   };
@@ -425,7 +469,9 @@ const EventsPageClient: React.FC = () => {
             <Calendar className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-semibold text-gray-900 dark:text-white">{event.title}</div>
+            <div className="font-semibold text-gray-900 dark:text-white">
+              {event.title}
+            </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
               {event.description.length > 60
                 ? `${event.description.substring(0, 60)}...`
@@ -507,7 +553,9 @@ const EventsPageClient: React.FC = () => {
       renderData: (event) => (
         <div className="flex items-center space-x-2">
           <Users className="w-4 h-4 text-blue-500" />
-          <span className="font-medium text-gray-900 dark:text-white">{event.max_attendees}</span>
+          <span className="font-medium text-gray-900 dark:text-white">
+            {event.max_attendees}
+          </span>
         </div>
       ),
     },
@@ -520,7 +568,9 @@ const EventsPageClient: React.FC = () => {
       key: "created_at",
       label: "Created",
       renderData: (event) => (
-        <span className="text-gray-600 dark:text-gray-400">{formatDate(event.created_at)}</span>
+        <span className="text-gray-600 dark:text-gray-400">
+          {formatDate(event.created_at)}
+        </span>
       ),
     },
     {
@@ -530,7 +580,6 @@ const EventsPageClient: React.FC = () => {
       width: "w-12",
     },
   ];
-
 
   return (
     <div className="space-y-6">
@@ -577,12 +626,12 @@ const EventsPageClient: React.FC = () => {
                   className="pl-10 pr-24"
                 />
               </div>
-              {filtersApplied?.search && filtersApplied.search !== '' ? (
+              {filtersApplied?.search && filtersApplied.search !== "" ? (
                 <Button
                   onClick={() => {
-                    setSearchQuery('');
+                    setSearchQuery("");
                     setCurrentPage(1);
-                    getListEvents('');
+                    getListEvents("");
                   }}
                   variant="outline"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -592,7 +641,7 @@ const EventsPageClient: React.FC = () => {
               ) : (
                 <Button
                   onClick={handleSearch}
-                  disabled={searchQuery === ''}
+                  disabled={searchQuery === ""}
                   variant="outline"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >

@@ -510,8 +510,8 @@ const OrganizationsPageClient: React.FC = () => {
     if (categoryFilter !== 'all') count++;
     if (subscriptionStatusFilter !== 'all') count++;
     if (activeOnly) count++;
-    if (createdFrom) count++;
-    if (createdTo) count++;
+    if (createdFrom || createdTo) count += 1;
+
     return count;
   };
 
@@ -537,6 +537,18 @@ const OrganizationsPageClient: React.FC = () => {
     if (activeOnly) filters.active_only = 'true';
     if (createdFrom) filters.created_from = createdFrom;
     if (createdTo) filters.created_to = createdTo;
+
+       //  Check if there are any applied filters
+       const hasFilters =
+       Object.keys(filters).length > 0 &&
+       Object.values(filters).some((val) => val && val !== "");
+ 
+     if (!hasFilters) {
+       enqueueSnackbar("Please select at least one filter", {
+         variant: "warning",
+       });
+       return;
+     }
 
     getListOrganizations(searchQuery, filters);
     setFilterDrawerOpen(false);

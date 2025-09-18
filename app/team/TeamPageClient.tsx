@@ -329,8 +329,7 @@ const TeamPageClient: React.FC = () => {
   const getAppliedFiltersCount = () => {
     let count = 0;
     if (statusFilter !== "all") count += 1;
-    if (createdFrom) count += 1;
-    if (createdTo) count += 1;
+    if (createdFrom || createdTo) count += 1;
     return count;
   };
 
@@ -343,9 +342,19 @@ const TeamPageClient: React.FC = () => {
     if (createdFrom) filters.created_from = createdFrom;
     if (createdTo) filters.created_to = createdTo;
 
-    // Call API with dynamic filters
-    getListTeamMembers(searchQuery, filters);
+    //  Check if there are any applied filters
+    const hasFilters =
+      Object.keys(filters).length > 0 &&
+      Object.values(filters).some((val) => val && val !== "");
 
+    if (!hasFilters) {
+      enqueueSnackbar("Please select at least one filter", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    getListTeamMembers(searchQuery, filters);
     setFilterDrawerOpen(false);
   };
 

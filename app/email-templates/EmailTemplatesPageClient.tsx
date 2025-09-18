@@ -133,11 +133,11 @@ const EmailTemplatesPageClient: React.FC = () => {
         setEmailTemplates(result.data.email_templates || []);
         setTotalCount(result.data.total_count || 0);
         setTotalPages(result.data.total_pages || 1);
-        setFiltersApplied(result.data.filters_applied || {});
+        // setFiltersApplied(result.data.filters_applied || {});
       } else {
-        enqueueSnackbar(result?.message || "Failed to load email templates", {
-          variant: "error",
-        });
+        // enqueueSnackbar(result?.message || "Failed to load email templates", {
+        //   variant: "error",
+        // });
         setEmailTemplates([]);
       }
     } catch (err) {
@@ -255,7 +255,7 @@ const EmailTemplatesPageClient: React.FC = () => {
       };
 
       if (result?.code === 200) {
-        setEmailTemplates(prev => [result.data, ...prev]);
+        // setEmailTemplates(prev => [result.data, ...prev]);
         setCreateDialog(false);
         enqueueSnackbar("Email template created successfully", {
           variant: "success",
@@ -288,8 +288,8 @@ const EmailTemplatesPageClient: React.FC = () => {
     if (statusFilter !== "all") count++;
     if (typeFilter !== "all") count++;
     if (activeOnly) count++;
-    if (createdFrom) count++;
-    if (createdTo) count++;
+    if (createdFrom || createdTo) count += 1;
+
     return count;
   };
 
@@ -313,6 +313,18 @@ const EmailTemplatesPageClient: React.FC = () => {
     if (activeOnly) filters.active_only = "true";
     if (createdFrom) filters.created_from = createdFrom;
     if (createdTo) filters.created_to = createdTo;
+
+       //  Check if there are any applied filters
+       const hasFilters =
+       Object.keys(filters).length > 0 &&
+       Object.values(filters).some((val) => val && val !== "");
+ 
+     if (!hasFilters) {
+       enqueueSnackbar("Please select at least one filter", {
+         variant: "warning",
+       });
+       return;
+     }
 
     getListEmailTemplates(searchQuery, filters);
     setFilterDrawerOpen(false);

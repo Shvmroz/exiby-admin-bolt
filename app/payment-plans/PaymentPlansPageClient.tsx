@@ -405,8 +405,9 @@ const PaymentPlansPageClient: React.FC = () => {
     if (statusFilter !== "all") count += 1;
     if (typeFilter !== "all") count += 1;
     if (billingCycleFilter !== "all") count += 1;
-    if (createdFrom) count += 1;
-    if (createdTo) count += 1;
+
+    if (createdFrom || createdTo) count += 1;
+
     return count;
   };
 
@@ -428,21 +429,33 @@ const PaymentPlansPageClient: React.FC = () => {
       created_from?: string;
       created_to?: string;
     } = {};
-  
+
     if (statusFilter === "active") filters.status = "true";
     else if (statusFilter === "inactive") filters.status = "false";
-  
+
     if (typeFilter !== "all") filters.type = typeFilter;
-  
-    if (billingCycleFilter !== "all") filters.billing_cycle = billingCycleFilter;
-  
+
+    if (billingCycleFilter !== "all")
+      filters.billing_cycle = billingCycleFilter;
+
     if (createdFrom) filters.created_from = createdFrom;
     if (createdTo) filters.created_to = createdTo;
-  
+
+    //  Check if there are any applied filters
+    const hasFilters =
+      Object.keys(filters).length > 0 &&
+      Object.values(filters).some((val) => val && val !== "");
+
+    if (!hasFilters) {
+      enqueueSnackbar("Please select at least one filter", {
+        variant: "warning",
+      });
+      return;
+    }
+
     getListPaymentPlans(searchQuery, filters);
     setFilterDrawerOpen(false);
   };
-  
 
   const MENU_OPTIONS: MenuOption[] = [
     {
