@@ -8,7 +8,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import QuillEditor from '@/components/ui/quill-editor';
+import QuillEditor from '@/components/ui/quillEditor/quillEditor';
 import {
   Select,
   SelectContent,

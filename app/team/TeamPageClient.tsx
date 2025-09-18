@@ -246,9 +246,7 @@ const TeamPageClient: React.FC = () => {
     const result = await _add_admin_team_api(data);
 
     if (result?.code === 200) {
-      // Append the new member to the list
-      setTeamMembers((prev) => [...prev, result.data || data]);
-
+      setTeamMembers((prev) => [result.data || data, ...prev]);
       setCreateDialog(false);
       enqueueSnackbar("Admin member added successfully", {
         variant: "success",
@@ -286,29 +284,17 @@ const TeamPageClient: React.FC = () => {
     }
   };
 
-  const handleSearch = () => {
-    setCurrentPage(1);
-    getAllTeamList(searchQuery);
-  };
-
-  const getAllTeamList = async (
+  const getListTeamMembers = async (
     searchQuery?: string,
-    filters?: { status?: string; created_from?: string; created_to?: string }
+    filters?: { [key: string]: string }
   ) => {
     setLoading(true);
     try {
-      const apiFilters = {
-        status: filters?.status ?? "",
-        created_from: filters?.created_from ?? "",
-        created_to: filters?.created_to ?? "",
-      };
-
-      // Call API with search query and filters
       const result = await _admin_team_list_api(
         currentPage,
         rowsPerPage,
         searchQuery || "",
-        apiFilters
+        filters || {}
       );
 
       if (result?.code === 200) {
@@ -331,27 +317,9 @@ const TeamPageClient: React.FC = () => {
     }
   };
 
-  const handleApplyFilters = () => {
-    const filters: {
-      status?: string;
-      created_from?: string;
-      created_to?: string;
-    } = {};
-
-    // Status filter as string
-    if (statusFilter === "active") filters.status = "true";
-    else if (statusFilter === "inactive") filters.status = "false";
-    else filters.status = ""; // empty string if no value
-
-    // Date range
-    if (createdFrom) filters.created_from = createdFrom;
-    if (createdTo) filters.created_to = createdTo;
-
-    // Call API with search query and filters
-    getAllTeamList(searchQuery, filters);
-
-    // Close filter drawer
-    setFilterDrawerOpen(false);
+  const handleSearch = () => {
+    setCurrentPage(1);
+    getListTeamMembers(searchQuery);
   };
 
   const isDateRangeInvalid = Boolean(
@@ -365,11 +333,27 @@ const TeamPageClient: React.FC = () => {
     if (createdTo) count += 1;
     return count;
   };
+
+  const handleApplyFilters = () => {
+    const filters: { [key: string]: string } = {};
+
+    if (statusFilter === "active") filters.status = "true";
+    else if (statusFilter === "inactive") filters.status = "false";
+
+    if (createdFrom) filters.created_from = createdFrom;
+    if (createdTo) filters.created_to = createdTo;
+
+    // Call API with dynamic filters
+    getListTeamMembers(searchQuery, filters);
+
+    setFilterDrawerOpen(false);
+  };
+
   const handleClearFilters = () => {
     setStatusFilter("all");
     setCreatedFrom("");
     setCreatedTo("");
-    getAllTeamList();
+    getListTeamMembers();
     setFilterDrawerOpen(false);
   };
 
@@ -430,9 +414,9 @@ const TeamPageClient: React.FC = () => {
   };
 
   useEffect(() => {
-    getAllTeamList();
+    getListTeamMembers();
   }, [currentPage, rowsPerPage]);
-// =============================================================================================
+  // =============================================================================================
   const getStatusBadge = (status: boolean) =>
     status ? (
       <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 ">
@@ -503,7 +487,7 @@ const TeamPageClient: React.FC = () => {
                   onClick={() => {
                     setSearchQuery("");
                     setCurrentPage(1);
-                    getAllTeamList(""); // reset to no search
+                    getListTeamMembers(""); // reset to no search
                   }}
                   variant="outline"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -514,6 +498,7 @@ const TeamPageClient: React.FC = () => {
                 <Button
                   onClick={handleSearch}
                   variant="outline"
+                  disabled={searchQuery === ""}
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Search

@@ -128,33 +128,3 @@
 *::-webkit-scrollbar-thumb:hover {
   background-color: var(--scrollbar-thumb-hover);
 }
-
-/* Quill Editor Custom Styles */
-.quill-editor-wrapper .ql-toolbar {
-  border-top: 1px solid rgb(209 213 219);
-  border-left: 1px solid rgb(209 213 219);
-  border-right: 1px solid rgb(209 213 219);
-  border-bottom: none;
-}
-
-.quill-editor-wrapper .ql-container {
-  border-bottom: 1px solid rgb(209 213 219);
-  border-left: 1px solid rgb(209 213 219);
-  border-right: 1px solid rgb(209 213 219);
-  border-top: none;
-}
-
-.quill-editor-wrapper .ql-editor {
-  font-family: inherit;
-}
-
-.quill-editor-wrapper .ql-editor.ql-blank::before {
-  font-style: normal;
-  color: rgb(156 163 175);
-}
-
-/* Dark mode specific styles for Quill */
-.dark .quill-editor-wrapper .ql-editor.ql-blank::before {
-  color: rgb(107 114 128);
-}
-

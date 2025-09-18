@@ -1,16 +1,32 @@
 import { invokeApi } from "../utils/invokeApi";
 
 
-export const _admin_team_list_api = async (page, limit, search , filters) => {
+// Updated API function
+export const _admin_team_list_api = async (page, limit, search = "", filters = {}) => {
+    const params = new URLSearchParams({
+        page: page,
+        limit: limit,
+        search: search || "",
+    });
+
+    // Dynamically append only filters with value
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+            params.append(key, value);
+        }
+    });
+
     const requestObj = {
-        path: `api/admin/list_admins?page=${page}&limit=${limit}&search=${search}&status=${filters.status}&created_from=${filters.created_from}&created_to=${filters.created_to}`,
+        path: `api/admin/list_admins?${params.toString()}`,
         method: "GET",
         headers: {
-            "x-sh-auth": localStorage.getItem("authToken"),
+            "x-sh-auth": localStorage.getItem("authToken") || "",
         },
     };
+
     return invokeApi(requestObj);
 };
+
 export const _add_admin_team_api = async (data) => {
     const requestObj = {
         path: `api/admin/add_admin_team`,

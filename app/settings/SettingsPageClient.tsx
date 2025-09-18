@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import SettingsSkeleton from "@/components/ui/skeleton/settings-skeleton";
 import { Shield, Save, Edit, FileText, Scale, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import QuillEditor from "@/components/ui/quill-editor";
+import QuillEditor from "@/components/ui/quillEditor/quillEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

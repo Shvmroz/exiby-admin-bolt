@@ -18,14 +18,14 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  CalendarFold,
 } from "lucide-react";
 import CustomTable, {
   TableHeader,
   MenuOption,
 } from "@/components/ui/custom-table";
 import ConfirmDeleteDialog from "@/components/ui/confirm-delete-dialog";
-import PaymentPlanEditDialog from "@/components/payment-plans/PaymentPlanEditDialog";
-import PaymentPlanCreateDialog from "@/components/payment-plans/PaymentPlanCreateDialog";
+
 import CustomDrawer from "@/components/ui/custom-drawer";
 import PaymentPlanFilters from "@/components/payment-plans/PaymentPlanFilters";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,13 @@ import CsvExportDialog from "@/components/ui/csv-export-dialog";
 import { Badge } from "@/components/ui/badge";
 import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
 import { useSnackbar } from "notistack";
-import { _payment_plans_list_api } from "@/DAL/paymentPlanAPI";
+import {
+  _add_payment_plan_api,
+  _delete_payment_plan_api,
+  _edit_payment_plan_api,
+  _payment_plans_list_api,
+} from "@/DAL/paymentPlanAPI";
+import PaymentPlansAddEditDialog from "@/components/payment-plans/PaymentPlansAddEditDialog";
 
 interface PaymentPlan {
   _id: string;
@@ -44,14 +50,12 @@ interface PaymentPlan {
   billing_cycle: string;
   price: number;
   currency: string;
-  setup_fee: number;
   max_events: number;
   max_attendees: number;
   max_companies: number;
   is_active: boolean;
   is_popular: boolean;
   trial_days: number;
-  target_audience: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -66,7 +70,7 @@ const PaymentPlansPageClient: React.FC = () => {
   const [addLoading, setAddLoading] = useState(false);
   const [rowData, setRowData] = useState<PaymentPlan | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     plan: PaymentPlan | null;
@@ -76,10 +80,10 @@ const PaymentPlansPageClient: React.FC = () => {
     plan: PaymentPlan | null;
   }>({ open: false, plan: null });
   const [createDialog, setCreateDialog] = useState(false);
-  
+
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  
+
   // Filter states
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -121,7 +125,7 @@ const PaymentPlansPageClient: React.FC = () => {
     {
       key: "index",
       label: "#",
-      renderData: (_row, rowIndex) => (
+      renderData: (rowData, rowIndex) => (
         <span className="text-gray-500 dark:text-gray-400 text-sm">
           {rowIndex !== undefined ? rowIndex + 1 : "-"}.
         </span>
@@ -130,25 +134,28 @@ const PaymentPlansPageClient: React.FC = () => {
     {
       key: "plan",
       label: "Plan",
-      renderData: (plan) => (
+      renderData: (rowData) => (
         <div className="flex items-start space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <CreditCard className="w-5 h-5 text-white" />
+            <CalendarFold className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-gray-900 dark:text-white">
-              {plan.plan_name}
+              {rowData.plan_name}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-              {plan.description.length > 50
-                ? `${plan.description.substring(0, 50)}...`
-                : plan.description}
+              {rowData.description
+                ? (() => {
+                    const plainText = rowData.description.replace(
+                      /<[^>]+>/g,
+                      ""
+                    ); // remove HTML tags
+                    return plainText.length > 50
+                      ? `${plainText.substring(0, 50)}...`
+                      : plainText;
+                  })()
+                : ""}
             </div>
-            {plan.target_audience && (
-              <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                Target: {plan.target_audience}
-              </div>
-            )}
           </div>
         </div>
       ),
@@ -156,42 +163,51 @@ const PaymentPlansPageClient: React.FC = () => {
     {
       key: "pricing",
       label: "Pricing",
-      renderData: (plan) => (
+      renderData: (rowData) => (
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
-            <DollarSign className="w-4 h-4 text-green-500" />
             <span className="font-semibold text-green-600 dark:text-green-400">
-              {formatCurrency(plan.price, plan.currency)}
+              {formatCurrency(rowData.price, rowData.currency)}
             </span>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            per {plan.billing_cycle}
-          </div>
-          {plan.setup_fee > 0 && (
-            <div className="text-xs text-gray-500 dark:text-gray-500">
-              Setup: {formatCurrency(plan.setup_fee, plan.currency)}
-            </div>
-          )}
+        </div>
+      ),
+    },
+    {
+      key: "billing_cycle",
+      label: "Billing Cycle",
+      renderData: (rowData) => (
+        <div className="text-sm font-medium text-gray-600 dark:text-gray-400 first-letter:uppercase">
+          {rowData.billing_cycle}
         </div>
       ),
     },
     {
       key: "plan_type",
       label: "Type",
-      renderData: (plan) => (
-        <Badge className={plan.plan_type === 'recurring' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' : 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'}>
-          {plan.plan_type.charAt(0).toUpperCase() + plan.plan_type.slice(1)}
+      renderData: (rowData) => (
+        <Badge
+          className={
+            rowData.plan_type === "recurring"
+              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+              : "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
+          }
+        >
+          {rowData.plan_type === "one_time"
+            ? "One Time"
+            : rowData.plan_type.charAt(0).toUpperCase() +
+              rowData.plan_type.slice(1)}
         </Badge>
       ),
     },
     {
       key: "max_events",
       label: "Max Events",
-      renderData: (plan) => (
+      renderData: (rowData) => (
         <div className="flex items-center space-x-2">
           <Calendar className="w-4 h-4 text-purple-500" />
           <span className="font-medium text-gray-900 dark:text-white">
-            {plan.max_events}
+            {rowData.max_events}
           </span>
         </div>
       ),
@@ -199,11 +215,11 @@ const PaymentPlansPageClient: React.FC = () => {
     {
       key: "max_attendees",
       label: "Max Attendees",
-      renderData: (plan) => (
+      renderData: (rowData) => (
         <div className="flex items-center space-x-2">
           <Users className="w-4 h-4 text-blue-500" />
           <span className="font-medium text-gray-900 dark:text-white">
-            {plan.max_attendees.toLocaleString()}
+            {rowData.max_attendees.toLocaleString()}
           </span>
         </div>
       ),
@@ -211,11 +227,11 @@ const PaymentPlansPageClient: React.FC = () => {
     {
       key: "max_companies",
       label: "Max Companies",
-      renderData: (plan) => (
+      renderData: (rowData) => (
         <div className="flex items-center space-x-2">
           <Building className="w-4 h-4 text-orange-500" />
           <span className="font-medium text-gray-900 dark:text-white">
-            {plan.max_companies}
+            {rowData.max_companies}
           </span>
         </div>
       ),
@@ -223,26 +239,30 @@ const PaymentPlansPageClient: React.FC = () => {
     {
       key: "status",
       label: "Status",
-      renderData: (plan) => getStatusBadge(plan.is_active, plan.is_popular),
+      renderData: (rowData) =>
+        getStatusBadge(rowData.is_active, rowData.is_popular),
     },
     {
       key: "trial_days",
       label: "Trial",
-      renderData: (plan) => (
+      renderData: (rowData) => (
         <div className="flex items-center space-x-2">
           <Clock className="w-4 h-4 text-blue-500" />
           <span className="font-medium text-gray-900 dark:text-white">
-            {plan.trial_days} days
+            {rowData.trial_days && rowData.trial_days > 0
+              ? `${rowData.trial_days} Days`
+              : "No Trial"}
           </span>
         </div>
       ),
     },
+
     {
       key: "createdAt",
       label: "Created",
-      renderData: (plan) => (
+      renderData: (rowData) => (
         <span className="text-gray-600 dark:text-gray-400">
-          {formatDate(plan.createdAt)}
+          {formatDate(rowData.createdAt)}
         </span>
       ),
     },
@@ -255,35 +275,25 @@ const PaymentPlansPageClient: React.FC = () => {
   ];
 
   // Load payment plans
-  const getPaymentPlansList = async (
-    searchQuery?: string,
-    filters?: { status?: string; created_from?: string; created_to?: string }
-  ) => {
+  const getListPaymentPlans = async (searchQuery = "", filters = {}) => {
     setLoading(true);
     try {
-      const apiFilters = {
-        status: filters?.status ?? "",
-        created_from: filters?.created_from ?? "",
-        created_to: filters?.created_to ?? "",
-      };
-
       const result = await _payment_plans_list_api(
         currentPage,
         rowsPerPage,
-        searchQuery || "",
-        apiFilters
+        searchQuery,
+        filters
       );
 
       if (result?.code === 200) {
         setPaymentPlans(result.data.payment_plans || []);
         setTotalCount(result.data.total_count || 0);
         setTotalPages(result.data.total_pages || 1);
-        setFiltersApplied(result.data.filters_applied || filtersApplied);
+        setFiltersApplied(result.data.filters_applied || {});
       } else {
-        enqueueSnackbar(
-          result?.message || "Failed to load payment plans",
-          { variant: "error" }
-        );
+        enqueueSnackbar(result?.message || "Failed to load payment plans", {
+          variant: "error",
+        });
         setPaymentPlans([]);
       }
     } catch (err) {
@@ -296,7 +306,7 @@ const PaymentPlansPageClient: React.FC = () => {
   };
 
   useEffect(() => {
-    getPaymentPlansList();
+    getListPaymentPlans();
   }, [currentPage, rowsPerPage]);
 
   if (loading && paymentPlans.length === 0) {
@@ -317,89 +327,73 @@ const PaymentPlansPageClient: React.FC = () => {
     if (!rowData?._id) return;
 
     setDeleteLoading(true);
-    try {
-      // TODO: Implement delete API call
-      // const result = await _delete_payment_plan_api(rowData._id);
-      
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setPaymentPlans(prev => prev.filter(plan => plan._id !== rowData._id));
-      setTotalCount(prev => prev - 1);
-      setTotalPages(Math.ceil((totalCount - 1) / rowsPerPage));
-      
+    const result = await _delete_payment_plan_api(rowData._id);
+    if (result?.code === 200) {
+      setPaymentPlans((prev) =>
+        prev.filter((plan) => plan._id !== rowData._id)
+      );
       setDeleteDialog({ open: false, plan: null });
       setRowData(null);
-      
-      enqueueSnackbar("Payment plan deleted successfully", { variant: "success" });
-    } catch (error) {
-      console.error("Error deleting payment plan:", error);
-      enqueueSnackbar("Failed to delete payment plan", { variant: "error" });
-    } finally {
+      enqueueSnackbar("Payment plan deleted successfully", {
+        variant: "success",
+      });
+    } else {
+      enqueueSnackbar(result?.message || "Failed to delete payment plan", {
+        variant: "error",
+      });
       setDeleteLoading(false);
     }
+    setDeleteLoading(false);
   };
 
   const handleSaveEdit = async (data: Partial<PaymentPlan>) => {
+    console.log("Edit Data:", data);
     if (!rowData?._id) return;
-    
     setEditLoading(true);
-    try {
-      // TODO: Implement edit API call
-      // const result = await _edit_payment_plan_api(rowData._id, data);
-      
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setPaymentPlans(prev =>
-        prev.map(plan => plan._id === rowData._id ? { ...plan, ...data } : plan)
-      );
-      
+    const result = await _edit_payment_plan_api(rowData._id, data);
+    if (result?.code === 200) {
       setEditDialog({ open: false, plan: null });
       setRowData(null);
-      
-      enqueueSnackbar("Payment plan updated successfully", { variant: "success" });
-    } catch (error) {
-      console.error("Error updating payment plan:", error);
-      enqueueSnackbar("Failed to update payment plan", { variant: "error" });
-    } finally {
+      setEditLoading(false);
+      setPaymentPlans((prev) =>
+        prev.map((plan) =>
+          plan._id === rowData._id ? { ...plan, ...data } : plan
+        )
+      );
+
+      enqueueSnackbar("Payment plan updated successfully", {
+        variant: "success",
+      });
+    } else {
+      enqueueSnackbar(result?.message || "Failed to update payment plan", {
+        variant: "error",
+      });
       setEditLoading(false);
     }
   };
 
   const handleAddNewPlan = async (data: Partial<PaymentPlan>) => {
     setAddLoading(true);
-    try {
-      // TODO: Implement create API call
-      // const result = await _add_payment_plan_api(data);
-      
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const newPlan = {
-        _id: `plan_${Date.now()}`,
-        ...data,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as PaymentPlan;
-      
-      setPaymentPlans(prev => [newPlan, ...prev]);
-      setTotalCount(prev => prev + 1);
-      setTotalPages(Math.ceil((totalCount + 1) / rowsPerPage));
-      
+    const result = await _add_payment_plan_api(data);
+
+    if (result?.code === 200) {
+      setPaymentPlans((prev) => [result.data, ...prev]);
       setCreateDialog(false);
-      enqueueSnackbar("Payment plan created successfully", { variant: "success" });
-    } catch (error) {
-      console.error("Error creating payment plan:", error);
-      enqueueSnackbar("Failed to create payment plan", { variant: "error" });
-    } finally {
+      setAddLoading(false);
+      enqueueSnackbar("Payment plan created successfully", {
+        variant: "success",
+      });
+    } else {
+      enqueueSnackbar(result?.message || "Failed to create payment plan", {
+        variant: "error",
+      });
       setAddLoading(false);
     }
   };
 
   const handleSearch = () => {
     setCurrentPage(1);
-    getPaymentPlansList(searchQuery);
+    getListPaymentPlans(searchQuery);
   };
 
   // Filter functions
@@ -425,8 +419,8 @@ const PaymentPlansPageClient: React.FC = () => {
     setPopularOnly(false);
     setCreatedFrom("");
     setCreatedTo("");
-    getPaymentPlansList();
     setFilterDrawerOpen(false);
+    getListPaymentPlans();
   };
 
   const handleApplyFilters = () => {
@@ -441,15 +435,15 @@ const PaymentPlansPageClient: React.FC = () => {
 
     if (statusFilter === "active") filters.status = "true";
     else if (statusFilter === "inactive") filters.status = "false";
-    else filters.status = "";
 
     if (typeFilter !== "all") filters.type = typeFilter;
-    if (billingCycleFilter !== "all") filters.billing_cycle = billingCycleFilter;
+    if (billingCycleFilter !== "all")
+      filters.billing_cycle = billingCycleFilter;
     if (popularOnly) filters.popular_only = "true";
     if (createdFrom) filters.created_from = createdFrom;
     if (createdTo) filters.created_to = createdTo;
 
-    getPaymentPlansList(searchQuery, filters);
+    getListPaymentPlans(searchQuery, filters);
     setFilterDrawerOpen(false);
   };
 
@@ -558,7 +552,7 @@ const PaymentPlansPageClient: React.FC = () => {
                   onClick={() => {
                     setSearchQuery("");
                     setCurrentPage(1);
-                    getPaymentPlansList("");
+                    getListPaymentPlans("");
                   }}
                   variant="outline"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -568,6 +562,7 @@ const PaymentPlansPageClient: React.FC = () => {
               ) : (
                 <Button
                   onClick={handleSearch}
+                  disabled={searchQuery === ""}
                   variant="outline"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
@@ -622,24 +617,22 @@ const PaymentPlansPageClient: React.FC = () => {
         loading={deleteLoading}
       />
 
-      {/* Edit Payment Plan Dialog */}
-      <PaymentPlanEditDialog
-        open={editDialog.open}
+      {/* Payment Plan Dialog (Create / Edit) */}
+      <PaymentPlansAddEditDialog
+        open={editDialog.open || createDialog}
         onOpenChange={(open) => {
-          setEditDialog({ open, plan: null });
-          if (!open) setRowData(null);
+          if (editDialog.open) {
+            // closing edit dialog
+            setEditDialog({ open, plan: null });
+            if (!open) setRowData(null);
+          } else {
+            // closing create dialog
+            setCreateDialog(open);
+          }
         }}
-        plan={rowData}
-        onSave={handleSaveEdit}
-        loading={editLoading}
-      />
-
-      {/* Create Payment Plan Dialog */}
-      <PaymentPlanCreateDialog
-        open={createDialog}
-        onOpenChange={setCreateDialog}
-        onSave={handleAddNewPlan}
-        loading={addLoading}
+        plan={editDialog.open ? rowData : null} // pass plan only in edit mode
+        onSave={editDialog.open ? handleSaveEdit : handleAddNewPlan}
+        loading={editDialog.open ? editLoading : addLoading}
       />
 
       {/* CSV Export Dialog */}

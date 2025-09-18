@@ -106,7 +106,7 @@ const PaymentPlanFilters: React.FC<PaymentPlanFiltersProps> = ({
             <SelectItem value="one-time">
               <div className="flex items-center">
                 <Calendar className="w-4 h-4 mr-2 text-purple-500" />
-                One-time
+                One time
               </div>
             </SelectItem>
           </SelectContent>
@@ -124,9 +124,9 @@ const PaymentPlanFilters: React.FC<PaymentPlanFiltersProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Cycles</SelectItem>
+            <SelectItem value="weekly">Weekly</SelectItem>
             <SelectItem value="monthly">Monthly</SelectItem>
             <SelectItem value="yearly">Yearly</SelectItem>
-            <SelectItem value="quarterly">Quarterly</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -141,7 +141,7 @@ const PaymentPlanFilters: React.FC<PaymentPlanFiltersProps> = ({
           value={createdFrom}
           onChange={(e) => setCreatedFrom(e.target.value)}
         />
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:bg">
           Created To
         </label>
         <Input
