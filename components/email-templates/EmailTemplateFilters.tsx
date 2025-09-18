@@ -117,7 +117,7 @@ const EmailTemplateFilters: React.FC<EmailTemplateFiltersProps> = ({
       {setCreatedFrom && setCreatedTo && (
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Created From
+            Start Date
           </label>
           <Input
             type="date"
@@ -125,7 +125,7 @@ const EmailTemplateFilters: React.FC<EmailTemplateFiltersProps> = ({
             onChange={(e) => setCreatedFrom(e.target.value)}
           />
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Created To
+            End Date
           </label>
           <Input
             type="date"

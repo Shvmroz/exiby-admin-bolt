@@ -31,6 +31,10 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TableSkeleton from '@/components/ui/skeleton/table-skeleton';
 import { useSnackbar } from 'notistack';
+import {
+  _add_organizations_api,
+  _organizations_list_api,
+} from "@/DAL/organizationAPI";
 
 interface Organization {
   _id: string;
@@ -267,27 +271,15 @@ const OrganizationsPageClient: React.FC = () => {
     }
 
     try {
-      // TODO: Replace with actual API call
-      // const result = await _organizations_list_api(currentPage, rowsPerPage, searchQuery, filters);
+      const result = await _organizations_list_api(currentPage, rowsPerPage, searchQuery, filters);
       
-      // Simulate API response structure
-      const result = {
-        code: 200,
-        data: {
-          organizations: [],
-          total_count: 0,
-          total_pages: 1,
-          filters_applied: filters,
-        }
-      };
-
       if (result?.code === 200) {
         if (includeDeleted) {
           setDeletedOrganizations(result.data.organizations || []);
         } else {
           setOrganizations(result.data.organizations || []);
-          setTotalCount(result.data.total_count || 0);
-          setTotalPages(result.data.total_pages || 1);
+          setTotalCount(result.data.total_count);
+          setTotalPages(result.data.total_pages);
           setFiltersApplied(result.data.filters_applied || {});
         }
       } else {
@@ -325,9 +317,7 @@ const OrganizationsPageClient: React.FC = () => {
     }
   }, [currentPage, rowsPerPage, activeTab]);
 
-  if (loading && organizations.length === 0) {
-    return <TableSkeleton rows={8} columns={8} showFilters={true} />;
-  }
+
 
   const handleEdit = (organization: Organization) => {
     setEditDialog({ open: true, organization });
@@ -422,17 +412,11 @@ const OrganizationsPageClient: React.FC = () => {
     setAddLoading(true);
     try {
       // TODO: Replace with actual API call
-      // const result = await _add_organization_api(data);
+      const result = await _add_organizations_api(data);
       
-      // Simulate API response
-      const result = {
-        code: 200,
-        message: 'Organization created successfully',
-        data: { _id: `org_${Date.now()}`, ...data }
-      };
 
       if (result?.code === 200) {
-        setOrganizations(prev => [result.data, ...prev]);
+        // setOrganizations(prev => [result.data, ...prev]);
         setCreateDialog(false);
         enqueueSnackbar('Organization created successfully', {
           variant: 'success',
@@ -610,6 +594,10 @@ const OrganizationsPageClient: React.FC = () => {
       day: 'numeric',
     });
   };
+
+  if (loading && organizations.length === 0) {
+    return <TableSkeleton rows={8} columns={8} showFilters={true} />;
+  }
 
   return (
     <div className="space-y-6">

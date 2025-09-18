@@ -19,8 +19,6 @@ interface PaymentPlanFiltersProps {
   setTypeFilter: (value: string) => void;
   billingCycleFilter: string;
   setBillingCycleFilter: (value: string) => void;
-  popularOnly: boolean;
-  setPopularOnly: (value: boolean) => void;
   createdFrom: string;
   setCreatedFrom: (value: string) => void;
   createdTo: string;
@@ -35,8 +33,6 @@ const PaymentPlanFilters: React.FC<PaymentPlanFiltersProps> = ({
   setTypeFilter,
   billingCycleFilter,
   setBillingCycleFilter,
-  popularOnly,
-  setPopularOnly,
   createdFrom,
   setCreatedFrom,
   createdTo,
@@ -45,19 +41,7 @@ const PaymentPlanFilters: React.FC<PaymentPlanFiltersProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-        <div className="flex items-center space-x-2">
-          <Star className="w-4 h-4 text-yellow-500" />
-          <span className="text-sm font-medium text-gray-900 dark:text-white">
-            Popular Plans Only
-          </span>
-        </div>
-        <Switch
-          checked={popularOnly}
-          onCheckedChange={setPopularOnly}
-          className="data-[state=checked]:bg-[#0077ED]"
-        />
-      </div>
+    
 
       {/* Status Filter */}
       <div>
@@ -134,7 +118,7 @@ const PaymentPlanFilters: React.FC<PaymentPlanFiltersProps> = ({
       {/* Date Range Filter */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Created From
+          Start Date
         </label>
         <Input
           type="date"
@@ -142,7 +126,7 @@ const PaymentPlanFilters: React.FC<PaymentPlanFiltersProps> = ({
           onChange={(e) => setCreatedFrom(e.target.value)}
         />
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 dark:bg">
-          Created To
+          End Date
         </label>
         <Input
           type="date"

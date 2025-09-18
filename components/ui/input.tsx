@@ -12,7 +12,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          'w-full h-10 px-3 rounded-md border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ' +
+          'w-full h-10 px-3 rounded-md border text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 ' +
             'bg-white text-gray-900 placeholder-gray-400 border-gray-300 ' + // light mode
             'dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:border-gray-600 ' + // dark mode
             // Calendar icon styles

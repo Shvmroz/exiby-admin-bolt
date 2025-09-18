@@ -88,7 +88,6 @@ const PaymentPlansPageClient: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [billingCycleFilter, setBillingCycleFilter] = useState("all");
-  const [popularOnly, setPopularOnly] = useState(false);
   const [createdFrom, setCreatedFrom] = useState("");
   const [createdTo, setCreatedTo] = useState("");
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -286,10 +285,10 @@ const PaymentPlansPageClient: React.FC = () => {
       );
 
       if (result?.code === 200) {
-        setPaymentPlans(result.data.payment_plans || []);
-        setTotalCount(result.data.total_count || 0);
-        setTotalPages(result.data.total_pages || 1);
-        setFiltersApplied(result.data.filters_applied || {});
+        setPaymentPlans(result.payment_plans || []);
+        setTotalCount(result.total_count);
+        setTotalPages(result.total_pages);
+        setFiltersApplied(result.filters_applied || {});
       } else {
         enqueueSnackbar(result?.message || "Failed to load payment plans", {
           variant: "error",
@@ -406,7 +405,6 @@ const PaymentPlansPageClient: React.FC = () => {
     if (statusFilter !== "all") count += 1;
     if (typeFilter !== "all") count += 1;
     if (billingCycleFilter !== "all") count += 1;
-    if (popularOnly) count += 1;
     if (createdFrom) count += 1;
     if (createdTo) count += 1;
     return count;
@@ -416,7 +414,6 @@ const PaymentPlansPageClient: React.FC = () => {
     setStatusFilter("all");
     setTypeFilter("all");
     setBillingCycleFilter("all");
-    setPopularOnly(false);
     setCreatedFrom("");
     setCreatedTo("");
     setFilterDrawerOpen(false);
@@ -428,24 +425,24 @@ const PaymentPlansPageClient: React.FC = () => {
       status?: string;
       type?: string;
       billing_cycle?: string;
-      popular_only?: string;
       created_from?: string;
       created_to?: string;
     } = {};
-
+  
     if (statusFilter === "active") filters.status = "true";
     else if (statusFilter === "inactive") filters.status = "false";
-
+  
     if (typeFilter !== "all") filters.type = typeFilter;
-    if (billingCycleFilter !== "all")
-      filters.billing_cycle = billingCycleFilter;
-    if (popularOnly) filters.popular_only = "true";
+  
+    if (billingCycleFilter !== "all") filters.billing_cycle = billingCycleFilter;
+  
     if (createdFrom) filters.created_from = createdFrom;
     if (createdTo) filters.created_to = createdTo;
-
+  
     getListPaymentPlans(searchQuery, filters);
     setFilterDrawerOpen(false);
   };
+  
 
   const MENU_OPTIONS: MenuOption[] = [
     {
@@ -660,8 +657,6 @@ const PaymentPlansPageClient: React.FC = () => {
           setTypeFilter={setTypeFilter}
           billingCycleFilter={billingCycleFilter}
           setBillingCycleFilter={setBillingCycleFilter}
-          popularOnly={popularOnly}
-          setPopularOnly={setPopularOnly}
           createdFrom={createdFrom}
           setCreatedFrom={setCreatedFrom}
           createdTo={createdTo}

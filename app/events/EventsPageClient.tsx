@@ -147,11 +147,11 @@ const EventsPageClient: React.FC = () => {
         setEvents(result.data.events || []);
         setTotalCount(result.data.total_count || 0);
         setTotalPages(result.data.total_pages || 1);
-        setFiltersApplied(result.data.filters_applied || {});
+        // setFiltersApplied(result.data.filters_applied || {});
       } else {
-        enqueueSnackbar(result?.message || 'Failed to load events', {
-          variant: 'error',
-        });
+        // enqueueSnackbar(result?.message || 'Failed to load events', {
+        //   variant: 'error',
+        // });
         setEvents([]);
       }
     } catch (err) {
@@ -265,7 +265,7 @@ const EventsPageClient: React.FC = () => {
       };
 
       if (result?.code === 200) {
-        setEvents(prev => [result.data, ...prev]);
+        // setEvents(prev => [result.data, ...prev]);
         setCreateDialog(false);
         enqueueSnackbar('Event created successfully', {
           variant: 'success',
@@ -531,24 +531,6 @@ const EventsPageClient: React.FC = () => {
     },
   ];
 
-  const handleSearch = () => {
-    setCurrentPage(1);
-    getListEvents(searchQuery);
-  };
-
-  const MENU_OPTIONS: MenuOption[] = [
-    {
-      label: 'Edit',
-      action: handleEdit,
-      icon: <Edit className="w-4 h-4" />,
-    },
-    {
-      label: 'Delete',
-      action: handleDelete,
-      icon: <Trash2 className="w-4 h-4" />,
-      variant: 'destructive',
-    },
-  ];
 
   return (
     <div className="space-y-6">
