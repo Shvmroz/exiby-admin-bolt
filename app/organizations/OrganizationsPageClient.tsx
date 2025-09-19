@@ -423,7 +423,7 @@ const OrganizationsPageClient: React.FC = () => {
       setRowData(null);
       setEditLoading(false);
       setOrganizations((prev) =>
-        prev.map((org) => (org._id === rowData._id ? { ...org, ...data } : org))
+        prev.map((org) => (org._id === rowData._id ? { ...org, ...result.data } : org))
       );
       enqueueSnackbar("Organization updated successfully", {
         variant: "success",

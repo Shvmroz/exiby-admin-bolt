@@ -176,12 +176,12 @@ const ProfilePageClient: React.FC = () => {
                 </button>
               )}
             </div>
-            <p className="text-gray-500 text-xs mt-2 text-center">Recommended: 1:1 image, up to 1MB</p>
+            <p className="text-gray-500 text-xs mt-2 text-center">Recommended: 1:1 Ratio up to 1MB</p>
           </div>
 
           {/* Form */}
           <div className="md:col-span-8 flex flex-col justify-between space-y-6">
-            <div>
+            <div className="space-y-4">
               {/* First Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
@@ -200,7 +200,7 @@ const ProfilePageClient: React.FC = () => {
               </div>
 
               {/* Last Name */}
-              <div>
+              <div >
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4  text-gray-600 dark:text-gray-300" />

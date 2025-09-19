@@ -273,35 +273,28 @@ const PaymentPlansPageClient: React.FC = () => {
     },
   ];
 
-  // Load payment plans
+  // Get payment plans list
   const getListPaymentPlans = async (searchQuery = "", filters = {}) => {
     setLoading(true);
-    try {
-      const result = await _payment_plans_list_api(
-        currentPage,
-        rowsPerPage,
-        searchQuery,
-        filters
-      );
+    const result = await _payment_plans_list_api(
+      currentPage,
+      rowsPerPage,
+      searchQuery,
+      filters
+    );
 
-      if (result?.code === 200) {
-        setPaymentPlans(result.payment_plans || []);
-        setTotalCount(result.pagination.total_count);
-        setTotalPages(result.pagination.total_pages);
-        setFiltersApplied(result.filters_applied || {});
-      } else {
-        enqueueSnackbar(result?.message || "Failed to load payment plans", {
-          variant: "error",
-        });
-        setPaymentPlans([]);
-      }
-    } catch (err) {
-      console.error(err);
-      enqueueSnackbar("Something went wrong", { variant: "error" });
+    if (result?.code === 200) {
+      setPaymentPlans(result.payment_plans || []);
+      setTotalCount(result.pagination.total_count);
+      setTotalPages(result.pagination.total_pages);
+      setFiltersApplied(result.filters_applied || {});
+    } else {
+      enqueueSnackbar(result?.message || "Failed to load payment plans", {
+        variant: "error",
+      });
       setPaymentPlans([]);
-    } finally {
-      setLoading(false);
     }
+    setLoading(true);
   };
 
   useEffect(() => {
