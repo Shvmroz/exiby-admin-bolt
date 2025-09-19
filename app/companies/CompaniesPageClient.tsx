@@ -36,6 +36,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TableSkeleton from "@/components/ui/skeleton/table-skeleton";
 import { useSnackbar } from "notistack";
+import {
+  _companies_list_api
+} from "@/DAL/companyAPI";
 
 interface Company {
   _id: string;
@@ -117,7 +120,7 @@ const CompaniesPageClient: React.FC = () => {
 
   const [filtersApplied, setFiltersApplied] = useState({
     search: "",
-    sort_by: "created_at",
+    sort_by: "createdAt",
     sort_order: "desc",
     page: 1,
     limit: 50,
@@ -146,7 +149,7 @@ const CompaniesPageClient: React.FC = () => {
     {
       key: "company",
       label: "Company",
-      renderData: (company: Company) => (
+      renderData: (company) => (
         <div className="flex items-start space-x-3">
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <Building className="w-5 h-5 text-white" />
@@ -156,7 +159,19 @@ const CompaniesPageClient: React.FC = () => {
               {company.orgn_user.name}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-              {company.bio.description}
+              {(() => {
+                const plainText = company.bio?.description
+                  ?.replace(/<[^>]+>/g, "")
+                  .trim();
+
+                if (!plainText) {
+                  return "No description";
+                }
+
+                return plainText.length > 50
+                  ? `${plainText.substring(0, 50)}...`
+                  : plainText;
+              })()}
             </div>
             {company.social_links.website && (
               <a
@@ -177,7 +192,7 @@ const CompaniesPageClient: React.FC = () => {
     {
       key: "industry",
       label: "Industry",
-      renderData: (company: Company) => (
+      renderData: (company) => (
         <div className="flex items-center space-x-2">
           <span className="font-medium text-gray-900 dark:text-white">
             {company.bio.industry}
@@ -188,7 +203,7 @@ const CompaniesPageClient: React.FC = () => {
     {
       key: "contact",
       label: "Contact",
-      renderData: (company: Company) => (
+      renderData: (company) => (
         <div className="space-y-1">
           <div className="flex items-center space-x-2 text-sm">
             <Mail className="w-3 h-3 text-gray-400" />
@@ -208,12 +223,12 @@ const CompaniesPageClient: React.FC = () => {
     {
       key: "status",
       label: "Status",
-      renderData: (company: Company) => getStatusBadge(company.status),
+      renderData: (company) => getStatusBadge(company.status),
     },
     {
       key: "total_events",
       label: "Events",
-      renderData: (company: Company) => (
+      renderData: (company) => (
         <div className="flex items-center space-x-2">
           <Calendar className="w-4 h-4 text-purple-500" />
           <span className="font-medium text-gray-900 dark:text-white">
@@ -225,9 +240,8 @@ const CompaniesPageClient: React.FC = () => {
     {
       key: "total_payments",
       label: "Payments",
-      renderData: (company: Company) => (
+      renderData: (company) => (
         <div className="flex items-center space-x-2">
-          <DollarSign className="w-4 h-4 text-green-500" />
           <span className="font-medium text-green-600 dark:text-green-400">
             ${company.total_payments.toLocaleString()}
           </span>
@@ -235,11 +249,11 @@ const CompaniesPageClient: React.FC = () => {
       ),
     },
     {
-      key: "created_at",
+      key: "createdAt",
       label: "Created",
-      renderData: (company: Company) => (
+      renderData: (company) => (
         <span className="text-gray-600 dark:text-gray-400">
-          {formatDate(company.created_at)}
+          {formatDate(company.createdAt)}
         </span>
       ),
     },
@@ -264,19 +278,7 @@ const CompaniesPageClient: React.FC = () => {
     }
 
     try {
-      // TODO: Replace with actual API call
-      // const result = await _companies_list_api(currentPage, rowsPerPage, searchQuery, filters);
-
-      // Simulate API response structure
-      const result = {
-        code: 200,
-        data: {
-          companies: [],
-          total_count: 0,
-          total_pages: 1,
-          filters_applied: filters,
-        },
-      };
+      const result = await _companies_list_api(currentPage, rowsPerPage, searchQuery, filters);
 
       if (result?.code === 200) {
         if (includeDeleted) {
@@ -745,7 +747,7 @@ const CompaniesPageClient: React.FC = () => {
               onRowsPerPageChange,
             }}
             totalPages={totalPages}
-            onRowClick={handleRowClick}
+            // onRowClick={handleRowClick}
             loading={loading}
             emptyMessage="No companies found"
           />

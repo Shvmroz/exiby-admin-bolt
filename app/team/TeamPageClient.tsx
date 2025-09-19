@@ -125,20 +125,17 @@ const TeamPageClient: React.FC = () => {
       renderData: (row) => (
         <div className="flex items-start space-x-3">
           <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden">
-            {row.profile_image ? (
-              <img
-                src={s3baseUrl + row.profile_image}
-                alt={`${row.first_name} ${row.last_name}`}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/fallback-user.png";
-                }}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-r from-cyan-500 to-cyan-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-gray-200 flex items-center justify-center">
+              {row.profile_image ? (
+                <img
+                  src={s3baseUrl + row.profile_image}
+                  alt={`${row.first_name} ${row.last_name}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
                 <User className="w-5 h-5 text-white" />
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="font-semibold text-gray-900 dark:text-white">
@@ -221,13 +218,13 @@ const TeamPageClient: React.FC = () => {
     const result = await _edit_team_member_api(rowData._id, data);
     if (result?.code === 200) {
       setEditDialog({ open: false, member: null });
-      setRowData(null);
       setEditLoading(false);
       setTeamMembers((prev) =>
-        prev.map((m) =>
-          m._id === rowData._id ? { ...m, ...result?.admin } : m
+        prev.map((x) =>
+          x._id === rowData._id ? { ...x, ...result?.admin } : x
         )
       );
+      setRowData(null);
 
       enqueueSnackbar("Team member updated successfully", {
         variant: "success",
@@ -246,7 +243,7 @@ const TeamPageClient: React.FC = () => {
     const result = await _add_admin_team_api(data);
 
     if (result?.code === 200) {
-      setTeamMembers((prev) => [result.data || data, ...prev]);
+      setTeamMembers((prev) => [result.admin, ...prev]);
       setCreateDialog(false);
       enqueueSnackbar("Admin member added successfully", {
         variant: "success",
