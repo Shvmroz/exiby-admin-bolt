@@ -160,17 +160,19 @@ const OrganizationsPageClient: React.FC = () => {
             </div>
 
             <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-              {organization.bio?.description
-                ? (() => {
-                    const plainText = organization.bio?.description.replace(
-                      /<[^>]+>/g,
-                      ""
-                    ); // remove HTML tags
-                    return plainText.length > 50
-                      ? `${plainText.substring(0, 50)}...`
-                      : plainText;
-                  })()
-                : "No description"}
+              {(() => {
+                const plainText = organization.bio?.description
+                  ?.replace(/<[^>]+>/g, "")
+                  .trim();
+
+                if (!plainText) {
+                  return "No description";
+                }
+
+                return plainText.length > 50
+                  ? `${plainText.substring(0, 50)}...`
+                  : plainText;
+              })()}
             </div>
           </div>
         </div>
@@ -316,8 +318,8 @@ const OrganizationsPageClient: React.FC = () => {
           setDeletedOrganizations(result.data.organizations || []);
         } else {
           setOrganizations(result.data.organizations || []);
-          setTotalCount(result.data.total_count);
-          setTotalPages(result.data.total_pages);
+          setTotalCount(result.data.pagination.total_count);
+          setTotalPages(result.data.pagination.total_pages);
           setFiltersApplied(result.data.filters_applied || {});
         }
       } else {
@@ -729,8 +731,6 @@ const OrganizationsPageClient: React.FC = () => {
                   Search
                 </Button>
               )}
-
-            
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -871,12 +871,13 @@ const OrganizationsPageClient: React.FC = () => {
         <OrganizationFilters
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
-          activeOnly={activeOnly}
-          setActiveOnly={setActiveOnly}
           subscriptionStatusFilter={subscriptionStatusFilter}
           setSubscriptionStatusFilter={setSubscriptionStatusFilter}
+          createdFrom={createdFrom}
+          setCreatedFrom={setCreatedFrom}
+          createdTo={createdTo}
+          setCreatedTo={setCreatedTo}
+          isDateRangeInvalid={isDateRangeInvalid}
         />
       </CustomDrawer>
     </div>

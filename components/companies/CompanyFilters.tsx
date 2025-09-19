@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { CheckCircle, XCircle, Building } from "lucide-react";
+import { CheckCircle, XCircle, Building, AlertTriangle } from "lucide-react";
 
 interface CompanyFiltersProps {
   statusFilter: string;
@@ -134,11 +134,12 @@ const CompanyFilters: React.FC<CompanyFiltersProps> = ({
             value={createdTo}
             onChange={(e) => setCreatedTo(e.target.value)}
           />
-          {isDateRangeInvalid && (
-            <p className="text-xs text-red-500 mt-1">
-              End date cannot be earlier than start date
-            </p>
-          )}
+           {isDateRangeInvalid && (
+          <div className="flex items-center text-xs text-orange-400 mt-1">
+            <AlertTriangle className="w-4 h-4 mr-1 text-orange-400" />
+            End date cannot be earlier than start date
+          </div>
+        )}
         </div>
       )}
     </div>

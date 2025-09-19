@@ -153,7 +153,7 @@ const PaymentPlansPageClient: React.FC = () => {
                       ? `${plainText.substring(0, 50)}...`
                       : plainText;
                   })()
-                : ""}
+                : "No Description"}
             </div>
           </div>
         </div>
@@ -286,8 +286,8 @@ const PaymentPlansPageClient: React.FC = () => {
 
       if (result?.code === 200) {
         setPaymentPlans(result.payment_plans || []);
-        setTotalCount(result.total_count);
-        setTotalPages(result.total_pages);
+        setTotalCount(result.pagination.total_count);
+        setTotalPages(result.pagination.total_pages);
         setFiltersApplied(result.filters_applied || {});
       } else {
         enqueueSnackbar(result?.message || "Failed to load payment plans", {

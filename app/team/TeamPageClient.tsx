@@ -299,8 +299,8 @@ const TeamPageClient: React.FC = () => {
 
       if (result?.code === 200) {
         setTeamMembers(result.data.admins || []);
-        setTotalCount(result.data.total_count);
-        setTotalPages(result.data.total_pages);
+        setTotalCount(result.data.pagination.total_count);
+        setTotalPages(result.data.pagination.total_pages);
         setFiltersApplied(result.data.filters_applied || filtersApplied);
       } else {
         enqueueSnackbar(result?.message || "Failed to load team members", {

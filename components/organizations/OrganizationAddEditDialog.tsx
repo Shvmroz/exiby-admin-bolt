@@ -297,7 +297,14 @@ const OrganizationAddEditDialog: React.FC<OrganizationAddEditDialogProps> = ({
         <Button
           form="organization-form"
           type="submit"
-          disabled={loading || !formData.name}
+          disabled={
+            loading ||
+            !formData.name ||
+            !formData.industry ||
+            !formData.founded_year ||
+            !formData.description ||
+            (!isEdit && (!formData.email || !formData.password))
+          }
           className="bg-[#0077ED] hover:bg-[#0066CC] text-white"
         >
           {loading ? (

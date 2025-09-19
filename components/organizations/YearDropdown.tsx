@@ -1,7 +1,16 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
 
-const YearDropdown = ({ value, onChange }: { value: string; onChange: (val: string) => void }) => {
+const YearDropdown = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+}) => {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const years = Array.from(
@@ -9,10 +18,17 @@ const YearDropdown = ({ value, onChange }: { value: string; onChange: (val: stri
     (_, i) => (new Date().getFullYear() - i).toString()
   );
 
-  // close dropdown on outside click
+  const filteredYears = years.filter((year) =>
+    year.toLowerCase().includes(query.toLowerCase())
+  );
+
+  // close dropdown on outside click or escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -41,21 +57,43 @@ const YearDropdown = ({ value, onChange }: { value: string; onChange: (val: stri
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full max-h-[150px] overflow-y-auto border rounded-md bg-white dark:bg-gray-700 shadow">
-          {years.map((year) => (
-            <div
-              key={year}
-              onClick={() => {
-                onChange(year);
-                setOpen(false);
-              }}
-              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                value === year ? "bg-gray-200 dark:bg-gray-600 font-medium" : ""
-              }`}
-            >
-              {year}
-            </div>
-          ))}
+        <div className="absolute z-50 mt-1 w-full border rounded-md bg-white dark:bg-gray-700 shadow">
+          {/* Search Input */}
+          <input
+            type="text"
+            autoFocus
+            placeholder="Search year..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full px-3 py-2 border-b bg-gray-100 dark:bg-gray-700 dark:text-white outline-none"
+          />
+
+          {/* List */}
+          <div className="max-h-[150px] overflow-y-auto">
+            {filteredYears.length > 0 ? (
+              filteredYears.map((year) => (
+                <div
+                  key={year}
+                  onClick={() => {
+                    onChange(year);
+                    setOpen(false);
+                    setQuery("");
+                  }}
+                  className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 ${
+                    value === year
+                      ? "bg-gray-200 dark:bg-gray-600 font-medium"
+                      : ""
+                  }`}
+                >
+                  {year}
+                </div>
+              ))
+            ) : (
+              <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                No results
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

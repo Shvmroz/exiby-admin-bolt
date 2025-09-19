@@ -8,7 +8,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Calendar, FileText, X } from "lucide-react";
+import { Download, Calendar, FileText, X, AlertTriangle } from "lucide-react";
 
 interface CsvExportDialogProps {
   open: boolean;
@@ -150,9 +150,10 @@ const CsvExportDialog: React.FC<CsvExportDialogProps> = ({
               />
 
               {isDateRangeInvalid && (
-                <p className="text-xs text-red-500 mt-1">
+                <div className="flex items-center text-xs text-orange-400 mt-1">
+                  <AlertTriangle className="w-4 h-4 mr-1 text-orange-400" />
                   End date cannot be earlier than start date
-                </p>
+                </div>
               )}
             </div>
           </div>

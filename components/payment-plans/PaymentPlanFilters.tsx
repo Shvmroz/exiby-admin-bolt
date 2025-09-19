@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Star, CheckCircle, XCircle, CreditCard, Calendar } from "lucide-react";
+import { Star, CheckCircle, XCircle, CreditCard, Calendar, AlertTriangle } from "lucide-react";
 
 interface PaymentPlanFiltersProps {
   statusFilter: string;
@@ -134,9 +134,10 @@ const PaymentPlanFilters: React.FC<PaymentPlanFiltersProps> = ({
           onChange={(e) => setCreatedTo(e.target.value)}
         />
         {isDateRangeInvalid && (
-          <p className="text-xs text-red-500 mt-1">
+          <div className="flex items-center text-xs text-orange-400 mt-1">
+            <AlertTriangle className="w-4 h-4 mr-1 text-orange-400" />
             End date cannot be earlier than start date
-          </p>
+          </div>
         )}
       </div>
     </div>
