@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import QuillEditor from "@/components/ui/quillEditor/quillEditor";
 import { Save, X, Building2, EyeOff, Eye } from "lucide-react";
+import YearDropdown from "./YearDropdown";
 
 interface OrganizationAddEditDialogProps {
   open: boolean;
@@ -48,6 +49,7 @@ const OrganizationAddEditDialog: React.FC<OrganizationAddEditDialogProps> = ({
   // Prefill in edit
   useEffect(() => {
     if (organization) {
+      console.log("Organization to edit:", organization);
       setFormData({
         name: organization.orgn_user?.name || "",
         email: "", // no email/password update on edit
@@ -244,29 +246,26 @@ const OrganizationAddEditDialog: React.FC<OrganizationAddEditDialogProps> = ({
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Industry</label>
-            <Input
-              value={formData.industry}
-              onChange={(e) =>
-                setFormData({ ...formData, industry: e.target.value })
-              }
-              placeholder="Technology"
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Industry</label>
+              <Input
+                value={formData.industry}
+                onChange={(e) =>
+                  setFormData({ ...formData, industry: e.target.value })
+                }
+                placeholder="eg. 'Technology'"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Founded Year
-            </label>
-            <Input
-              type="number"
-              value={formData.founded_year}
-              onChange={(e) =>
-                setFormData({ ...formData, founded_year: e.target.value })
-              }
-              placeholder="2020"
-            />
+            <div>
+              <YearDropdown
+                value={formData.founded_year}
+                onChange={(year) =>
+                  setFormData({ ...formData, founded_year: year })
+                }
+              />
+            </div>
           </div>
 
           <div>

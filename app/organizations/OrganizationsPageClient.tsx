@@ -58,7 +58,7 @@ interface Organization {
   total_companies: number;
   total_revenue: number;
   total_attendees: number;
-  created_at: string;
+  createdAt: string;
   deleted_at?: string;
   is_deleted?: boolean;
 }
@@ -120,7 +120,7 @@ const OrganizationsPageClient: React.FC = () => {
 
   const [filtersApplied, setFiltersApplied] = useState({
     search: "",
-    sort_by: "created_at",
+    sort_by: "createdAt",
     sort_order: "desc",
     page: 1,
     limit: 50,
@@ -232,7 +232,7 @@ const OrganizationsPageClient: React.FC = () => {
         <div className="flex items-center space-x-2">
           <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           <span className="font-medium text-gray-900 dark:text-white">
-            {organization.total_events}
+            {organization.total_events || 0}
           </span>
         </div>
       ),
@@ -244,23 +244,12 @@ const OrganizationsPageClient: React.FC = () => {
         <div className="flex items-center space-x-2">
           <Building className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           <span className="font-medium text-gray-900 dark:text-white">
-            {organization.total_companies}
+            {organization.total_companies || 0}
           </span>
         </div>
       ),
     },
-    {
-      key: "total_revenue",
-      label: "Revenue",
-      renderData: (organization) => (
-        <div className="flex items-center space-x-2">
-          <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
-          <span className="font-medium text-green-600 dark:text-green-400">
-            ${organization.total_revenue?.toLocaleString() || 0}
-          </span>
-        </div>
-      ),
-    },
+
     {
       key: "total_attendees",
       label: "Attendees",
@@ -274,11 +263,23 @@ const OrganizationsPageClient: React.FC = () => {
       ),
     },
     {
-      key: "created_at",
+      key: "total_revenue",
+      label: "Revenue",
+      renderData: (organization) => (
+        <div className="flex items-center space-x-2">
+          {/* <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" /> */}
+          <span className="font-medium text-green-600 dark:text-green-400">
+            ${organization.total_revenue?.toLocaleString() || 0}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "createdAt",
       label: "Created At",
       renderData: (organization) => (
         <span className="text-sm text-gray-700 dark:text-gray-300">
-          {formatDate(organization.created_at)}
+          {formatDate(organization.createdAt)}
         </span>
       ),
     },
@@ -438,7 +439,7 @@ const OrganizationsPageClient: React.FC = () => {
     setAddLoading(true);
     const result = await _add_organization_api(data);
     if (result?.code === 200) {
-      setOrganizations((prev) => [result.data.organization_user, ...prev]);
+      setOrganizations((prev) => [result.organization_user, ...prev]);
       setCreateDialog(false);
       enqueueSnackbar("Organization created successfully", {
         variant: "success",
@@ -647,13 +648,14 @@ const OrganizationsPageClient: React.FC = () => {
     return <Badge className={config.className}>{config.label}</Badge>;
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-  };
 
   if (loading && organizations.length === 0) {
     return <TableSkeleton rows={8} columns={8} showFilters={true} />;
@@ -704,12 +706,13 @@ const OrganizationsPageClient: React.FC = () => {
                   className="pl-10 pr-24"
                 />
               </div>
+
               {filtersApplied?.search && filtersApplied.search !== "" ? (
                 <Button
                   onClick={() => {
                     setSearchQuery("");
                     setCurrentPage(1);
-                    getListOrganizations("");
+                    getListOrganizations(""); // reset to no search
                   }}
                   variant="outline"
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -719,13 +722,15 @@ const OrganizationsPageClient: React.FC = () => {
               ) : (
                 <Button
                   onClick={handleSearch}
-                  disabled={searchQuery === ""}
                   variant="outline"
+                  disabled={searchQuery === ""}
                   className="absolute right-0 top-1/2 transform -translate-y-1/2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   Search
                 </Button>
               )}
+
+            
             </div>
           </div>
           <div className="flex items-center space-x-3">

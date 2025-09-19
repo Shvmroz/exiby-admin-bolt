@@ -341,7 +341,7 @@ const OrganizationDetailView = ({
                 <h3 className="text-md font-semibold mb-2">Monthly Stats</h3>
                 {organization.monthly_stats &&
                 Object.keys(organization.monthly_stats).length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {Object.entries(organization.monthly_stats).map(
                       ([month, value]: [string, any]) => (
                         <div
@@ -367,8 +367,8 @@ const OrganizationDetailView = ({
                   <span className="font-semibold text-gray-800 dark:text-gray-200">
                     Created At:
                   </span>{" "}
-                  {organization.created_at
-                    ? new Date(organization.created_at).toLocaleString()
+                  {organization.createdAt
+                    ? new Date(organization.createdAt).toLocaleString()
                     : "N/A"}
                 </p>
               </div>

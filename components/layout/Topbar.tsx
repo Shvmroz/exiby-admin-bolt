@@ -14,7 +14,7 @@ interface TopbarProps {
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const { user, logout, darkMode, toggleDarkMode, unreadNotificationsCount } =
-  useAppContext();
+    useAppContext();
 
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
@@ -39,7 +39,6 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
       setLoading(false);
     }
   };
-  
 
   const handleNavigation = (path: string) => {
     setShowUserMenu(false);
@@ -108,14 +107,16 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
             className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="w-8 h-8 rounded-full  p-[2px] flex items-center justify-center">
-              <div className="w-full h-full rounded-full overflow-hidden">
-                <img
-                  src={
-                    user?.profile_image ? s3baseUrl + user.profile_image : ""
-                  }
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
+              <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                {user?.profile_image ? (
+                  <img
+                    src={s3baseUrl + user.profile_image}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="text-gray-400" />
+                )}
               </div>
             </div>
 
