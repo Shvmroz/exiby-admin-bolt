@@ -98,13 +98,13 @@ const OrganizationAddEditDialog: React.FC<OrganizationAddEditDialogProps> = ({
         },
       };
       console.log("Update Payload:", reqData);
-      // onSave(reqData);
+      onSave(reqData);
     } else {
       const reqData = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: "company",
+        // role: "company",
         bio: {
           description: formData.description,
           website: formData.website,

@@ -438,7 +438,7 @@ const OrganizationsPageClient: React.FC = () => {
     setAddLoading(true);
     const result = await _add_organization_api(data);
     if (result?.code === 200) {
-      setOrganizations((prev) => [result.data, ...prev]);
+      setOrganizations((prev) => [result.data.organization_user, ...prev]);
       setCreateDialog(false);
       enqueueSnackbar("Organization created successfully", {
         variant: "success",

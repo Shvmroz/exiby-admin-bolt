@@ -38,7 +38,7 @@ export const _organization_detail_view_api = async (rowID) => {
 
 export const _add_organization_api = async (data) => {
     const requestObj = {
-        path: `api/organization/profile`,
+        path: `api/organization/register`,
         method: "POST",
         postData: data,
         headers: {
