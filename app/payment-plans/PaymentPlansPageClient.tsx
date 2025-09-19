@@ -294,7 +294,7 @@ const PaymentPlansPageClient: React.FC = () => {
       });
       setPaymentPlans([]);
     }
-    setLoading(true);
+    setLoading(false);
   };
 
   useEffect(() => {

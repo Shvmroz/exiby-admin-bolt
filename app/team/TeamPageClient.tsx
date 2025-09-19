@@ -289,32 +289,25 @@ const TeamPageClient: React.FC = () => {
     filters?: { [key: string]: string }
   ) => {
     setLoading(true);
-    try {
-      const result = await _admin_team_list_api(
-        currentPage,
-        rowsPerPage,
-        searchQuery || "",
-        filters || {}
-      );
+    const result = await _admin_team_list_api(
+      currentPage,
+      rowsPerPage,
+      searchQuery || "",
+      filters || {}
+    );
 
-      if (result?.code === 200) {
-        setTeamMembers(result.data.admins || []);
-        setTotalCount(result.data.pagination.total_count);
-        setTotalPages(result.data.pagination.total_pages);
-        setFiltersApplied(result.data.filters_applied || filtersApplied);
-      } else {
-        enqueueSnackbar(result?.message || "Failed to load team members", {
-          variant: "error",
-        });
-        setTeamMembers([]);
-      }
-    } catch (err) {
-      console.error(err);
-      enqueueSnackbar("Something went wrong", { variant: "error" });
+    if (result?.code === 200) {
+      setTeamMembers(result.data.admins || []);
+      setTotalCount(result.data.pagination.total_count);
+      setTotalPages(result.data.pagination.total_pages);
+      setFiltersApplied(result.data.filters_applied || filtersApplied);
+    } else {
+      enqueueSnackbar(result?.message || "Failed to load team members", {
+        variant: "error",
+      });
       setTeamMembers([]);
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleSearch = () => {

@@ -294,8 +294,8 @@ const DashboardPageClient: React.FC = () => {
         </div>
         <button
           onClick={() => router.push("/analytics")}
-          className="flex items-center space-x-2 px-4 py-2 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors shadow-sm"
-        >
+          className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-[#0077ED] hover:bg-[#0066CC] text-white rounded-lg font-medium transition-colors shadow-sm"
+          >
           <TrendingUp className="w-4 h-4" />
           <span>View Analytics</span>
         </button>

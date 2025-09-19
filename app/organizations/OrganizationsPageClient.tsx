@@ -140,7 +140,7 @@ const OrganizationsPageClient: React.FC = () => {
     {
       key: "index",
       label: "#",
-      renderData: (_row, rowIndex) => (
+      renderData: (row, rowIndex) => (
         <span className="text-gray-500 dark:text-gray-400 text-sm">
           {rowIndex !== undefined ? rowIndex + 1 : "-"}.
         </span>
@@ -207,27 +207,6 @@ const OrganizationsPageClient: React.FC = () => {
       ),
     },
     {
-      key: "status",
-      label: "Status",
-      renderData: (organization) =>
-        organization.status ? (
-          <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-800 dark:text-green-100 rounded">
-            Active
-          </span>
-        ) : (
-          <span className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-800 dark:text-red-100 rounded">
-            Inactive
-          </span>
-        ),
-    },
-    {
-      key: "subscription_status",
-      label: "Subscription",
-      renderData: (organization) =>
-        getStatusBadge(organization.subscription_status),
-    },
-
-    {
       key: "total_events",
       label: "Events",
       renderData: (organization) => (
@@ -276,6 +255,27 @@ const OrganizationsPageClient: React.FC = () => {
         </div>
       ),
     },
+    {
+      key: "subscription_status",
+      label: "Subscription",
+      renderData: (organization) =>
+        getStatusBadge(organization.subscription_status),
+    },
+    {
+      key: "status",
+      label: "Status",
+      renderData: (organization) =>
+        organization.status ? (
+          <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-800 dark:text-green-100 rounded">
+            Active
+          </span>
+        ) : (
+          <span className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-800 dark:text-red-100 rounded">
+            Inactive
+          </span>
+        ),
+    },
+
     {
       key: "createdAt",
       label: "Created At",
@@ -423,7 +423,9 @@ const OrganizationsPageClient: React.FC = () => {
       setRowData(null);
       setEditLoading(false);
       setOrganizations((prev) =>
-        prev.map((org) => (org._id === rowData._id ? { ...org, ...result.data } : org))
+        prev.map((org) =>
+          org._id === rowData._id ? { ...org, ...result.data } : org
+        )
       );
       enqueueSnackbar("Organization updated successfully", {
         variant: "success",
